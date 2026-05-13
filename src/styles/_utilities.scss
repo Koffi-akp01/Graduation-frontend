@@ -1,0 +1,135 @@
+@import 'variables';
+
+// ── Flexbox ──
+.flex        { display: flex; }
+.flex-col    { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center  { justify-content: center; }
+.flex-wrap   { flex-wrap: wrap; }
+.flex-1      { flex: 1; }
+.gap-1 { gap: $s1; } .gap-2 { gap: $s2; }
+.gap-3 { gap: $s3; } .gap-4 { gap: $s4; }
+.gap-6 { gap: $s6; }
+
+// ── Grid ──
+.grid        { display: grid; }
+.grid-2      { display: grid; grid-template-columns: 1fr 1fr; gap: $s4; }
+.grid-3      { display: grid; grid-template-columns: repeat(3, 1fr); gap: $s4; }
+.grid-4      { display: grid; grid-template-columns: repeat(4, 1fr); gap: $s4; }
+
+// ── Spacing ──
+.p-2 { padding: $s2; } .p-3 { padding: $s3; }
+.p-4 { padding: $s4; } .p-6 { padding: $s6; }
+.mt-2 { margin-top: $s2; } .mt-4 { margin-top: $s4; }
+.mt-6 { margin-top: $s6; } .mt-8 { margin-top: $s8; }
+.mb-2 { margin-bottom: $s2; } .mb-4 { margin-bottom: $s4; }
+
+// ── Largeur ──
+.w-full      { width: 100%; }
+.w-auto      { width: auto; }
+.max-w-sm    { max-width: 400px; }
+.max-w-md    { max-width: 600px; }
+.max-w-lg    { max-width: 800px; }
+
+// ── Card ──
+.card {
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+.card-header {
+  padding: $s4 $s6;
+  border-bottom: 1px solid $border;
+  background: $cream;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $s3;
+}
+.card-body { padding: $s6; }
+
+// ── Boutons ──
+.btn {
+  display: inline-flex; align-items: center; gap: $s2;
+  padding: 10px 20px; border-radius: $radius-md;
+  font-family: $font-sans; font-size: $fs-base; font-weight: 600;
+  cursor: pointer; border: none; transition: $t-base;
+  text-decoration: none; white-space: nowrap;
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+.btn-primary {
+  background: $navy; color: $white;
+  &:hover { background: $navy-2; }
+}
+.btn-gold {
+  background: $gold; color: $white;
+  &:hover { filter: brightness(1.08); }
+}
+.btn-outline {
+  background: transparent; color: $navy;
+  border: 1.5px solid $border;
+  &:hover { border-color: $navy; background: $cream; }
+}
+.btn-danger {
+  background: $danger; color: $white;
+  &:hover { filter: brightness(1.1); }
+}
+.btn-sm { padding: 6px 14px; font-size: $fs-sm; }
+.btn-lg { padding: 14px 28px; font-size: $fs-lg; }
+
+// ── Inputs ──
+.input {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid $border; border-radius: $radius-md;
+  font-family: $font-sans; font-size: $fs-base; color: $ink;
+  background: $white; transition: $t-fast; outline: none;
+  &:focus { border-color: $blue; box-shadow: 0 0 0 3px rgba($blue, 0.12); }
+  &::placeholder { color: $ink-3; }
+  &:disabled { background: $cream; color: $ink-3; }
+}
+.input-label {
+  display: block; font-size: $fs-sm; font-weight: 600;
+  color: $ink-2; margin-bottom: $s1;
+}
+.input-group {
+  display: flex; flex-direction: column; gap: $s1;
+  margin-bottom: $s4;
+}
+select.input { cursor: pointer; }
+textarea.input { resize: vertical; min-height: 100px; }
+
+// ── Table ──
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: $fs-sm;
+}
+th {
+  background: $navy; color: $white;
+  padding: 10px 14px; text-align: left;
+  font-size: $fs-xs; font-weight: 700;
+  letter-spacing: 0.5px; white-space: nowrap;
+}
+td {
+  padding: 10px 14px; border-bottom: 1px solid $border;
+  color: $ink-2; vertical-align: middle;
+}
+tr:nth-child(even) td { background: $cream; }
+tr:hover td { background: rgba($blue, 0.04); }
+
+// ── Divider ──
+.divider {
+  height: 1px; background: $border;
+  margin: $s6 0; border: none;
+}
+
+// ── Responsive helpers ──
+@media (max-width: $bp-md) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: $bp-md) {
+  .hide-desktop { display: none !important; }
+}

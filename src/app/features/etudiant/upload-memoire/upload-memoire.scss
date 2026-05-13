@@ -1,0 +1,33 @@
+.upload-container { max-width: 1000px; margin: 0 auto; }
+.dropzone {
+  border: 2px dashed #E2DDD4;
+  border-radius: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  background: #FAF8F3;
+  transition: all 0.2s;
+  margin-bottom: 24px;
+}
+.dropzone.drag-over {
+  border-color: #C8963E;
+  background: #FDF3E0;
+}
+.drop-hint {
+  font-size: 12px;
+  color: #718096;
+  margin-top: 12px;
+}
+.progress-bar {
+  margin-top: 16px;
+  height: 8px;
+  background: #E2DDD4;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+.progress-fill {
+  height: 100%;
+  background: #C8963E;
+  width: 0%;
+  transition: width 0.3s;
+}
