@@ -1,0 +1,41 @@
+<div class="examen-container">
+  <h2 class="font-playfair color-navy">Verification de Conformite & Anti-Plagiat</h2>
+
+  <div class="table-container card-white">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Etudiant</th>
+          <th>Score Plagiat</th>
+          <th>Detection IA</th>
+          <th>Document</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of memoiresAverifier(); track m.id) {
+          <tr>
+            <td><strong>{{ m.etudiant_nom }}</strong></td>
+            <td>
+              <span class="score-pill" [class.danger]="m.score_plagiat > 25">
+                {{ m.score_plagiat }}%
+              </span>
+            </td>
+            <td>
+              <span class="badge" [class.badge-danger]="m.detecte_IA">
+                {{ m.detecte_IA ? 'Suspecte' : 'Propre' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-outline">Ouvrir le Viewer</button>
+            </td>
+            <td>
+              <button class="btn-success" (click)="validerTechnique(m.id, 'VALIDE')">Approuver</button>
+              <button class="btn-danger" (click)="validerTechnique(m.id, 'REJETE')">Rejeter</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

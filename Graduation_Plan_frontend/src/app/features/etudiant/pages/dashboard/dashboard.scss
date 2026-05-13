@@ -1,0 +1,112 @@
+.dashboard-container {
+  padding: 2rem;
+  background-color: var(--cream);
+  min-height: 100vh;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+  color: var(--navy);
+}
+
+.welcome-section {
+  margin-bottom: 1.5rem;
+}
+
+.text-secondary {
+  color: #5f6b7a;
+}
+
+.card-white {
+  max-width: 860px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.section-title {
+  margin: 0;
+  color: var(--navy);
+}
+
+.stepper-vertical {
+  margin-top: 2rem;
+
+  .step-item {
+    display: flex;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+
+    &.completed {
+      .step-circle {
+        background-color: var(--success);
+        color: white;
+      }
+
+      .step-line {
+        background-color: var(--success);
+      }
+    }
+
+    &.active {
+      .step-circle {
+        background-color: var(--gold);
+        color: white;
+        box-shadow: 0 0 10px rgba(200, 150, 62, 0.4);
+      }
+
+      .step-label {
+        color: var(--navy);
+        font-weight: bold;
+      }
+    }
+
+    .step-indicator {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      min-width: 40px;
+    }
+
+    .step-line {
+      position: absolute;
+      top: 40px;
+      bottom: -2rem;
+      width: 2px;
+      background-color: var(--border);
+    }
+
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      font-weight: 700;
+    }
+  }
+}
+
+.step-label {
+  margin: 0 0 0.25rem;
+}
+
+.step-description {
+  margin: 0;
+  color: #5f6b7a;
+}
+
+.btn-gold {
+  background-color: var(--gold);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+  font-family: 'DM Sans', sans-serif;
+}

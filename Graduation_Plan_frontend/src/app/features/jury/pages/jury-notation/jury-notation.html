@@ -1,0 +1,36 @@
+<div class="jury-container card-white">
+  <h2 class="font-playfair color-navy">Evaluation de la Soutenance</h2>
+
+  <form [formGroup]="notationForm" (ngSubmit)="validerNote()">
+    <div class="notes-grid">
+      <div class="input-group">
+        <label>Qualite du Rapport (/20)</label>
+        <input type="number" formControlName="note_rapport" />
+      </div>
+      <div class="input-group">
+        <label>Presentation Orale (/20)</label>
+        <input type="number" formControlName="note_presentation" />
+      </div>
+      <div class="input-group">
+        <label>Reponses aux Questions (/20)</label>
+        <input type="number" formControlName="note_reponses" />
+      </div>
+    </div>
+
+    <div class="summary-zone">
+      <div class="moyenne-display">
+        <span>Moyenne Generale</span>
+        <strong class="color-gold">{{ moyenne() }} / 20</strong>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Observations et Deliberations</label>
+      <textarea formControlName="observations" rows="4" placeholder="Appreciations du jury..."></textarea>
+    </div>
+
+    <button type="submit" class="btn-navy" [disabled]="isSubmitting()">
+      {{ isSubmitting() ? 'Enregistrement...' : 'Cloturer la soutenance & Publier' }}
+    </button>
+  </form>
+</div>

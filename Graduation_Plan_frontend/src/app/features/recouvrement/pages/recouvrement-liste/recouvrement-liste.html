@@ -1,0 +1,48 @@
+<div class="recouvrement-container">
+  <h2 class="font-playfair color-navy">Gestion du Recouvrement</h2>
+
+  <div class="stats-grid">
+    <div class="stat-card border-success">
+      <span class="label">Total Encaisse</span>
+      <span class="value">{{ stats()?.total_encaisse }} FCFA</span>
+    </div>
+    <div class="stat-card border-danger">
+      <span class="label">Impayes</span>
+      <span class="value">{{ stats()?.total_impayes }} FCFA</span>
+    </div>
+  </div>
+
+  <div class="table-container card-white">
+    <h3 class="color-navy">Paiements en attente de validation</h3>
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Etudiant</th>
+          <th>Type de Frais</th>
+          <th>Montant</th>
+          <th>Date</th>
+          <th>Preuve</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of paiements(); track p.id) {
+          <tr>
+            <td><strong>Matricule #{{ p.etudiant_id }}</strong></td>
+            <td><span class="badge">{{ p.type_frais }}</span></td>
+            <td class="amount">{{ p.montant }} FCFA</td>
+            <td>{{ p.date_paiement | date:'shortDate' }}</td>
+            <td>
+              <a [href]="p.recu_url" target="_blank" class="link-gold">Voir le recu</a>
+            </td>
+            <td>
+              <button class="btn-success" (click)="confirmerPaiement(p.id)">Valider</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="empty">Aucune transaction en attente.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
