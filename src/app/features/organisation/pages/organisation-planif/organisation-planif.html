@@ -1,0 +1,26 @@
+<div class="organisation-container">
+  <h2 class="font-playfair color-navy">Generation du Calendrier de Soutenance</h2>
+
+  <div class="card-white settings-panel">
+    <p class="text-ink2">
+      L'algorithme va repartir les <strong>etudiants eligibles</strong> selon la disponibilite
+      des <strong>jurys</strong> et des <strong>salles</strong>.
+    </p>
+
+    <div class="actions-zone">
+      <button class="btn-gold large" [disabled]="isProcessing()" (click)="lancerAlgorithme()">
+        {{ isProcessing() ? 'Calcul du planning en cours...' : 'Lancer la planification automatique' }}
+      </button>
+    </div>
+  </div>
+
+  @if (generationSuccess()) {
+    <div class="alert-success card-white">
+      <h3 class="color-success">Planning genere avec succes !</h3>
+      <p>Un brouillon du calendrier est disponible pour verification avant publication.</p>
+      <button class="btn-outline" routerLink="/organisation/calendrier-test">
+        Visualiser le brouillon
+      </button>
+    </div>
+  }
+</div>
