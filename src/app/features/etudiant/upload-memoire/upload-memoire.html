@@ -1,0 +1,45 @@
+<div class="upload-container">
+  <h2 class="page-title">Mon mémoire</h2>
+
+  <!-- Zone de drag & drop -->
+  <div
+    class="dropzone"
+    [class.drag-over]="dragOver"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
+    <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" hidden />
+    <button class="btn btn-outline" (click)="fileInput.click()">
+      📄 Choisir un fichier PDF
+    </button>
+    <p class="drop-hint">ou glissez‑déposez votre fichier ici</p>
+    <div *ngIf="uploadProgress > 0" class="progress-bar">
+      <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+    </div>
+  </div>
+
+  <!-- Alertes -->
+  <app-alert *ngIf="error" type="danger" [message]="error" (dismissed)="error = ''"></app-alert>
+  <app-alert *ngIf="success" type="success" message="Mémoire uploadé avec succès !" (dismissed)="success = false"></app-alert>
+
+  <!-- Historique des versions -->
+  <div class="card" *ngIf="versions().length">
+    <div class="card-header">Historique des versions</div>
+    <table>
+      <thead>
+        <tr><th>Version</th><th>Date</th><th>Taille</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of versions()">
+          <td>v{{ v.version }}</td>
+          <td>{{ v.date_upload | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ v.taille / 1024 | number:'1.0-0' }} KB</td>
+          <td><button class="btn btn-sm btn-outline" (click)="viewPdf(v)">👁️ Voir</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PDF Viewer -->
+  <app-pdf-viewer *ngIf="pdfUrl" [src]="pdfUrl" (close)="pdfUrl = null"></app-pdf-viewer>
+</div>

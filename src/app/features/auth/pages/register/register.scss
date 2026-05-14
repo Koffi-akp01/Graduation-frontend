@@ -1,4 +1,4 @@
-.login-page {
+.register-page {
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -6,22 +6,37 @@
   background: #f6f7fb;
 }
 
-.login-panel {
-  width: min(100%, 380px);
+.register-panel {
+  width: min(100%, 620px);
   padding: 24px;
   border: 1px solid #d8dee9;
   border-radius: 8px;
   background: #ffffff;
 }
 
+.panel-header {
+  margin-bottom: 20px;
+}
+
 h1 {
-  margin: 0 0 20px;
+  margin: 0 0 6px;
   font-size: 24px;
 }
 
-.login-form {
+p {
+  margin: 0;
+  color: #526173;
+}
+
+.register-form {
   display: grid;
   gap: 16px;
+}
+
+.name-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 label {
@@ -56,12 +71,16 @@ button:disabled {
 }
 
 .error-message {
-  margin: 0;
   color: #b42318;
   font-size: 14px;
 }
 
-.register-link {
+.success-message {
+  color: #146c43;
+  font-size: 14px;
+}
+
+.login-link {
   display: flex;
   justify-content: center;
   gap: 6px;
@@ -70,12 +89,18 @@ button:disabled {
   font-size: 14px;
 }
 
-.register-link a {
+.login-link a {
   color: #1459b8;
   font-weight: 700;
   text-decoration: none;
 }
 
-.register-link a:hover {
+.login-link a:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 620px) {
+  .name-grid {
+    grid-template-columns: 1fr;
+  }
 }

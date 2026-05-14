@@ -5,6 +5,15 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { VerificationMemoire } from '../../models/examen.model';
 
+export interface MemoireAVerifier {
+  id: number;
+  etudiant_nom: string;
+  titre: string;
+  score_similarite: number;
+  score_ia: number;
+  nb_pages: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -22,5 +31,20 @@ export class ExamenService {
     data: { statut: 'VALIDE' | 'REJETE'; observations: string }
   ): Observable<VerificationMemoire> {
     return this.http.patch<VerificationMemoire>(`${this.apiUrl}${id}/conformite/`, data);
+  }
+
+  getMemoiresAVerifier(): Observable<MemoireAVerifier[]> {
+    return this.http.get<MemoireAVerifier[]>(`${environment.apiUrl}/examen/memoires/en_attente/`);
+  }
+
+  verifierMemoire(
+    id: number,
+    decision: 'valider' | 'rejeter' | 'correction',
+    commentaire?: string
+  ): Observable<unknown> {
+    return this.http.post(`${environment.apiUrl}/examen/memoires/${id}/verifier/`, {
+      decision,
+      commentaire,
+    });
   }
 }

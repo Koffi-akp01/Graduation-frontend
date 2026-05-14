@@ -1,0 +1,72 @@
+// ── Couleurs primaires ──
+$navy:          #0F2237;
+$navy-2:        #1A3C5E;
+$blue:          #2B6CB0;
+$gold:          #C8963E;
+$gold-light:    #FDF3E0;
+$cream:         #FAF8F3;
+$white:         #FFFFFF;
+
+// ── Texte ──
+$ink:           #0F0E0C;
+$ink-2:         #2D3748;
+$ink-3:         #718096;
+
+// ── Fond & bordures ──
+$border:        #E2DDD4;
+$bg:            #F7F5F0;
+$bg-card:       #FFFFFF;
+
+// ── Sémantique ──
+$success:       #276749;
+$success-light: #D8F3DC;
+$danger:        #9B2226;
+$danger-light:  #FFE8E8;
+$warning:       #7B4F00;
+$warning-light: #FFF3CD;
+$info:          #2B6CB0;
+$info-light:    #EBF4FF;
+
+// ── Typographie ──
+$font-sans:  'DM Sans', sans-serif;
+$font-serif: 'Playfair Display', serif;
+$font-mono:  'DM Mono', monospace;
+
+$fs-xs:   11px;
+$fs-sm:   12px;
+$fs-base: 14px;
+$fs-md:   15px;
+$fs-lg:   16px;
+$fs-xl:   18px;
+$fs-2xl:  22px;
+$fs-3xl:  28px;
+
+// ── Espacement ──
+$s1: 4px;  $s2: 8px;  $s3: 12px; $s4: 16px;
+$s5: 20px; $s6: 24px; $s8: 32px; $s10: 40px;
+
+// ── Radius ──
+$radius-sm:   4px;
+$radius-md:   8px;
+$radius-lg:   12px;
+$radius-full: 9999px;
+
+// ── Ombres ──
+$shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+$shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+$shadow-lg: 0 10px 30px rgba(0,0,0,0.10);
+
+// ── Transitions ──
+$t-fast: all 0.15s ease;
+$t-base: all 0.25s ease;
+
+// ── Breakpoints ──
+$bp-sm:  480px;
+$bp-md:  768px;
+$bp-lg:  1024px;
+$bp-xl:  1280px;
+
+// ── Z-index ──
+$z-dropdown: 100;
+$z-modal:    300;
+$z-toast:    400;

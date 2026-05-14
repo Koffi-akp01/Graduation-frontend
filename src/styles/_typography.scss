@@ -1,0 +1,46 @@
+@import 'variables';
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: $font-sans;
+  font-size: $fs-base;
+  color: $ink-2;
+  background: $bg;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-serif;
+  color: $navy;
+  line-height: 1.25;
+}
+h1 { font-size: $fs-3xl; }
+h2 { font-size: $fs-2xl; }
+h3 { font-size: $fs-xl; }
+h4 { font-size: $fs-lg; }
+
+p  { line-height: 1.6; color: $ink-2; }
+
+a  { color: $blue; text-decoration: none;
+     &:hover { text-decoration: underline; } }
+
+code, pre {
+  font-family: $font-mono;
+  font-size: $fs-sm;
+  background: $cream;
+  color: $navy-2;
+  border-radius: $radius-sm;
+  padding: 2px 6px;
+}
+
+.text-gold   { color: $gold; }
+.text-navy   { color: $navy; }
+.text-muted  { color: $ink-3; }
+.text-sm     { font-size: $fs-sm; }
+.text-xs     { font-size: $fs-xs; }
+.font-bold   { font-weight: 700; }
+.font-medium { font-weight: 500; }
+.font-mono   { font-family: $font-mono; }
+.font-serif  { font-family: $font-serif; }
