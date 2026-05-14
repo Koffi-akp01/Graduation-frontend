@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../../core/services/auth/auth';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -22,9 +22,24 @@ export class LoginComponent {
     this.errorMessage = '';
 
     this.authService.login(this.credentials).subscribe({
-      next: () => {
-        const role = localStorage.getItem('user_role');
-        this.redirectByUserRole(role);
+      next: (response: any) => {
+        console.log('Réponse du serveur:', response); 
+        
+        if (response.access) {
+          localStorage.setItem('access_token', response.access);
+        }
+      
+        const role = response.role || localStorage.getItem('user_role');
+        
+        console.log('Rôle détecté:', role);
+
+        if (role) {
+          this.redirectByUserRole(role);
+        } else {
+          
+          console.warn("Aucun rôle trouvé, redirection par défaut vers étudiant");
+          this.router.navigate(['/dashboard-etudiant']); 
+        }
       },
       error: (err) => {
         console.error('Erreur de connexion', err);

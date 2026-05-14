@@ -1,0 +1,72 @@
+<main class="register-page">
+  <section class="register-panel">
+    <div class="panel-header">
+      <h1>Inscription etudiant</h1>
+      <p>Creer un compte avec vos informations academiques.</p>
+    </div>
+
+    <form (ngSubmit)="onRegister()" class="register-form">
+      <div class="name-grid">
+        <label>
+          Prenom
+          <input type="text" name="first_name" [(ngModel)]="form.first_name" autocomplete="given-name" required />
+        </label>
+
+        <label>
+          Nom
+          <input type="text" name="last_name" [(ngModel)]="form.last_name" autocomplete="family-name" required />
+        </label>
+      </div>
+
+      <label>
+        Matricule
+        <input type="text" name="matricule" [(ngModel)]="form.matricule" required />
+      </label>
+
+      <label>
+        Nom d'utilisateur
+        <input type="text" name="username" [(ngModel)]="form.username" autocomplete="username" required />
+      </label>
+
+      <label>
+        Email institutionnel
+        <input type="email" name="email" [(ngModel)]="form.email" autocomplete="email" required />
+      </label>
+
+      <div class="name-grid">
+        <label>
+          Mot de passe
+          <input type="password" name="password" [(ngModel)]="form.password" autocomplete="new-password" required />
+        </label>
+
+        <label>
+          Confirmation
+          <input
+            type="password"
+            name="confirmPassword"
+            [(ngModel)]="form.confirmPassword"
+            autocomplete="new-password"
+            required
+          />
+        </label>
+      </div>
+
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+
+      @if (successMessage) {
+        <p class="success-message">{{ successMessage }}</p>
+      }
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Creation...' : 'Creer mon compte' }}
+      </button>
+    </form>
+
+    <div class="login-link">
+      <span>Vous avez deja un compte ?</span>
+      <a routerLink="/login">Se connecter</a>
+    </div>
+  </section>
+</main>

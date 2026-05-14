@@ -60,3 +60,22 @@ button:disabled {
   color: #b42318;
   font-size: 14px;
 }
+
+.register-link {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 18px;
+  color: #526173;
+  font-size: 14px;
+}
+
+.register-link a {
+  color: #1459b8;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
