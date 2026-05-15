@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AccueilComponent } from './features/public/accueil/accueil.component';
 
 import { roleGuard } from './core/guards/role.guard';
 import { AdminDashboardComponent } from './features/admin/pages/admin-dashboard/admin-dashboard';
@@ -40,6 +41,6 @@ export const routes: Routes = [
   { path: 'examen/conformite', component: ExamenCheckComponent },
   { path: 'jury/notation', component: JuryNotationComponent },
   { path: 'admin', component: AdminDashboardComponent },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: '**', redirectTo: 'login' },
+  { path: '', component: AccueilComponent },
+  { path: '**', redirectTo: '' },
 ];
