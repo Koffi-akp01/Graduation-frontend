@@ -1,0 +1,152 @@
+<div class="min-h-screen bg-[#051124] text-white font-sans">
+  <!-- --- NAVBAR --- -->
+  <nav class="flex items-center justify-between px-12 py-6 bg-[#051124] border-b border-gray-800 sticky top-0 z-50">
+    <div class="flex items-center gap-2">
+      <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold">GP</div>
+      <span class="text-xl font-bold uppercase tracking-wider">Graduation <span class="text-amber-500">Plan</span></span>
+    </div>
+    <div class="hidden md:flex gap-8 text-sm font-medium text-gray-300">
+      <a href="#fonctions" class="hover:text-amber-500">Fonctionnalités</a>
+      <a href="#acteurs" class="hover:text-amber-500">Acteurs</a>
+      <a href="#processus" class="hover:text-amber-500">Processus</a>
+      <a href="#regles" class="hover:text-amber-500">Règles métier</a>
+    </div>
+    <div class="flex items-center gap-4">
+      <a routerLink="/login" class="text-sm font-medium hover:text-amber-500">Se connecter</a>
+      <a routerLink="/login" class="bg-amber-500 hover:bg-amber-600 text-[#051124] px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-all">
+        Accéder à la plateforme <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
+      </a>
+    </div>
+  </nav>
+
+  <!-- --- SECTION 1: HERO --- -->
+  <section class="container mx-auto px-12 py-20 flex flex-col md:flex-row items-center gap-12">
+    <div class="flex-1 space-y-6">
+      <span class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+        Nouvelle Plateforme 2025
+      </span>
+      <h1 class="text-6xl font-extrabold leading-tight">
+        Gérez vos <span class="text-amber-500 italic">soutenances</span> académiques avec intelligence
+      </h1>
+      <p class="text-gray-400 text-lg max-w-lg">
+        Graduation Plan centralise, automatise et sécurise l'ensemble du processus de soutenance — du dépôt de thème jusqu'à la publication des résultats.
+      </p>
+      <div class="flex gap-4 pt-4">
+        <a routerLink="/login" class="bg-amber-500 text-[#051124] px-8 py-4 rounded-xl font-bold inline-block">Accéder à la plateforme</a>
+        <a href="#fonctions" class="border border-gray-700 hover:bg-gray-800 px-8 py-4 rounded-xl font-bold transition-all inline-block">Découvrir les fonctionnalités</a>
+      </div>
+      <p class="text-xs text-gray-500 flex items-center gap-2">
+        <lucide-icon name="shield-check" [size]="14"></lucide-icon> Accès sécurisé par rôle • Django + Angular • PostgreSQL
+      </p>
+    </div>
+
+    <!-- Mockup Dashboard -->
+    <div class="flex-1 bg-[#0a1a33] border border-gray-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+        <div class="flex gap-2 mb-6">
+            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 mb-8 text-center">
+            <div class="bg-[#051124] p-4 rounded-xl border border-gray-800">
+                <p class="text-3xl font-bold">87</p>
+                <p class="text-xs text-gray-500 uppercase">Étudiants</p>
+            </div>
+            <div class="bg-[#051124] p-4 rounded-xl border border-gray-800">
+                <p class="text-3xl font-bold">34</p>
+                <p class="text-xs text-gray-500 uppercase">Planifiées</p>
+            </div>
+            <div class="bg-[#051124] p-4 rounded-xl border border-gray-800 text-green-400 border-green-500/20">
+                <p class="text-3xl font-bold">58</p>
+                <p class="text-xs uppercase">Éligibles</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <div class="bg-[#051124]/50 p-4 rounded-lg flex justify-between items-center text-sm">
+                <span>Ama Koffi - Mémoire Master 2</span>
+                <span class="text-amber-500 bg-amber-500/10 px-3 py-1 rounded text-[10px] font-bold">EN RÉVISION</span>
+            </div>
+            <div class="bg-[#051124]/50 p-4 rounded-lg flex justify-between items-center text-sm">
+                <span>Abena Mensah - Licence 3</span>
+                <span class="text-red-500 bg-red-500/10 px-3 py-1 rounded text-[10px] font-bold uppercase">Bloqué</span>
+            </div>
+        </div>
+    </div>
+  </section>
+
+  <!-- --- SECTION 2: STATS --- -->
+  <section class="bg-white/5 py-12 border-y border-gray-800">
+    <div class="container mx-auto px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div><p class="text-4xl font-bold text-amber-500">10</p><p class="text-gray-400 text-sm">Acteurs du système</p></div>
+      <div><p class="text-4xl font-bold text-amber-500">8</p><p class="text-gray-400 text-sm">Modules fonctionnels</p></div>
+      <div><p class="text-4xl font-bold text-amber-500">100%</p><p class="text-gray-400 text-sm">Dématérialisé</p></div>
+      <div><p class="text-4xl font-bold text-amber-500">0</p><p class="text-gray-400 text-sm">Conflit d'horaires</p></div>
+    </div>
+  </section>
+
+  <!-- --- SECTION 3: FONCTIONNALITÉS --- -->
+  <section id="fonctions" class="bg-[#f8f9fa] text-[#051124] py-24 px-12">
+    <div class="container mx-auto">
+        <h2 class="text-amber-600 font-bold uppercase tracking-widest text-sm mb-4 border-l-4 border-amber-500 pl-4">Fonctionnalités</h2>
+        <h3 class="text-5xl font-extrabold mb-12">Une plateforme <span class="text-amber-600">complète</span> pour chaque étape</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div *ngFor="let feature of features" class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-all group">
+                <div class="w-12 h-12 mb-6 transform group-hover:scale-110 transition-transform">
+                    <lucide-icon [name]="feature.icon" [class]="feature.colorClass"></lucide-icon>
+                </div>
+                <h4 class="text-xl font-extrabold mb-4">{{ feature.title }}</h4>
+                <p class="text-gray-500 text-sm leading-relaxed">{{ feature.desc }}</p>
+            </div>
+        </div>
+    </div>
+  </section>
+
+  <!-- --- SECTION 4: PROCESSUS --- -->
+  <section id="processus" class="bg-[#051124] py-24 px-12 text-center">
+    <h2 class="text-4xl font-extrabold mb-12">Du thème au résultat, en <span class="text-amber-500">6 étapes</span> fluides</h2>
+    <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4 relative">
+        <div class="absolute top-1/2 left-0 w-full h-0.5 bg-gray-800 -z-0 hidden md:block"></div>
+        <div *ngFor="let item of processus" class="z-10 flex flex-col items-center group">
+            <div class="w-14 h-14 rounded-full bg-gray-900 border-2 border-gray-700 flex items-center justify-center group-hover:border-amber-500 group-hover:text-amber-500 transition-all cursor-default">
+                <lucide-icon [name]="item.icon" [size]="20"></lucide-icon>
+            </div>
+            <p class="mt-4 text-xs font-bold uppercase text-gray-500 group-hover:text-white">{{ item.step }}</p>
+        </div>
+    </div>
+  </section>
+
+  <!-- --- SECTION 5: FOOTER & CTA --- -->
+  <footer class="bg-[#030a17] py-20 px-12 border-t border-gray-800">
+    <div class="container mx-auto text-center space-y-8">
+        <h4 class="text-5xl font-bold">Prêt à planifier vos soutenances ?</h4>
+        <div class="flex justify-center gap-4">
+            <a routerLink="/login" class="bg-amber-500 text-[#051124] px-10 py-4 rounded-xl font-bold inline-block">Accéder à la plateforme</a>
+            <button class="bg-white text-[#051124] px-10 py-4 rounded-xl font-bold">Voir la démo</button>
+        </div>
+        <div class="pt-20 grid grid-cols-1 md:grid-cols-4 text-left gap-12 border-t border-gray-900 mt-12">
+            <div>
+                <span class="font-bold text-xl uppercase tracking-tighter">Graduation <span class="text-amber-500">Plan</span></span>
+                <p class="text-sm text-gray-500 mt-4">Plateforme intelligente de gestion des soutenances à l'IPNET.</p>
+            </div>
+            <div>
+                <h5 class="font-bold mb-4 uppercase text-xs text-gray-400">Plateforme</h5>
+                <ul class="text-sm text-gray-500 space-y-2">
+                    <li><a href="#fonctions" class="hover:text-amber-500">Fonctionnalités</a></li>
+                    <li><a href="#acteurs" class="hover:text-amber-500">Acteurs</a></li>
+                    <li><a href="#regles" class="hover:text-amber-500">Règles métier</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-bold mb-4 uppercase text-xs text-gray-400">Technique</h5>
+                <ul class="text-sm text-gray-500 space-y-2">
+                    <li>Django / Angular</li>
+                    <li>PostgreSQL</li>
+                    <li>RBAC Sécurité</li>
+                </ul>
+            </div>
+        </div>
+        <p class="text-xs text-gray-700 mt-12 border-t border-gray-900 pt-8">© 2025 Graduation Plan - IPNET Institute of Technology - Tous droits réservés</p>
+    </div>
+  </footer>
+</div>
