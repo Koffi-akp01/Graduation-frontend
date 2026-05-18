@@ -1,0 +1,1612 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /api/academic/pre-soutenances/:
+    get:
+      operationId: api_academic_pre_soutenances_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreSoutenance'
+          description: ''
+    post:
+      operationId: api_academic_pre_soutenances_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreSoutenance'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PreSoutenance'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PreSoutenance'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreSoutenance'
+          description: ''
+  /api/academic/pre-soutenances/{id}/:
+    get:
+      operationId: api_academic_pre_soutenances_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pré-soutenance.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreSoutenance'
+          description: ''
+    put:
+      operationId: api_academic_pre_soutenances_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pré-soutenance.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreSoutenance'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PreSoutenance'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PreSoutenance'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreSoutenance'
+          description: ''
+    patch:
+      operationId: api_academic_pre_soutenances_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pré-soutenance.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPreSoutenance'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPreSoutenance'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPreSoutenance'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreSoutenance'
+          description: ''
+    delete:
+      operationId: api_academic_pre_soutenances_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pré-soutenance.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/auth/token/:
+    post:
+      operationId: api_auth_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/token/refresh/:
+    post:
+      operationId: api_auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/bordereaux/:
+    get:
+      operationId: api_bordereaux_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Fichier uploadé avec succès
+        '400':
+          description: Requête invalide
+        '403':
+          description: Non autorisé
+        '404':
+          description: Étudiant non trouvé
+    post:
+      operationId: api_bordereaux_create
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Fichier uploadé avec succès
+        '400':
+          description: Requête invalide
+        '403':
+          description: Non autorisé
+        '404':
+          description: Étudiant non trouvé
+  /api/bordereaux/{id}/:
+    get:
+      operationId: api_bordereaux_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Fichier uploadé avec succès
+        '400':
+          description: Requête invalide
+        '403':
+          description: Non autorisé
+        '404':
+          description: Étudiant non trouvé
+    put:
+      operationId: api_bordereaux_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Fichier uploadé avec succès
+        '400':
+          description: Requête invalide
+        '403':
+          description: Non autorisé
+        '404':
+          description: Étudiant non trouvé
+    patch:
+      operationId: api_bordereaux_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Fichier uploadé avec succès
+        '400':
+          description: Requête invalide
+        '403':
+          description: Non autorisé
+        '404':
+          description: Étudiant non trouvé
+    delete:
+      operationId: api_bordereaux_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Fichier uploadé avec succès
+        '400':
+          description: Requête invalide
+        '403':
+          description: Non autorisé
+        '404':
+          description: Étudiant non trouvé
+  /api/documents/memoires/:
+    get:
+      operationId: api_documents_memoires_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Memoire'
+          description: ''
+    post:
+      operationId: api_documents_memoires_create
+      tags:
+      - api
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Memoire'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Memoire'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memoire'
+          description: ''
+  /api/documents/memoires/{memoire_id}/verifier/:
+    post:
+      operationId: api_documents_memoires_verifier_create
+      description: |-
+        Vue permettant au service examen de marquer un mémoire comme vérifié
+        (anti-plagiat et anti-IA) avant la planification de la soutenance.
+      parameters:
+      - in: path
+        name: memoire_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Mémoire vérifié
+        '400':
+          description: Données invalides
+        '403':
+          description: Non autorisé
+        '404':
+          description: Mémoire non trouvé
+  /api/documents/memoires/{id}/:
+    get:
+      operationId: api_documents_memoires_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memoire'
+          description: ''
+    put:
+      operationId: api_documents_memoires_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Memoire'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Memoire'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memoire'
+          description: ''
+    patch:
+      operationId: api_documents_memoires_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMemoire'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMemoire'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memoire'
+          description: ''
+    delete:
+      operationId: api_documents_memoires_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/documents/upload/:
+    post:
+      operationId: api_documents_upload_create
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Fichier uploadé avec succès
+        '400':
+          description: Requête invalide
+        '403':
+          description: Non autorisé
+        '404':
+          description: Étudiant non trouvé
+  /api/memoires/:
+    get:
+      operationId: api_memoires_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Memoire'
+          description: ''
+    post:
+      operationId: api_memoires_create
+      tags:
+      - api
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Memoire'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Memoire'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memoire'
+          description: ''
+  /api/memoires/{id}/:
+    get:
+      operationId: api_memoires_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memoire'
+          description: ''
+    put:
+      operationId: api_memoires_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Memoire'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Memoire'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memoire'
+          description: ''
+    patch:
+      operationId: api_memoires_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMemoire'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMemoire'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memoire'
+          description: ''
+    delete:
+      operationId: api_memoires_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/scheduling/evaluations/:
+    get:
+      operationId: api_scheduling_evaluations_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Evaluation'
+          description: ''
+    post:
+      operationId: api_scheduling_evaluations_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evaluation'
+          description: ''
+  /api/scheduling/evaluations/{id}/:
+    get:
+      operationId: api_scheduling_evaluations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this evaluation.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evaluation'
+          description: ''
+    put:
+      operationId: api_scheduling_evaluations_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this evaluation.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evaluation'
+          description: ''
+    patch:
+      operationId: api_scheduling_evaluations_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this evaluation.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEvaluation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEvaluation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEvaluation'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evaluation'
+          description: ''
+    delete:
+      operationId: api_scheduling_evaluations_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this evaluation.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/scheduling/evaluations/{id}/telecharger-pv/:
+    get:
+      operationId: api_scheduling_evaluations_telecharger_pv_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this evaluation.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evaluation'
+          description: ''
+  /api/scheduling/evaluations/{id}/valider/:
+    post:
+      operationId: api_scheduling_evaluations_valider_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this evaluation.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Evaluation'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evaluation'
+          description: ''
+  /api/scheduling/indisponibilites/:
+    get:
+      operationId: api_scheduling_indisponibilites_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Indisponibilite'
+          description: ''
+    post:
+      operationId: api_scheduling_indisponibilites_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Indisponibilite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Indisponibilite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Indisponibilite'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Indisponibilite'
+          description: ''
+  /api/scheduling/indisponibilites/{id}/:
+    get:
+      operationId: api_scheduling_indisponibilites_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this indisponibilite.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Indisponibilite'
+          description: ''
+    put:
+      operationId: api_scheduling_indisponibilites_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this indisponibilite.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Indisponibilite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Indisponibilite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Indisponibilite'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Indisponibilite'
+          description: ''
+    patch:
+      operationId: api_scheduling_indisponibilites_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this indisponibilite.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIndisponibilite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIndisponibilite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIndisponibilite'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Indisponibilite'
+          description: ''
+    delete:
+      operationId: api_scheduling_indisponibilites_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this indisponibilite.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/users/:
+    get:
+      operationId: api_users_list
+      description: |-
+        Permet aux administrateurs de voir tous les utilisateurs,
+        mais aux autres de ne voir que leur propre profil.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+  /api/users/{id}/:
+    get:
+      operationId: api_users_retrieve
+      description: |-
+        Permet aux administrateurs de voir tous les utilisateurs,
+        mais aux autres de ne voir que leur propre profil.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Utilisateur.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+components:
+  schemas:
+    Evaluation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        note_finale:
+          type: number
+          format: double
+          readOnly: true
+        mention:
+          type: string
+          readOnly: true
+        note_presentation:
+          type: number
+          format: double
+          maximum: 20
+          minimum: 0
+        note_maitrise:
+          type: number
+          format: double
+          maximum: 20
+          minimum: 0
+        note_memoire:
+          type: number
+          format: double
+          maximum: 20
+          minimum: 0
+        note_reponses:
+          type: number
+          format: double
+          maximum: 20
+          minimum: 0
+        remarques_jury:
+          type: string
+        pv_genere:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        est_signe_par_tous:
+          type: boolean
+          readOnly: true
+        soutenance:
+          type: integer
+      required:
+      - est_signe_par_tous
+      - id
+      - mention
+      - note_finale
+      - pv_genere
+      - soutenance
+    Indisponibilite:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type_indisponible:
+          $ref: '#/components/schemas/TypeIndisponibleEnum'
+        date_debut:
+          type: string
+          format: date-time
+        date_fin:
+          type: string
+          format: date-time
+        raison:
+          type: string
+          nullable: true
+          maxLength: 255
+        utilisateur:
+          type: integer
+          nullable: true
+        salle:
+          type: integer
+          nullable: true
+      required:
+      - date_debut
+      - date_fin
+      - id
+      - type_indisponible
+    Memoire:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        etudiant:
+          type: integer
+          readOnly: true
+        etudiant_nom:
+          type: string
+          readOnly: true
+        filiere_nom:
+          type: string
+          title: Nom de la filière
+          readOnly: true
+        titre_final:
+          type: string
+          maxLength: 255
+        fichier_pdf:
+          type: string
+          format: uri
+          title: Version PDF (Immuable)
+        fichier_word:
+          type: string
+          format: uri
+          title: Version Word (Anti-plagiat)
+        support_presentation:
+          type: string
+          format: uri
+          nullable: true
+          title: Support PowerPoint
+        est_valide_par_directeur:
+          type: boolean
+          readOnly: true
+          title: Quitus du Directeur
+        verifie_anti_plagiat:
+          type: boolean
+          readOnly: true
+          title: Vérification Plagiat/IA
+        score_similarite:
+          type: number
+          format: double
+          readOnly: true
+          description: Pourcentage de similarité détecté
+        nb_pages:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Nombre de pages
+          description: 'Licence: max 90, Master: 100-120'
+        date_depot:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_depot
+      - est_valide_par_directeur
+      - etudiant
+      - etudiant_nom
+      - fichier_pdf
+      - fichier_word
+      - filiere_nom
+      - id
+      - nb_pages
+      - score_similarite
+      - titre_final
+      - verifie_anti_plagiat
+    PatchedEvaluation:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        note_finale:
+          type: number
+          format: double
+          readOnly: true
+        mention:
+          type: string
+          readOnly: true
+        note_presentation:
+          type: number
+          format: double
+          maximum: 20
+          minimum: 0
+        note_maitrise:
+          type: number
+          format: double
+          maximum: 20
+          minimum: 0
+        note_memoire:
+          type: number
+          format: double
+          maximum: 20
+          minimum: 0
+        note_reponses:
+          type: number
+          format: double
+          maximum: 20
+          minimum: 0
+        remarques_jury:
+          type: string
+        pv_genere:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        est_signe_par_tous:
+          type: boolean
+          readOnly: true
+        soutenance:
+          type: integer
+    PatchedIndisponibilite:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type_indisponible:
+          $ref: '#/components/schemas/TypeIndisponibleEnum'
+        date_debut:
+          type: string
+          format: date-time
+        date_fin:
+          type: string
+          format: date-time
+        raison:
+          type: string
+          nullable: true
+          maxLength: 255
+        utilisateur:
+          type: integer
+          nullable: true
+        salle:
+          type: integer
+          nullable: true
+    PatchedMemoire:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        etudiant:
+          type: integer
+          readOnly: true
+        etudiant_nom:
+          type: string
+          readOnly: true
+        filiere_nom:
+          type: string
+          title: Nom de la filière
+          readOnly: true
+        titre_final:
+          type: string
+          maxLength: 255
+        fichier_pdf:
+          type: string
+          format: uri
+          title: Version PDF (Immuable)
+        fichier_word:
+          type: string
+          format: uri
+          title: Version Word (Anti-plagiat)
+        support_presentation:
+          type: string
+          format: uri
+          nullable: true
+          title: Support PowerPoint
+        est_valide_par_directeur:
+          type: boolean
+          readOnly: true
+          title: Quitus du Directeur
+        verifie_anti_plagiat:
+          type: boolean
+          readOnly: true
+          title: Vérification Plagiat/IA
+        score_similarite:
+          type: number
+          format: double
+          readOnly: true
+          description: Pourcentage de similarité détecté
+        nb_pages:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Nombre de pages
+          description: 'Licence: max 90, Master: 100-120'
+        date_depot:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPreSoutenance:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date_prevue:
+          type: string
+          format: date-time
+          title: Date prévue de la pré-soutenance
+        date_reelle:
+          type: string
+          format: date-time
+          nullable: true
+          title: Date réelle de la pré-soutenance
+        statut:
+          $ref: '#/components/schemas/StatutEnum'
+        rapport:
+          type: string
+          format: uri
+          nullable: true
+          title: Rapport de pré-soutenance
+        commentaires:
+          type: string
+          title: Commentaires du jury
+        date_validation:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        etudiant:
+          type: integer
+        theme:
+          type: integer
+        valide_par:
+          type: integer
+          nullable: true
+    PreSoutenance:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date_prevue:
+          type: string
+          format: date-time
+          title: Date prévue de la pré-soutenance
+        date_reelle:
+          type: string
+          format: date-time
+          nullable: true
+          title: Date réelle de la pré-soutenance
+        statut:
+          $ref: '#/components/schemas/StatutEnum'
+        rapport:
+          type: string
+          format: uri
+          nullable: true
+          title: Rapport de pré-soutenance
+        commentaires:
+          type: string
+          title: Commentaires du jury
+        date_validation:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        etudiant:
+          type: integer
+        theme:
+          type: integer
+        valide_par:
+          type: integer
+          nullable: true
+      required:
+      - date_prevue
+      - date_validation
+      - etudiant
+      - id
+      - theme
+    RoleEnum:
+      enum:
+      - ADMIN_ACADEMIC
+      - CHEF_SERVICE_EXAM
+      - SERVICE_RECOUVREMENT
+      - CHARGE_ORGANISATION
+      - STUDENT
+      - INTERNAL_TRAINER
+      - EXTERNAL_TRAINER
+      - EXAMINER
+      - PRESIDENT_JURY
+      - MC
+      type: string
+      description: |-
+        * `ADMIN_ACADEMIC` - Direction Académique
+        * `CHEF_SERVICE_EXAM` - Chef Service Examen
+        * `SERVICE_RECOUVREMENT` - Service de Recouvrement
+        * `CHARGE_ORGANISATION` - Chargé d'Organisation
+        * `STUDENT` - Étudiant
+        * `INTERNAL_TRAINER` - Formateur Interne
+        * `EXTERNAL_TRAINER` - Formateur Externe
+        * `EXAMINER` - Examinateur
+        * `PRESIDENT_JURY` - Président du Jury
+        * `MC` - Maître de Cérémonie
+    StatutEnum:
+      enum:
+      - EN_ATTENTE
+      - VALIDE
+      - REPORTEE
+      - REFUSEE
+      type: string
+      description: |-
+        * `EN_ATTENTE` - En attente
+        * `VALIDE` - Validée
+        * `REPORTEE` - Reportée
+        * `REFUSEE` - Refusée
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    TypeIndisponibleEnum:
+      enum:
+      - JURY
+      - SALLE
+      type: string
+      description: |-
+        * `JURY` - Membre du jury
+        * `SALLE` - Salle
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+          title: Rôle utilisateur
+        is_doctor:
+          type: boolean
+          title: Est Docteur ?
+          description: Obligatoire pour être Président ou Examinateur en Master
+        is_internal:
+          type: boolean
+          title: Personnel Interne IPNET
+      required:
+      - id
+      - role
+      - username
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
