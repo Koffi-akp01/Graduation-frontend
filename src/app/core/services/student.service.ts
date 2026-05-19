@@ -39,6 +39,14 @@ export interface SoutenanceInfo {
   examinateur: string;
 }
 
+export interface MemoireVersion {
+  id: number;
+  version: number;
+  date_upload: string;
+  taille: number;
+  url: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -60,5 +68,15 @@ export class StudentService {
 
   getEligibilite(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/etudiant/eligibilite/`);
+  }
+
+  getVersions(): Observable<MemoireVersion[]> {
+    return this.http.get<MemoireVersion[]>(`${this.apiUrl}/etudiant/memoire/versions/`);
+  }
+
+  uploadMemoire(file: File): Observable<MemoireVersion> {
+    const formData = new FormData();
+    formData.append('fichier', file);
+    return this.http.post<MemoireVersion>(`${this.apiUrl}/etudiant/memoire/upload/`, formData);
   }
 }

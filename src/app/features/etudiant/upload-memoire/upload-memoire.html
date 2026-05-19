@@ -1,45 +1,135 @@
-<div class="upload-container">
-  <h2 class="page-title">Mon mémoire</h2>
+<app-top-nav></app-top-nav>
 
-  <!-- Zone de drag & drop -->
-  <div
-    class="dropzone"
-    [class.drag-over]="dragOver"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave($event)"
-    (drop)="onDrop($event)">
-    <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" hidden />
-    <button class="btn btn-outline" (click)="fileInput.click()">
-      📄 Choisir un fichier PDF
-    </button>
-    <p class="drop-hint">ou glissez‑déposez votre fichier ici</p>
-    <div *ngIf="uploadProgress > 0" class="progress-bar">
-      <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+<div class="app-page">
+
+  <!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item active" routerLink="/etudiant/memoire">
+      <span class="ico">📁</span> Déposer un document
+    </a>
+
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item" routerLink="/etudiant">
+      <span class="ico">📅</span> Ma soutenance
+    </a>
+    <a class="nav-item" routerLink="/etudiant/eligibilite">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+    <a class="nav-item" routerLink="/recouvrement">
+      <span class="ico">💳</span> Paiement des frais
+    </a>
+
+    <div class="sidebar-section">Résultats</div>
+    <a class="nav-item" routerLink="/etudiant">
+      <span class="ico">🏆</span> Mes résultats
+    </a>
+    <a class="nav-item" routerLink="/etudiant">
+      <span class="ico">🔔</span> Notifications
+    </a>
+  </aside>
+
+  <!-- ═══ CONTENU PRINCIPAL ════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Déposer mon mémoire</div>
+        <div class="page-subtitle">Glissez-déposez votre fichier PDF ou cliquez pour le sélectionner</div>
+      </div>
+      <a class="btn btn-secondary btn-sm" routerLink="/etudiant">← Retour au tableau de bord</a>
     </div>
+
+    <!-- Zone de dépôt -->
+    <div class="card dropzone-card">
+      <div
+        class="dropzone"
+        [class.drag-over]="dragOver"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" hidden />
+
+        <div class="dropzone-icon">📄</div>
+        <div class="dropzone-label">Glissez-déposez votre mémoire ici</div>
+        <div class="dropzone-hint">Format PDF uniquement — taille max 50 Mo</div>
+
+        <button
+          class="btn btn-gold"
+          [disabled]="uploading"
+          (click)="fileInput.click()">
+          {{ uploading ? 'Envoi en cours…' : '📤 Choisir un fichier PDF' }}
+        </button>
+      </div>
+
+      <!-- Barre de progression -->
+      @if (uploadProgress > 0) {
+        <div class="progress-wrap">
+          <div class="progress-label">
+            @if (uploading) { Envoi en cours… }
+            @else { Terminé }
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+          </div>
+        </div>
+      }
+
+      <!-- Messages -->
+      @if (error) {
+        <div class="alert alert-danger">⚠ {{ error }}</div>
+      }
+      @if (success) {
+        <div class="alert alert-success">✓ Mémoire déposé avec succès !</div>
+      }
+    </div>
+
+    <!-- Historique des versions -->
+    @if (versions().length) {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Historique des versions</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Version</th>
+                <th>Date de dépôt</th>
+                <th>Taille</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (v of versions(); track v.id) {
+                <tr>
+                  <td><span class="version-badge">v{{ v.version }}</span></td>
+                  <td>{{ v.date_upload | date:'dd/MM/yyyy à HH:mm' }}</td>
+                  <td>{{ (v.taille / 1024) | number:'1.0-0' }} Ko</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" (click)="viewPdf(v)">
+                      👁 Voir
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Visionneuse PDF -->
+    @if (pdfUrl) {
+      <app-pdf-viewer [src]="pdfUrl" (close)="pdfUrl = null"></app-pdf-viewer>
+    }
+
   </div>
-
-  <!-- Alertes -->
-  <app-alert *ngIf="error" type="danger" [message]="error" (dismissed)="error = ''"></app-alert>
-  <app-alert *ngIf="success" type="success" message="Mémoire uploadé avec succès !" (dismissed)="success = false"></app-alert>
-
-  <!-- Historique des versions -->
-  <div class="card" *ngIf="versions().length">
-    <div class="card-header">Historique des versions</div>
-    <table>
-      <thead>
-        <tr><th>Version</th><th>Date</th><th>Taille</th><th>Action</th></tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let v of versions()">
-          <td>v{{ v.version }}</td>
-          <td>{{ v.date_upload | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td>{{ v.taille / 1024 | number:'1.0-0' }} KB</td>
-          <td><button class="btn btn-sm btn-outline" (click)="viewPdf(v)">👁️ Voir</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- PDF Viewer -->
-  <app-pdf-viewer *ngIf="pdfUrl" [src]="pdfUrl" (close)="pdfUrl = null"></app-pdf-viewer>
 </div>
