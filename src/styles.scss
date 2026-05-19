@@ -1,1 +1,108 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --cream: #faf8f3;
+  --navy: #0f2237;
+  --navy-2: #1a3c5e;
+  --gold: #c8963e;
+  --success: #276749;
+  --success-light: #dcfce7;
+  --danger: #c53030;
+  --warn: #b7791f;
+  --border: #e2ddd4;
+  --ink1: #1e293b;
+  --ink2: #334155;
+  --ink3: #64748b;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', Arial, sans-serif;
+  background: var(--cream);
+  color: var(--ink2);
+}
+
+.card-white {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.color-navy {
+  color: var(--navy);
+}
+
+.color-gold {
+  color: var(--gold);
+}
+
+.color-success {
+  color: var(--success);
+}
+
+.text-ink2 {
+  color: var(--ink2);
+}
+
+.text-ink3 {
+  color: var(--ink3);
+}
+
+.btn-gold,
+.btn-success,
+.btn-danger,
+.btn-outline {
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.btn-gold {
+  background-color: var(--gold);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.btn-success {
+  background-color: var(--success);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--cream);
+}

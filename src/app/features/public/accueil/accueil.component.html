@@ -1,0 +1,846 @@
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav>
+  <a routerLink="/" class="gp-logo">
+    <svg class="gp-logo-icon" width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="21" stroke="#C8963E" stroke-width="1.4" stroke-dasharray="4 2.5" opacity=".5"/>
+      <circle cx="22" cy="22" r="19" fill="#0F2237"/>
+      <polygon points="22,8 38,17 22,22 6,17" fill="#C8963E"/>
+      <polygon points="22,8 38,17 30,17 22,11" fill="#E8B86D" opacity=".5"/>
+      <circle cx="22" cy="8" r="1.8" fill="#F5E6C8"/>
+      <line x1="35" y1="17" x2="35" y2="26" stroke="#C8963E" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="35" cy="27.5" r="2.2" fill="#C8963E"/>
+      <rect x="13" y="22" width="18" height="13" rx="2" fill="#1A3C5E"/>
+      <line x1="16" y1="26.5" x2="28" y2="26.5" stroke="rgba(255,255,255,.35)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="29.5" x2="28" y2="29.5" stroke="rgba(255,255,255,.35)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="32.5" x2="23" y2="32.5" stroke="rgba(255,255,255,.35)" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="27" cy="30" r="3" fill="#C8963E" opacity=".9"/>
+      <text x="27" y="31.5" text-anchor="middle" font-size="4" fill="#fff" font-weight="700">★</text>
+      <polyline points="18.5,17 21,19.5 25.5,14.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".7"/>
+    </svg>
+    <div class="gp-logo-text-wrap">
+      <div class="gp-logo-name">Graduation<span class="gp-accent"> Plan</span></div>
+      <div class="gp-logo-tagline">Gestion des Soutenances · IPNET</div>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#fonctionnalites">Fonctionnalités</a>
+    <a href="#acteurs">Acteurs</a>
+    <a href="#processus">Processus</a>
+    <a href="#regles">Règles métier</a>
+  </div>
+  <button class="hamburger" [class.open]="mobileNavOpen" (click)="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-cta">
+    <a routerLink="/login" class="btn btn-outline">Se connecter</a>
+    <a routerLink="/login" class="btn btn-gold">Accéder à la plateforme →</a>
+  </div>
+</nav>
+
+<!-- MOBILE NAV OVERLAY -->
+<div class="mobile-nav-overlay" [class.open]="mobileNavOpen">
+  <a href="#fonctionnalites" (click)="closeMobileNav()">Fonctionnalités</a>
+  <a href="#acteurs" (click)="closeMobileNav()">Acteurs</a>
+  <a href="#processus" (click)="closeMobileNav()">Processus</a>
+  <a href="#regles" (click)="closeMobileNav()">Règles métier</a>
+  <div class="mobile-divider"></div>
+  <a routerLink="/login" (click)="closeMobileNav()" class="btn btn-outline">Se connecter</a>
+  <a routerLink="/login" (click)="closeMobileNav()" class="btn btn-gold">Accéder à la plateforme →</a>
+</div>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero">
+  <div class="hero-circle-1"></div>
+  <div class="hero-circle-2"></div>
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="hero-tag">Nouvelle plateforme 2025</div>
+      <h1 class="hero-title">Gérez vos <em>soutenances</em> académiques avec intelligence</h1>
+      <p class="hero-desc"><strong style="color:rgba(255,255,255,.85)">Graduation Plan</strong> centralise, automatise et sécurise l'ensemble du processus de soutenance — du dépôt de thème jusqu'à la publication des résultats.</p>
+      <div class="hero-actions">
+        <a routerLink="/login" class="btn btn-gold btn-lg">Accéder à la plateforme →</a>
+        <a href="#fonctionnalites" class="btn btn-outline btn-lg">Découvrir les fonctionnalités</a>
+      </div>
+      <p class="hero-note">🔒 Accès sécurisé par rôle · Django + Angular · PostgreSQL</p>
+    </div>
+    <div class="hero-right">
+      <div class="hero-mockup">
+        <div class="mockup-topbar">
+          <div class="mockup-dot" style="background:#FF5F57"></div>
+          <div class="mockup-dot" style="background:#FFBD2E"></div>
+          <div class="mockup-dot" style="background:#28CA41"></div>
+          <span style="font-size:11px;color:rgba(255,255,255,.3);margin-left:8px;font-family:'DM Mono',monospace">graduationplan.ipnet.edu</span>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Session Juillet 2025</div>
+        <div class="mockup-stat-row">
+          <div class="mockup-stat">
+            <div class="mockup-stat-val">87</div>
+            <div class="mockup-stat-lbl">Étudiants</div>
+            <div class="mockup-bar"><div class="mockup-bar-fill" style="width:72%;background:#C8963E"></div></div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-val">34</div>
+            <div class="mockup-stat-lbl">Planifiées</div>
+            <div class="mockup-bar"><div class="mockup-bar-fill" style="width:39%;background:#4FC3F7"></div></div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-val">58</div>
+            <div class="mockup-stat-lbl">Éligibles</div>
+            <div class="mockup-bar"><div class="mockup-bar-fill" style="width:67%;background:#68D391"></div></div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Dernières activités</div>
+        <div class="mockup-list">
+          <div class="mockup-row">
+            <div><div class="mockup-name">Ama Koffi</div><div class="mockup-detail">Mémoire déposé · Master 2</div></div>
+            <div class="mkbadge mkbadge-gold">En révision</div>
+          </div>
+          <div class="mockup-row">
+            <div><div class="mockup-name">Kofi Asante</div><div class="mockup-detail">Soutenance planifiée · 14 Juil.</div></div>
+            <div class="mkbadge mkbadge-green">Confirmé</div>
+          </div>
+          <div class="mockup-row">
+            <div><div class="mockup-name">Abena Mensah</div><div class="mockup-detail">Frais non payés · Licence 3</div></div>
+            <div class="mkbadge mkbadge-red">Bloqué</div>
+          </div>
+          <div class="mockup-row">
+            <div><div class="mockup-name">Yaw Boateng</div><div class="mockup-detail">Notes saisies · PV généré</div></div>
+            <div class="mkbadge mkbadge-green">Archivé</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ STATS BAND ══════════════ -->
+<div class="stats-band">
+  <div class="stat-item"><div class="stat-num">10</div><div class="stat-lbl">Acteurs du système</div></div>
+  <div class="stat-item"><div class="stat-num">8</div><div class="stat-lbl">Modules fonctionnels</div></div>
+  <div class="stat-item"><div class="stat-num">100%</div><div class="stat-lbl">Processus dématérialisés</div></div>
+  <div class="stat-item"><div class="stat-num">0</div><div class="stat-lbl">Conflits d'horaires</div></div>
+</div>
+
+<!-- ══════════════ LOGO SHOWCASE ══════════════ -->
+<div class="logo-showcase">
+  <!-- Version principale : fond sombre -->
+  <div style="background:#0F2237;border-radius:16px;padding:32px 44px;display:flex;align-items:center;gap:18px;box-shadow:0 8px 32px rgba(15,34,55,.25)">
+    <svg width="64" height="64" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="21" stroke="#C8963E" stroke-width="1.4" stroke-dasharray="4 2.5" opacity=".6"/>
+      <circle cx="22" cy="22" r="19" fill="#0F2237"/>
+      <polygon points="22,8 38,17 22,22 6,17" fill="#C8963E"/>
+      <polygon points="22,8 38,17 30,17 22,11" fill="#E8B86D" opacity=".55"/>
+      <circle cx="22" cy="8" r="1.8" fill="#F5E6C8"/>
+      <line x1="35" y1="17" x2="35" y2="26" stroke="#C8963E" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="35" cy="27.5" r="2.2" fill="#C8963E"/>
+      <rect x="13" y="22" width="18" height="13" rx="2" fill="#1A3C5E"/>
+      <line x1="16" y1="26.5" x2="28" y2="26.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="29.5" x2="28" y2="29.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="32.5" x2="23" y2="32.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="27" cy="30" r="3" fill="#C8963E"/>
+      <text x="27" y="31.5" text-anchor="middle" font-size="4" fill="#fff" font-weight="700">★</text>
+      <polyline points="18.5,17 21,19.5 25.5,14.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".75"/>
+    </svg>
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#fff;letter-spacing:-.3px;line-height:1">Graduation<span style="color:#C8963E"> Plan</span></div>
+      <div style="font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2.5px;text-transform:uppercase;font-weight:600;margin-top:4px">Gestion des Soutenances</div>
+    </div>
+  </div>
+
+  <!-- Version icône seule : grande -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+    <svg width="96" height="96" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 8px 24px rgba(200,150,62,.35))">
+      <circle cx="22" cy="22" r="21" stroke="#C8963E" stroke-width="1.4" stroke-dasharray="4 2.5" opacity=".6"/>
+      <circle cx="22" cy="22" r="19" fill="#0F2237"/>
+      <polygon points="22,8 38,17 22,22 6,17" fill="#C8963E"/>
+      <polygon points="22,8 38,17 30,17 22,11" fill="#E8B86D" opacity=".55"/>
+      <circle cx="22" cy="8" r="1.8" fill="#F5E6C8"/>
+      <line x1="35" y1="17" x2="35" y2="26" stroke="#C8963E" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="35" cy="27.5" r="2.2" fill="#C8963E"/>
+      <rect x="13" y="22" width="18" height="13" rx="2" fill="#1A3C5E"/>
+      <line x1="16" y1="26.5" x2="28" y2="26.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="29.5" x2="28" y2="29.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="32.5" x2="23" y2="32.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="27" cy="30" r="3" fill="#C8963E"/>
+      <text x="27" y="31.5" text-anchor="middle" font-size="4" fill="#fff" font-weight="700">★</text>
+      <polyline points="18.5,17 21,19.5 25.5,14.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".75"/>
+    </svg>
+    <div style="font-size:10px;color:#718096;text-transform:uppercase;letter-spacing:1.5px;font-weight:600">Icône seule</div>
+  </div>
+
+  <!-- Version fond clair -->
+  <div style="background:#FFFFFF;border:1px solid #E2DDD4;border-radius:16px;padding:32px 44px;display:flex;align-items:center;gap:18px;box-shadow:0 4px 16px rgba(15,34,55,.08)">
+    <svg width="56" height="56" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="21" stroke="#C8963E" stroke-width="1.4" stroke-dasharray="4 2.5" opacity=".5"/>
+      <circle cx="22" cy="22" r="19" fill="#0F2237"/>
+      <polygon points="22,8 38,17 22,22 6,17" fill="#C8963E"/>
+      <polygon points="22,8 38,17 30,17 22,11" fill="#E8B86D" opacity=".55"/>
+      <circle cx="22" cy="8" r="1.8" fill="#F5E6C8"/>
+      <line x1="35" y1="17" x2="35" y2="26" stroke="#C8963E" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="35" cy="27.5" r="2.2" fill="#C8963E"/>
+      <rect x="13" y="22" width="18" height="13" rx="2" fill="#1A3C5E"/>
+      <line x1="16" y1="26.5" x2="28" y2="26.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="29.5" x2="28" y2="29.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <line x1="16" y1="32.5" x2="23" y2="32.5" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="27" cy="30" r="3" fill="#C8963E"/>
+      <text x="27" y="31.5" text-anchor="middle" font-size="4" fill="#fff" font-weight="700">★</text>
+      <polyline points="18.5,17 21,19.5 25.5,14.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".75"/>
+    </svg>
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:#0F2237;letter-spacing:-.3px;line-height:1">Graduation<span style="color:#C8963E"> Plan</span></div>
+      <div style="font-size:10px;color:#718096;letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-top:4px">IPNET Institute of Technology</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FONCTIONNALITÉS ══════════════ -->
+<section id="fonctionnalites" class="features-bg">
+  <div style="max-width:1280px;margin:0 auto">
+    <div class="section-tag">Fonctionnalités</div>
+    <h2 class="section-title">Une plateforme <em>complète</em><br>pour chaque étape</h2>
+    <p class="section-desc">Tous les modules nécessaires à la gestion intégrale des soutenances académiques, de la Licence au Master.</p>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">👥</div>
+        <div class="feat-title">Gestion des acteurs & rôles</div>
+        <div class="feat-desc">Comptes sécurisés pour chaque acteur avec droits spécifiques. Contrôle d'accès basé sur les rôles (RBAC) pour une sécurité totale.</div>
+        <div class="feat-tags"><span class="feat-tag">RBAC</span><span class="feat-tag">10 rôles</span><span class="feat-tag">Audit</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💡</div>
+        <div class="feat-title">Dépôt & validation des thèmes</div>
+        <div class="feat-desc">Soumission dématérialisée des thèmes, validation progressive par la direction et l'examinateur. Traçabilité complète des décisions.</div>
+        <div class="feat-tags"><span class="feat-tag">Dématérialisé</span><span class="feat-tag">Workflow</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📘</div>
+        <div class="feat-title">Encadrement & directeurs</div>
+        <div class="feat-desc">Désignation des directeurs de mémoire avec priorité aux formateurs internes. Suivi de la charge d'encadrement et répartition équilibrée.</div>
+        <div class="feat-tags"><span class="feat-tag">Priorité interne</span><span class="feat-tag">Charge</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">✅</div>
+        <div class="feat-title">Vérifications & éligibilité</div>
+        <div class="feat-desc">Contrôle automatique des UE validées, paiements et conformité du dossier. Blocage automatique des dossiers non conformes.</div>
+        <div class="feat-tags"><span class="feat-tag">Auto</span><span class="feat-tag">UE</span><span class="feat-tag">Paiement</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📁</div>
+        <div class="feat-title">Gestion documentaire</div>
+        <div class="feat-desc">Dépôt, consultation et archivage des mémoires. Historisation de chaque action. Vérification anti-plagiat et détection IA intégrée.</div>
+        <div class="feat-tags"><span class="feat-tag">Anti-IA</span><span class="feat-tag">Anti-plagiat</span><span class="feat-tag">Archivage</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚖️</div>
+        <div class="feat-title">Composition des jurys</div>
+        <div class="feat-desc">Constitution automatique selon les règles institutionnelles. Gestion des indisponibilités, minimum 2 docteurs requis pour Master.</div>
+        <div class="feat-tags"><span class="feat-tag">2 Docteurs</span><span class="feat-tag">Disponibilités</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📅</div>
+        <div class="feat-title">Planification mensuelle</div>
+        <div class="feat-desc">Calendrier mensuel structuré, détection automatique des conflits de salles et horaires, envoi des convocations. 1h par soutenance.</div>
+        <div class="feat-tags"><span class="feat-tag">Conflits auto</span><span class="feat-tag">Convocations</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📄</div>
+        <div class="feat-title">Notation & procès-verbaux</div>
+        <div class="feat-desc">Saisie sécurisée des notes par critère, validation du président du jury, génération automatique des PV signés et archivage définitif.</div>
+        <div class="feat-tags"><span class="feat-tag">PV auto</span><span class="feat-tag">Signature</span><span class="feat-tag">Mentions</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💰</div>
+        <div class="feat-title">Gestion financière</div>
+        <div class="feat-desc">Suivi des paiements des frais de soutenance, émission de reçus, alertes automatiques pour les impayés. Rapport financier mensuel.</div>
+        <div class="feat-tags"><span class="feat-tag">Mobile Money</span><span class="feat-tag">Reçu</span><span class="feat-tag">Alertes</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ ACTEURS ══════════════ -->
+<section id="acteurs" class="actors-bg">
+  <div style="max-width:1280px;margin:0 auto">
+    <div class="section-tag">Acteurs</div>
+    <h2 class="section-title">Conçu pour <em>tous</em> les acteurs<br>de la soutenance</h2>
+    <div class="actors-grid">
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">🎓</div>
+        <div class="actor-name">Étudiant</div>
+        <div class="actor-desc">Dépose son mémoire, suit son dossier, consulte sa soutenance</div>
+        <span class="actor-count">4 actions</span>
+      </div>
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">📋</div>
+        <div class="actor-name">Service Examen</div>
+        <div class="actor-desc">Vérifie la conformité des dossiers et contrôle le plagiat/IA</div>
+        <span class="actor-count">3 actions</span>
+      </div>
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">🏛️</div>
+        <div class="actor-name">Direction Académique</div>
+        <div class="actor-desc">Affecte les directeurs, constitue les jurys, valide les résultats</div>
+        <span class="actor-count">4 actions</span>
+      </div>
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">📘</div>
+        <div class="actor-name">Directeur de mémoire</div>
+        <div class="actor-desc">Propose des thèmes, encadre et valide les mémoires</div>
+        <span class="actor-count">3 actions</span>
+      </div>
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">⚖️</div>
+        <div class="actor-name">Jury / Président</div>
+        <div class="actor-desc">Évalue la soutenance, saisit les notes et signe le PV</div>
+        <span class="actor-count">3 actions</span>
+      </div>
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">🗓️</div>
+        <div class="actor-name">Chargée d'Organisation</div>
+        <div class="actor-desc">Planifie les soutenances et gère les sessions mensuelles</div>
+        <span class="actor-count">3 actions</span>
+      </div>
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">🏛️</div>
+        <div class="actor-name">Conseil Scientifique</div>
+        <div class="actor-desc">Valide les résultats finaux et approuve les mémoires</div>
+        <span class="actor-count">2 actions</span>
+      </div>
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">💰</div>
+        <div class="actor-name">Service Recouvrement</div>
+        <div class="actor-desc">Vérifie et valide les paiements des frais de soutenance</div>
+        <span class="actor-count">2 actions</span>
+      </div>
+      <div class="actor-card" routerLink="/login">
+        <div class="actor-icon">⚙️</div>
+        <div class="actor-name">Administrateur</div>
+        <div class="actor-desc">Gère les utilisateurs, les rôles et supervise le système</div>
+        <span class="actor-count">4 actions</span>
+      </div>
+      <div class="actor-card" style="background:#0F2237;border-color:#1A3C5E">
+        <div class="actor-icon">🔒</div>
+        <div class="actor-name" style="color:#fff">Accès sécurisé</div>
+        <div class="actor-desc" style="color:rgba(255,255,255,.5)">Chaque acteur accède uniquement à son espace dédié</div>
+        <span class="actor-count" style="background:rgba(200,150,62,.2);color:#C8963E">RBAC</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PROCESSUS ══════════════ -->
+<section id="processus" class="process-bg">
+  <div style="max-width:1280px;margin:0 auto;position:relative;z-index:1">
+    <div class="section-tag">Processus</div>
+    <h2 class="section-title">Du thème au résultat,<br>en <em>6 étapes</em> fluides</h2>
+    <p class="section-desc">La plateforme automatise et coordonne chaque étape du processus de soutenance sans rupture.</p>
+    <div class="process-steps">
+      <div class="proc-step done">
+        <div class="proc-num"><span class="proc-icon">💡</span></div>
+        <div class="proc-title">Dépôt du thème</div>
+        <div class="proc-desc">L'étudiant soumet son thème de mémoire</div>
+      </div>
+      <div class="proc-step done">
+        <div class="proc-num"><span class="proc-icon">✅</span></div>
+        <div class="proc-title">Validation & encadrement</div>
+        <div class="proc-desc">Thème validé, directeur affecté</div>
+      </div>
+      <div class="proc-step active">
+        <div class="proc-num"><span class="proc-icon">📄</span></div>
+        <div class="proc-title">Dépôt du mémoire</div>
+        <div class="proc-desc">Rédaction, dépôt et vérification</div>
+      </div>
+      <div class="proc-step">
+        <div class="proc-num"><span class="proc-icon">⚖️</span></div>
+        <div class="proc-title">Constitution du jury</div>
+        <div class="proc-desc">Planification et affectation des jurys</div>
+      </div>
+      <div class="proc-step">
+        <div class="proc-num"><span class="proc-icon">🎓</span></div>
+        <div class="proc-title">Soutenance</div>
+        <div class="proc-desc">Évaluation et saisie des notes</div>
+      </div>
+      <div class="proc-step">
+        <div class="proc-num"><span class="proc-icon">🏆</span></div>
+        <div class="proc-title">Publication des résultats</div>
+        <div class="proc-desc">PV signé, résultats archivés</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ RÈGLES MÉTIER ══════════════ -->
+<section id="regles" class="rules-bg">
+  <div style="max-width:1280px;margin:0 auto">
+    <div class="section-tag">Règles métier</div>
+    <h2 class="section-title">Des règles <em>institutionnelles</em><br>intégrées et automatisées</h2>
+    <p class="section-desc">La plateforme applique automatiquement toutes les règles académiques d'IPNET, sans intervention manuelle.</p>
+    <div class="rules-grid">
+      <div class="rule-item">
+        <div class="rule-icon">📚</div>
+        <div><div class="rule-title">Validation complète des UE</div><div class="rule-desc">Toutes les unités d'enseignement obligatoires doivent être validées avant toute planification de soutenance.</div></div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">💳</div>
+        <div><div class="rule-title">Paiement obligatoire</div><div class="rule-desc">Les frais de soutenance doivent être réglés avant l'accès à la planification. Blocage automatique sinon.</div></div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">👨‍🏫</div>
+        <div><div class="rule-title">Priorité formateurs internes</div><div class="rule-desc">Les directeurs de mémoire sont prioritairement choisis parmi les formateurs internes d'IPNET.</div></div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">🎓</div>
+        <div><div class="rule-title">2 Docteurs minimum (Master)</div><div class="rule-desc">Tout jury de Master doit comprendre au minimum deux membres titulaires d'un doctorat.</div></div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">📝</div>
+        <div><div class="rule-title">Validation exclusive par le directeur</div><div class="rule-desc">Le mémoire doit obligatoirement être validé par le directeur de mémoire avant la soutenance.</div></div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">🤖</div>
+        <div><div class="rule-title">Vérification anti-fraude & anti-IA</div><div class="rule-desc">Chaque mémoire est soumis à une vérification anti-plagiat et de détection de contenu généré par IA.</div></div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">✍️</div>
+        <div><div class="rule-title">Signature complète du jury</div><div class="rule-desc">Le procès-verbal doit être signé par l'ensemble des membres du jury pour être valide.</div></div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-icon">📏</div>
+        <div><div class="rule-title">Limite de pages</div><div class="rule-desc">90 pages maximum pour Licence, 100 à 120 pages pour Master. Durée de rédaction : 6 mois maximum.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CTA ══════════════ -->
+<section class="cta-section">
+  <h2 class="cta-title">Prêt à planifier vos soutenances ?</h2>
+  <p class="cta-desc">Accédez à <strong style="color:#C8963E">Graduation Plan</strong> et gérez l'intégralité de vos soutenances académiques en toute simplicité.</p>
+  <div class="cta-actions">
+    <a routerLink="/login" class="btn btn-gold btn-lg">Accéder à la plateforme →</a>
+    <button class="btn btn-white btn-lg" (click)="openDemo()">▶ Voir la démo</button>
+  </div>
+</section>
+
+<!-- ══════════════ MODAL DÉMO ══════════════ -->
+@if (demoOpen) {
+  <div class="demo-backdrop" (click)="closeDemo()">
+    <div class="demo-modal" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="demo-header">
+        <div>
+          <div class="demo-header-title">▶ Démo interactive — Graduation Plan</div>
+          <div class="demo-header-sub">Navigation libre · Aucune connexion requise · Données fictives</div>
+        </div>
+        <button class="demo-close" (click)="closeDemo()">✕</button>
+      </div>
+
+      <div class="demo-body">
+
+        <!-- Sidebar rôles -->
+        <aside class="demo-sidebar">
+          <div class="demo-sidebar-label">Choisir un espace</div>
+          @for (role of roles; track role.id) {
+            <button
+              class="demo-role-btn"
+              [class.active]="activeDemo === role.id"
+              (click)="activeDemo = role.id">
+              <span class="drb-icon">{{ role.icon }}</span>
+              <div>
+                <div class="drb-label">{{ role.label }}</div>
+                <div class="drb-sub">{{ role.subtitle }}</div>
+              </div>
+            </button>
+          }
+        </aside>
+
+        <!-- Zone préview -->
+        <main class="demo-preview">
+
+          <!-- ═══ ÉTUDIANT ═══ -->
+          @if (activeDemo === 'etudiant') {
+            <div class="dp-screen">
+              <div class="dp-topbar">
+                <span class="dp-logo">Graduation Plan</span>
+                <div class="dp-nav-links"><span>Dashboard</span><span>Mémoire</span><span>Thème</span><span>Éligibilité</span></div>
+                <div class="dp-avatar">AK</div>
+              </div>
+              <div class="dp-layout">
+                <div class="dp-sidebar">
+                  <div class="dp-user"><div class="dp-usr-av" style="background:#1A3C5E">AK</div><div><div class="dp-usr-name">Ama Koffi</div><div class="dp-usr-role">Étudiant · Master 2</div></div></div>
+                  <div class="dp-nav-section">Mon parcours</div>
+                  <div class="dp-nav-item active">🏠 Tableau de bord</div>
+                  <div class="dp-nav-item">📄 Mon mémoire</div>
+                  <div class="dp-nav-item">💡 Mon thème</div>
+                  <div class="dp-nav-item">✅ Mon éligibilité</div>
+                  <div class="dp-nav-section">Soutenance</div>
+                  <div class="dp-nav-item">🎓 Ma soutenance</div>
+                  <div class="dp-nav-item">💳 Paiement</div>
+                </div>
+                <div class="dp-main">
+                  <div class="dp-page-title">Bonjour, Ama 👋</div>
+                  <div class="dp-stepper">
+                    <div class="dp-step done">✓<div>Thème</div></div>
+                    <div class="dp-step-line done"></div>
+                    <div class="dp-step done">✓<div>Directeur</div></div>
+                    <div class="dp-step-line done"></div>
+                    <div class="dp-step active">3<div>Mémoire</div></div>
+                    <div class="dp-step-line"></div>
+                    <div class="dp-step">4<div>Éligibilité</div></div>
+                    <div class="dp-step-line"></div>
+                    <div class="dp-step">5<div>Soutenance</div></div>
+                  </div>
+                  <div class="dp-stats-row">
+                    <div class="dp-stat-card" style="border-left:3px solid #2B6CB0"><div class="dp-sc-val">78%</div><div class="dp-sc-lbl">Progression mémoire</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #C8963E"><div class="dp-sc-val">14 Juil.</div><div class="dp-sc-lbl">Date soutenance</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #276749"><div class="dp-sc-val">Validé</div><div class="dp-sc-lbl">Frais payés</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #276749"><div class="dp-sc-val">Éligible</div><div class="dp-sc-lbl">Statut dossier</div></div>
+                  </div>
+                  <div class="dp-card">
+                    <div class="dp-card-title">📄 Mon mémoire</div>
+                    <div class="dp-memoire-info">
+                      <div class="dp-mi-row"><span class="dp-mi-lbl">Titre</span><span>Optimisation des algorithmes de planification par IA</span></div>
+                      <div class="dp-mi-row"><span class="dp-mi-lbl">Directeur</span><span>Dr. Kofi Mensah</span></div>
+                      <div class="dp-mi-row"><span class="dp-mi-lbl">Version</span><span class="dp-badge green">v2.1 — Approuvée ✓</span></div>
+                      <div class="dp-mi-row"><span class="dp-mi-lbl">Plagiat</span><span class="dp-badge green">8% — Conforme ✓</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ═══ DIRECTION ═══ -->
+          @if (activeDemo === 'direction') {
+            <div class="dp-screen">
+              <div class="dp-topbar">
+                <span class="dp-logo">Graduation Plan</span>
+                <div class="dp-nav-links"><span>Thèmes</span><span>Jurys</span><span>Calendrier</span></div>
+                <div class="dp-avatar" style="background:#0F2237">DA</div>
+              </div>
+              <div class="dp-layout">
+                <div class="dp-sidebar">
+                  <div class="dp-user"><div class="dp-usr-av" style="background:#0F2237">DA</div><div><div class="dp-usr-name">Direction Acad.</div><div class="dp-usr-role">Accès Direction</div></div></div>
+                  <div class="dp-nav-section">Académique</div>
+                  <div class="dp-nav-item active">📋 Thèmes en attente</div>
+                  <div class="dp-nav-item">✅ Thèmes validés</div>
+                  <div class="dp-nav-item">👥 Jurys</div>
+                  <div class="dp-nav-item">📅 Calendrier</div>
+                </div>
+                <div class="dp-main">
+                  <div class="dp-page-title">Validation des thèmes</div>
+                  <div class="dp-stats-row">
+                    <div class="dp-stat-card" style="border-left:3px solid #C8963E"><div class="dp-sc-val">12</div><div class="dp-sc-lbl">En attente</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #276749"><div class="dp-sc-val">54</div><div class="dp-sc-lbl">Validés</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #9B2226"><div class="dp-sc-val">3</div><div class="dp-sc-lbl">Refusés</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #2B6CB0"><div class="dp-sc-val">6</div><div class="dp-sc-lbl">Jurys constitués</div></div>
+                  </div>
+                  <div class="dp-card">
+                    <div class="dp-card-title">📋 Thèmes en attente de validation</div>
+                    <table class="dp-table">
+                      <thead><tr><th>Étudiant</th><th>Thème</th><th>Niveau</th><th>Actions</th></tr></thead>
+                      <tbody>
+                        <tr><td>Ama Koffi</td><td>Algorithmes IA pour planification</td><td><span class="dp-badge blue">Master 2</span></td><td><button class="dp-btn green">Valider</button><button class="dp-btn red">Refuser</button></td></tr>
+                        <tr><td>Yaw Boateng</td><td>Blockchain et traçabilité</td><td><span class="dp-badge blue">Master 1</span></td><td><button class="dp-btn green">Valider</button><button class="dp-btn red">Refuser</button></td></tr>
+                        <tr><td>Abena Mensah</td><td>Machine Learning en finance</td><td><span class="dp-badge gold">Licence 3</span></td><td><button class="dp-btn green">Valider</button><button class="dp-btn red">Refuser</button></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ═══ DIRECTEUR ═══ -->
+          @if (activeDemo === 'directeur') {
+            <div class="dp-screen">
+              <div class="dp-topbar">
+                <span class="dp-logo">Graduation Plan</span>
+                <div class="dp-nav-links"><span>Mes étudiants</span><span>Validation</span></div>
+                <div class="dp-avatar" style="background:#2B6CB0">DM</div>
+              </div>
+              <div class="dp-layout">
+                <div class="dp-sidebar">
+                  <div class="dp-user"><div class="dp-usr-av" style="background:#2B6CB0">DM</div><div><div class="dp-usr-name">Dr. Kofi Mensah</div><div class="dp-usr-role">Directeur de mémoire</div></div></div>
+                  <div class="dp-nav-section">Encadrement</div>
+                  <div class="dp-nav-item active">👥 Mes étudiants</div>
+                  <div class="dp-nav-item">✅ Validations</div>
+                  <div class="dp-nav-item">📄 Mémoires reçus</div>
+                </div>
+                <div class="dp-main">
+                  <div class="dp-page-title">Mes étudiants encadrés</div>
+                  <div class="dp-stats-row">
+                    <div class="dp-stat-card" style="border-left:3px solid #2B6CB0"><div class="dp-sc-val">4</div><div class="dp-sc-lbl">Étudiants</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #276749"><div class="dp-sc-val">2</div><div class="dp-sc-lbl">Mémoires validés</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #C8963E"><div class="dp-sc-val">1</div><div class="dp-sc-lbl">En révision</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #9B2226"><div class="dp-sc-val">1</div><div class="dp-sc-lbl">En attente</div></div>
+                  </div>
+                  <div class="dp-card">
+                    <div class="dp-card-title">👥 Liste des étudiants</div>
+                    <table class="dp-table">
+                      <thead><tr><th>Étudiant</th><th>Thème</th><th>Statut mémoire</th><th>Action</th></tr></thead>
+                      <tbody>
+                        <tr><td>Ama Koffi</td><td>Algorithmes IA</td><td><span class="dp-badge green">Approuvé ✓</span></td><td><button class="dp-btn blue">Voir</button></td></tr>
+                        <tr><td>Yaw Boateng</td><td>Blockchain</td><td><span class="dp-badge gold">En révision</span></td><td><button class="dp-btn green">Valider</button></td></tr>
+                        <tr><td>Kwame Asante</td><td>Deep Learning</td><td><span class="dp-badge gray">En attente</span></td><td><button class="dp-btn blue">Voir</button></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ═══ JURY ═══ -->
+          @if (activeDemo === 'jury') {
+            <div class="dp-screen">
+              <div class="dp-topbar">
+                <span class="dp-logo">Graduation Plan</span>
+                <div class="dp-nav-links"><span>Notation</span><span>PV</span></div>
+                <div class="dp-avatar" style="background:#276749">PJ</div>
+              </div>
+              <div class="dp-layout">
+                <div class="dp-sidebar">
+                  <div class="dp-user"><div class="dp-usr-av" style="background:#276749">PJ</div><div><div class="dp-usr-name">Pr. Jean Asante</div><div class="dp-usr-role">Président du Jury</div></div></div>
+                  <div class="dp-nav-section">Jury</div>
+                  <div class="dp-nav-item active">📋 Notation</div>
+                  <div class="dp-nav-item">✅ PV générés</div>
+                  <div class="dp-nav-item">📅 Planning</div>
+                </div>
+                <div class="dp-main">
+                  <div class="dp-page-title">Fiche de notation — Ama Koffi</div>
+                  <div class="dp-card">
+                    <div class="dp-card-title">📊 Critères de notation</div>
+                    <table class="dp-table">
+                      <thead><tr><th>Critère</th><th>Coefficient</th><th>Note /20</th></tr></thead>
+                      <tbody>
+                        <tr><td>Qualité du mémoire</td><td>×3</td><td><div class="dp-note-input">16</div></td></tr>
+                        <tr><td>Maîtrise du sujet</td><td>×3</td><td><div class="dp-note-input">17</div></td></tr>
+                        <tr><td>Présentation orale</td><td>×2</td><td><div class="dp-note-input">15</div></td></tr>
+                        <tr><td>Réponses aux questions</td><td>×2</td><td><div class="dp-note-input">16</div></td></tr>
+                      </tbody>
+                    </table>
+                    <div class="dp-moyenne-row">
+                      <span>Moyenne pondérée</span>
+                      <span class="dp-moyenne">16.2 / 20</span>
+                      <span class="dp-badge green">Mention Bien</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;margin-top:12px">
+                    <button class="dp-btn green" style="padding:8px 20px;font-size:13px">✅ Valider & Générer le PV</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ═══ ORGANISATION ═══ -->
+          @if (activeDemo === 'organisation') {
+            <div class="dp-screen">
+              <div class="dp-topbar">
+                <span class="dp-logo">Graduation Plan</span>
+                <div class="dp-nav-links"><span>Planification</span><span>Salles</span><span>Calendrier</span></div>
+                <div class="dp-avatar" style="background:#553C9A">CO</div>
+              </div>
+              <div class="dp-layout">
+                <div class="dp-sidebar">
+                  <div class="dp-user"><div class="dp-usr-av" style="background:#553C9A">CO</div><div><div class="dp-usr-name">Chargée Organisation</div><div class="dp-usr-role">Planification</div></div></div>
+                  <div class="dp-nav-section">Planification</div>
+                  <div class="dp-nav-item active">🗓 Planifier</div>
+                  <div class="dp-nav-item">🚨 Conflits</div>
+                  <div class="dp-nav-item">📅 Calendrier</div>
+                  <div class="dp-nav-item">📊 Rapport</div>
+                </div>
+                <div class="dp-main">
+                  <div class="dp-page-title">Planification des soutenances</div>
+                  <div class="dp-stats-row">
+                    <div class="dp-stat-card" style="border-left:3px solid #2B6CB0"><div class="dp-sc-val">87</div><div class="dp-sc-lbl">Étudiants</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #276749"><div class="dp-sc-val">34</div><div class="dp-sc-lbl">Planifiées</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #C8963E"><div class="dp-sc-val">53</div><div class="dp-sc-lbl">En attente</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #9B2226"><div class="dp-sc-val">2</div><div class="dp-sc-lbl">Conflits</div></div>
+                  </div>
+                  <div class="dp-card">
+                    <div class="dp-card-title">🗓 Nouvelle planification</div>
+                    <div class="dp-form-grid">
+                      <div class="dp-field"><label>Étudiant</label><div class="dp-select-fake">Ama Koffi — M2-INFO-2025</div></div>
+                      <div class="dp-field"><label>Session</label><div class="dp-select-fake">Juillet 2026</div></div>
+                      <div class="dp-field"><label>Date</label><div class="dp-select-fake">14 Juillet 2026</div></div>
+                      <div class="dp-field"><label>Heure</label><div class="dp-select-fake">09:00</div></div>
+                      <div class="dp-field"><label>Salle</label><div class="dp-select-fake">Salle A — 30 places</div></div>
+                      <div class="dp-field"><label>Type</label><div class="dp-select-fake">Soutenance finale</div></div>
+                    </div>
+                    <div class="dp-alert warn">⚠ Conflit détecté — Pr. Asante déjà assigné le 14 Juil. à 09h</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ═══ RECOUVREMENT ═══ -->
+          @if (activeDemo === 'recouvrement') {
+            <div class="dp-screen">
+              <div class="dp-topbar">
+                <span class="dp-logo">Graduation Plan</span>
+                <div class="dp-nav-links"><span>Paiements</span><span>Reçus</span><span>Rapport</span></div>
+                <div class="dp-avatar" style="background:#9B2226">SR</div>
+              </div>
+              <div class="dp-layout">
+                <div class="dp-sidebar">
+                  <div class="dp-user"><div class="dp-usr-av" style="background:#9B2226">SR</div><div><div class="dp-usr-name">Service Recouvrement</div><div class="dp-usr-role">Gestion financière</div></div></div>
+                  <div class="dp-nav-section">Paiements</div>
+                  <div class="dp-nav-item active">💳 Tableau de bord</div>
+                  <div class="dp-nav-item">✅ Vérifier</div>
+                  <div class="dp-nav-item">🧾 Émettre reçu</div>
+                  <div class="dp-nav-item">⚠ Alertes</div>
+                </div>
+                <div class="dp-main">
+                  <div class="dp-page-title">Service Recouvrement</div>
+                  <div class="dp-stats-row">
+                    <div class="dp-stat-card" style="border-left:3px solid #2B6CB0"><div class="dp-sc-val">1 740 000</div><div class="dp-sc-lbl">Attendus (FCFA)</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #276749"><div class="dp-sc-val">1 450 000</div><div class="dp-sc-lbl">Encaissés (FCFA)</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #9B2226"><div class="dp-sc-val">290 000</div><div class="dp-sc-lbl">Impayés (FCFA)</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #C8963E"><div class="dp-sc-val">72</div><div class="dp-sc-lbl">Reçus émis</div></div>
+                  </div>
+                  <div class="dp-card">
+                    <div class="dp-card-title">💳 Suivi des paiements</div>
+                    <table class="dp-table">
+                      <thead><tr><th>Étudiant</th><th>Montant</th><th>Mode</th><th>Statut</th><th>Actions</th></tr></thead>
+                      <tbody>
+                        <tr><td>Ama Koffi</td><td>20 000 FCFA</td><td>Mobile Money</td><td><span class="dp-badge green">Validé ✓</span></td><td><button class="dp-btn blue">🧾 Reçu</button></td></tr>
+                        <tr><td>Abena Mensah</td><td>15 000 FCFA</td><td>—</td><td><span class="dp-badge red">Impayé</span></td><td><button class="dp-btn green">Valider</button></td></tr>
+                        <tr><td>Yaw Boateng</td><td>20 000 FCFA</td><td>Virement</td><td><span class="dp-badge gold">En vérification</span></td><td><button class="dp-btn green">Valider</button></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ═══ ADMIN ═══ -->
+          @if (activeDemo === 'admin') {
+            <div class="dp-screen">
+              <div class="dp-topbar">
+                <span class="dp-logo">Graduation Plan</span>
+                <div class="dp-nav-links"><span>Utilisateurs</span><span>Rôles</span><span>Audit</span><span>Config</span></div>
+                <div class="dp-avatar" style="background:#0F0E0C">AD</div>
+              </div>
+              <div class="dp-layout">
+                <div class="dp-sidebar">
+                  <div class="dp-user"><div class="dp-usr-av" style="background:#0F0E0C">AD</div><div><div class="dp-usr-name">Administrateur</div><div class="dp-usr-role">Système — Accès total</div></div></div>
+                  <div class="dp-nav-section">Système</div>
+                  <div class="dp-nav-item active">🏠 Tableau de bord</div>
+                  <div class="dp-nav-item">👥 Utilisateurs</div>
+                  <div class="dp-nav-item">🔑 Rôles</div>
+                  <div class="dp-nav-section">Monitoring</div>
+                  <div class="dp-nav-item">📊 Statistiques</div>
+                  <div class="dp-nav-item">📋 Journal d'audit</div>
+                  <div class="dp-nav-item">🔒 Sécurité</div>
+                </div>
+                <div class="dp-main">
+                  <div class="dp-page-title">Administration système</div>
+                  <div class="dp-stats-row">
+                    <div class="dp-stat-card" style="border-left:3px solid #2B6CB0"><div class="dp-sc-val">143</div><div class="dp-sc-lbl">Utilisateurs actifs</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #276749"><div class="dp-sc-val">12</div><div class="dp-sc-lbl">Sessions actives</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #276749"><div class="dp-sc-val">312</div><div class="dp-sc-lbl">Soutenances archivées</div></div>
+                    <div class="dp-stat-card" style="border-left:3px solid #9B2226"><div class="dp-sc-val">2</div><div class="dp-sc-lbl">Alertes système</div></div>
+                  </div>
+                  <div class="dp-two-col">
+                    <div class="dp-card">
+                      <div class="dp-card-title">👥 Utilisateurs récents</div>
+                      <table class="dp-table">
+                        <thead><tr><th>Nom</th><th>Rôle</th><th>Statut</th></tr></thead>
+                        <tbody>
+                          <tr><td>Ama Koffi</td><td><span class="dp-badge blue">Étudiant</span></td><td><span class="dp-badge green">Actif</span></td></tr>
+                          <tr><td>Dr. K. Mensah</td><td><span class="dp-badge gold">Directeur</span></td><td><span class="dp-badge green">Actif</span></td></tr>
+                          <tr><td>Pr. J. Asante</td><td><span class="dp-badge gray">Jury</span></td><td><span class="dp-badge green">Actif</span></td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="dp-card">
+                      <div class="dp-card-title">📋 Journal d'audit</div>
+                      <div class="dp-timeline">
+                        <div class="dp-tl-item"><div class="dp-tl-dot green"></div><div><div class="dp-tl-title">Mémoire validé par Dr. Mensah</div><div class="dp-tl-date">2026-06-02 14:32</div></div></div>
+                        <div class="dp-tl-item"><div class="dp-tl-dot green"></div><div><div class="dp-tl-title">Paiement validé — Ama Koffi</div><div class="dp-tl-date">2026-05-28 09:14</div></div></div>
+                        <div class="dp-tl-item"><div class="dp-tl-dot red"></div><div><div class="dp-tl-title">Tentative connexion échouée</div><div class="dp-tl-date">2026-06-02 08:02</div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+        </main>
+      </div>
+
+      <!-- Footer modal -->
+      <div class="demo-footer">
+        <span>🔒 Données fictives — aucune vraie donnée n'est exposée</span>
+        <a routerLink="/register" (click)="closeDemo()" class="demo-footer-cta">Créer un compte →</a>
+        <a routerLink="/login" (click)="closeDemo()" class="demo-footer-cta" style="background:#1A3C5E">Se connecter →</a>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a routerLink="/" class="gp-logo" style="margin-bottom:12px">
+        <svg class="gp-logo-icon" width="38" height="38" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="22" cy="22" r="21" stroke="#C8963E" stroke-width="1.4" stroke-dasharray="4 2.5" opacity=".5"/>
+          <circle cx="22" cy="22" r="19" fill="#0F2237"/>
+          <polygon points="22,8 38,17 22,22 6,17" fill="#C8963E"/>
+          <polygon points="22,8 38,17 30,17 22,11" fill="#E8B86D" opacity=".5"/>
+          <circle cx="22" cy="8" r="1.8" fill="#F5E6C8"/>
+          <line x1="35" y1="17" x2="35" y2="26" stroke="#C8963E" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="35" cy="27.5" r="2.2" fill="#C8963E"/>
+          <rect x="13" y="22" width="18" height="13" rx="2" fill="#1A3C5E"/>
+          <line x1="16" y1="26.5" x2="28" y2="26.5" stroke="rgba(255,255,255,.35)" stroke-width="1" stroke-linecap="round"/>
+          <line x1="16" y1="29.5" x2="28" y2="29.5" stroke="rgba(255,255,255,.35)" stroke-width="1" stroke-linecap="round"/>
+          <line x1="16" y1="32.5" x2="23" y2="32.5" stroke="rgba(255,255,255,.35)" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="27" cy="30" r="3" fill="#C8963E" opacity=".9"/>
+          <text x="27" y="31.5" text-anchor="middle" font-size="4" fill="#fff" font-weight="700">★</text>
+          <polyline points="18.5,17 21,19.5 25.5,14.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".7"/>
+        </svg>
+        <div class="gp-logo-text-wrap">
+          <div class="gp-logo-name">Graduation<span class="gp-accent"> Plan</span></div>
+          <div class="gp-logo-tagline">Gestion des Soutenances · IPNET</div>
+        </div>
+      </a>
+      <p>Plateforme intelligente de gestion et de planification des soutenances académiques de Licence et Master.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Plateforme</h4>
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#acteurs">Acteurs</a>
+      <a href="#processus">Processus</a>
+      <a href="#regles">Règles métier</a>
+    </div>
+    <div class="footer-col">
+      <h4>Accès</h4>
+      <a routerLink="/login">Espace Étudiant</a>
+      <a routerLink="/login">Espace Direction</a>
+      <a routerLink="/login">Espace Jury</a>
+      <a routerLink="/login">Administration</a>
+    </div>
+    <div class="footer-col">
+      <h4>Technique</h4>
+      <a href="#">Documentation API</a>
+      <a href="#">Guide utilisateur</a>
+      <a href="#">Support</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Graduation Plan — IPNET Institute of Technology — Tous droits réservés</p>
+    <div class="tech-badges">
+      <span class="tech-badge">Django</span>
+      <span class="tech-badge">Angular</span>
+      <span class="tech-badge">PostgreSQL</span>
+      <span class="tech-badge">RBAC</span>
+    </div>
+  </div>
+</footer>

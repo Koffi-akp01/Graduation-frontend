@@ -1,0 +1,154 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#2D6A4F">PJ</div>
+      <div>
+        <div class="avatar-name">Pr. Jean Asante</div>
+        <div class="avatar-role">Président du Jury</div>
+      </div>
+    </div>
+    <div class="sidebar-section">Soutenances</div>
+    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item"><span class="ico">📅</span> Mes soutenances</a>
+    <a class="nav-item"><span class="ico">📝</span> Saisir les notes</a>
+    <a class="nav-item"><span class="ico">📄</span> Procès-verbaux</a>
+    <div class="sidebar-section">Disponibilités</div>
+    <a class="nav-item"><span class="ico">🔔</span> Mes indisponibilités</a>
+  </aside>
+
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Pr. Jean Asante</div>
+        <div class="page-subtitle">Président du jury — 4 soutenances ce mois</div>
+      </div>
+      <button class="btn btn-secondary">📅 Mes indisponibilités</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Soutenances assignées</div>
+        <div class="stat-value">4</div>
+        <div class="stat-sub">Session Juillet 2026</div>
+        <div class="stat-icon">🎓</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Notes à saisir</div>
+        <div class="stat-value">1</div>
+        <div class="stat-sub">En attente</div>
+        <div class="stat-icon">📝</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">PV signés</div>
+        <div class="stat-value">3</div>
+        <div class="stat-sub">Archivés</div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">PV en attente</div>
+        <div class="stat-value">1</div>
+        <div class="stat-sub">Signature requise</div>
+        <div class="stat-icon">⏳</div>
+      </div>
+    </div>
+
+    <!-- Formulaire de notation -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📝 Saisie des notes — Ama Koffi</span>
+        <span class="badge badge-pending">En attente de saisie</span>
+      </div>
+      <div style="padding:24px">
+        <!-- Infos étudiant -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
+            <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">Étudiant</div>
+            <div style="font-size:15px;font-weight:700;margin-top:4px">Ama Koffi</div>
+            <div style="font-size:12px;color:var(--ink3)">Master 2 Informatique</div>
+          </div>
+          <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
+            <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">Titre du mémoire</div>
+            <div style="font-size:13px;font-weight:600;margin-top:4px">Système de détection d'intrusions basé sur le Machine Learning</div>
+          </div>
+        </div>
+
+        <!-- Tableau de notation pondérée -->
+        <form [formGroup]="notationForm" (ngSubmit)="validerNote()">
+          <table style="margin-bottom:16px">
+            <thead>
+              <tr>
+                <th>Critère d'évaluation</th>
+                <th>Coefficient</th>
+                <th>Note /20</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Qualité rédactionnelle du mémoire</td>
+                <td style="text-align:center;font-weight:700">3</td>
+                <td>
+                  <input type="number" formControlName="note_rapport" min="0" max="20"
+                    style="width:70px;text-align:center;font-family:'DM Mono',monospace"/>
+                </td>
+              </tr>
+              <tr>
+                <td>Maîtrise du sujet (présentation orale)</td>
+                <td style="text-align:center;font-weight:700">4</td>
+                <td>
+                  <input type="number" formControlName="note_presentation" min="0" max="20"
+                    style="width:70px;text-align:center;font-family:'DM Mono',monospace"/>
+                </td>
+              </tr>
+              <tr>
+                <td>Réponses aux questions du jury</td>
+                <td style="text-align:center;font-weight:700">3</td>
+                <td>
+                  <input type="number" formControlName="note_reponses" min="0" max="20"
+                    style="width:70px;text-align:center;font-family:'DM Mono',monospace"/>
+                </td>
+              </tr>
+              <tr style="background:var(--gold-lt)">
+                <td colspan="2"><strong>MOYENNE FINALE (/20)</strong></td>
+                <td>
+                  <strong style="font-size:20px;font-family:'DM Mono',monospace;color:var(--accent)">
+                    {{ moyenne() }}
+                  </strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="form-group" style="margin-bottom:16px">
+            <label>Mention attribuée</label>
+            <select>
+              <option>Sélectionner la mention...</option>
+              <option>Passable (10–12)</option>
+              <option>Assez Bien (12–14)</option>
+              <option selected>Bien (14–16)</option>
+              <option>Très Bien (16–18)</option>
+              <option>Félicitations (18–20)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px">
+            <label>Observations et délibérations</label>
+            <textarea formControlName="observations" rows="3" placeholder="Appréciations du jury..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary">Annuler</button>
+            <button type="button" class="btn btn-gold">📄 Générer le PV</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+              {{ isSubmitting() ? 'Enregistrement...' : '✅ Signer & Soumettre' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

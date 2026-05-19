@@ -1,0 +1,8 @@
+// Layout, sidebar, stat cards et tables : gérés par _app-layout.scss global.
+// On ne redéfinit ici que ce qui est vraiment spécifique.
+
+.amount {
+  font-family: 'DM Mono', monospace;
+  font-weight: 600;
+  color: var(--ink);
+}

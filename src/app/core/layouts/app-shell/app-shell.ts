@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { ToastComponent } from '../../../shared/components/toast/toast';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../services/auth/auth';
 
 @Component({
   selector: 'app-shell',

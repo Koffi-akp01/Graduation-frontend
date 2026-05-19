@@ -1,0 +1,191 @@
+// ══ STEPPER : labels SOUS les cercles (override du style global) ════════════
+.stepper-wrap {
+  padding: 20px 24px 24px;
+}
+
+.stepper-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.stepper {
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 0;
+  gap: 0;
+}
+
+// Chaque étape devient une colonne (cercle en haut, label en dessous)
+.step {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 64px;
+}
+
+.step:last-child {
+  flex: 0 0 auto;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+// Cercle vert vif pour les étapes terminées
+.step.done .step-circle {
+  background: #22C55E;
+  border-color: #22C55E;
+}
+
+.step-label {
+  text-align: center;
+  white-space: normal;
+  max-width: 84px;
+  line-height: 1.3;
+}
+
+// La ligne doit être au centre des cercles de 36px : 36/2 - 1px ≈ 17px
+.step-line {
+  flex: 1;
+  min-width: 16px;
+  margin: 0;
+  margin-top: 17px;
+  align-self: flex-start;
+}
+
+// ══ DEUX COLONNES mémoire / checklist (60 / 40) ═════════════════════════════
+.dash-two-col {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ══ MÉMOIRE CARD ═════════════════════════════════════════════════════════════
+.mem-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 3px;
+}
+
+.fv {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+}
+
+.mem-titre {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.mem-info-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.dir-comment {
+  background: #FFFBEB;
+  border: 1px solid #FCD34D;
+  border-left: 4px solid #F59E0B;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #92400E;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+// ══ CHECKLIST ÉLIGIBILITÉ ════════════════════════════════════════════════════
+.elig-list {
+  padding: 4px 20px;
+}
+
+.elig-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 13px;
+  color: var(--ink2);
+  border-bottom: 1px solid #F3F4F6;
+
+  &:last-child { border-bottom: none; }
+
+  .elig-ico {
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  &.ok  .elig-ico { color: #22C55E; }
+  &.nok .elig-ico { color: #EF4444; }
+  &.pnd .elig-ico { color: #9CA3AF; font-weight: 400; letter-spacing: 1px; }
+}
+
+.elig-footer {
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.elig-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.elig-ratio {
+  font-weight: 700;
+  color: var(--gold);
+}
+
+// ══ SOUTENANCE CARD ══════════════════════════════════════════════════════════
+.sout-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 20px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sout-val {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+}
+
+// ══ RESPONSIVE ═══════════════════════════════════════════════════════════════
+@media (max-width: 1000px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}

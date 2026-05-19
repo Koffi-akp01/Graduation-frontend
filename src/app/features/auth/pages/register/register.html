@@ -1,0 +1,159 @@
+<!-- ══ NAVBAR ══ -->
+<nav class="reg-nav">
+  <a routerLink="/" class="reg-nav-brand">
+    <div class="brand-icon">🎓</div>
+    <div>
+      <div class="brand-name">Graduation Plan</div>
+      <div class="brand-back">← ACCUEIL</div>
+    </div>
+  </a>
+  <div class="reg-nav-right">
+    <span class="reg-nav-hint">Vous avez déjà un compte ?</span>
+    <a routerLink="/login" class="reg-nav-login">Se connecter</a>
+  </div>
+</nav>
+
+<!-- ══ FOND ══ -->
+<div class="reg-bg">
+  <div class="reg-card">
+
+    <!-- En-tête -->
+    <div class="reg-header">
+      <div class="reg-title">Graduation Plan</div>
+      <div class="reg-subtitle">CRÉER VOTRE COMPTE ÉTUDIANT</div>
+    </div>
+
+    <form (ngSubmit)="onRegister()" autocomplete="off">
+
+      <!-- Nom -->
+      <div class="field-group">
+        <label>Nom <span class="req">*</span></label>
+        <input
+          type="text"
+          name="last_name"
+          [(ngModel)]="form.last_name"
+          placeholder="Koffi"
+          autocomplete="family-name"
+          required />
+      </div>
+
+      <!-- Prénom -->
+      <div class="field-group">
+        <label>Prénom <span class="req">*</span></label>
+        <input
+          type="text"
+          name="first_name"
+          [(ngModel)]="form.first_name"
+          placeholder="Ama"
+          autocomplete="given-name"
+          required />
+      </div>
+
+      <!-- Email -->
+      <div class="field-group">
+        <label>Email institutionnel <span class="req">*</span></label>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="form.email"
+          placeholder="ama.koffi@ipnet.edu"
+          autocomplete="email"
+          required />
+      </div>
+
+      <!-- Matricule -->
+      <div class="field-group">
+        <label>Matricule <span class="req">*</span></label>
+        <input
+          type="text"
+          name="matricule"
+          [(ngModel)]="form.matricule"
+          placeholder="M2-INFO-2026"
+          required />
+        <span class="field-hint">Format : Niveau-Filière-Année</span>
+      </div>
+
+      <!-- Nom d'utilisateur -->
+      <div class="field-group">
+        <label>Nom d'utilisateur <span class="req">*</span></label>
+        <input
+          type="text"
+          name="username"
+          [(ngModel)]="form.username"
+          placeholder="ama.koffi"
+          autocomplete="username"
+          required />
+      </div>
+
+      <!-- Mot de passe + Confirmation -->
+      <div class="two-col">
+        <div class="field-group">
+          <label>Mot de passe <span class="req">*</span></label>
+          <div class="input-eye">
+            <input
+              [type]="showPwd ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="form.password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              required />
+            <button type="button" class="eye-btn" (click)="showPwd = !showPwd">
+              {{ showPwd ? '🙈' : '👁' }}
+            </button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Confirmation <span class="req">*</span></label>
+          <div class="input-eye">
+            <input
+              [type]="showConfirm ? 'text' : 'password'"
+              name="confirmPassword"
+              [(ngModel)]="form.confirmPassword"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              required />
+            <button type="button" class="eye-btn" (click)="showConfirm = !showConfirm">
+              {{ showConfirm ? '🙈' : '👁' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Force mot de passe -->
+      @if (form.password) {
+        <div class="pwd-strength">
+          <div class="pwd-bar">
+            <div class="pwd-fill" [style.width]="pwdStrengthPct" [class]="pwdStrengthClass"></div>
+          </div>
+          <span class="pwd-label" [class]="pwdStrengthClass">{{ pwdStrengthLabel }}</span>
+        </div>
+      }
+
+      <!-- Alerte mdp -->
+      @if (form.confirmPassword && form.password !== form.confirmPassword) {
+        <div class="alert-msg warn">⚠ Les mots de passe ne correspondent pas.</div>
+      }
+
+      <!-- Messages API -->
+      @if (errorMessage) {
+        <div class="alert-msg error">❌ {{ errorMessage }}</div>
+      }
+      @if (successMessage) {
+        <div class="alert-msg success">✅ {{ successMessage }}</div>
+      }
+
+      <!-- Bouton -->
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="isLoading || (!!form.confirmPassword && form.password !== form.confirmPassword)">
+        @if (isLoading) {
+          <span class="spinner"></span> Création en cours…
+        } @else {
+          Créer un compte
+        }
+      </button>
+
+    </form>
+  </div>
+</div>

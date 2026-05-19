@@ -1,0 +1,160 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#6B21A8">CO</div>
+      <div>
+        <div class="avatar-name">Mme. Esi Quaye</div>
+        <div class="avatar-role">Chargée d'organisation</div>
+      </div>
+    </div>
+    <div class="sidebar-section">Planification</div>
+    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item"><span class="ico">📅</span> Planifier soutenances</a>
+    <a class="nav-item"><span class="ico">🏛</span> Gestion des salles</a>
+    <a class="nav-item"><span class="ico">📧</span> Envoyer convocations</a>
+    <div class="sidebar-section">Sessions</div>
+    <a class="nav-item"><span class="ico">✚</span> Créer une session</a>
+    <a class="nav-item"><span class="ico">📋</span> Liste des sessions</a>
+  </aside>
+
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Planification des soutenances</div>
+        <div class="page-subtitle">Session Juillet 2026 — Organisation mensuelle</div>
+      </div>
+      <button class="btn btn-primary">✚ Créer une session</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Soutenances à planifier</div>
+        <div class="stat-value">15</div>
+        <div class="stat-sub">Dossiers éligibles</div>
+        <div class="stat-icon">📋</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Salles disponibles</div>
+        <div class="stat-value">6</div>
+        <div class="stat-sub">Ce mois-ci</div>
+        <div class="stat-icon">🏛</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Planifiées</div>
+        <div class="stat-value">9</div>
+        <div class="stat-sub">Convocations envoyées</div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Conflits détectés</div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">À résoudre</div>
+        <div class="stat-icon">⚠</div>
+      </div>
+    </div>
+
+    <!-- Formulaire de planification manuelle -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">✚ Planifier une soutenance</span>
+      </div>
+      <div class="card-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Étudiant</label>
+            <select>
+              <option>Ama Koffi — M2 Informatique</option>
+              <option>Yaw Boateng — M1 Gestion</option>
+              <option>Abena Mensah — L3 Mathématiques</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Session de soutenance</label>
+            <select>
+              <option selected>Session Juillet 2026</option>
+              <option>Session Août 2026</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date de soutenance</label>
+            <input type="date" value="2026-07-15"/>
+          </div>
+          <div class="form-group">
+            <label>Heure de début</label>
+            <input type="time" value="09:30"/>
+            <div class="form-hint">Durée : 1 heure (règle institutionnelle)</div>
+          </div>
+          <div class="form-group">
+            <label>Salle</label>
+            <select>
+              <option>Salle B204 — 30 places (Disponible ✓)</option>
+              <option>Salle A101 — 50 places (Disponible ✓)</option>
+              <option disabled>Salle C302 — 20 places (Occupée ✗)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Type de soutenance</label>
+            <select>
+              <option>Master 2 — Soutenance principale</option>
+              <option>Master 1</option>
+              <option>Licence 3</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="alert alert-info">
+            ℹ Pré-soutenance obligatoire : vérifier que la pré-soutenance a eu lieu avant de planifier.
+          </div>
+        </div>
+        <div class="form-actions" style="margin-top:12px">
+          <button class="btn btn-secondary">Annuler</button>
+          <button class="btn btn-primary">📅 Confirmer la planification</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conflits détectés -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚠ Conflits détectés</span>
+        <span class="badge badge-warn">2 conflits</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div class="alert alert-warn">
+          ⚠ <strong>Conflit de salle :</strong> Salle B204 déjà réservée le 14 Juillet à 14h00 (K. Asante). Proposer Salle A101.
+        </div>
+        <div class="alert alert-warn">
+          ⚠ <strong>Indisponibilité jury :</strong> Dr. Afia Boateng indisponible le 15 Juillet. Remplacer l'examinateur.
+        </div>
+      </div>
+    </div>
+
+    <!-- Génération automatique -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🤖 Génération automatique du planning</span>
+      </div>
+      <div style="padding:24px">
+        <p style="font-size:13px;color:var(--ink3);margin-bottom:20px">
+          L'algorithme va répartir les <strong>étudiants éligibles</strong> selon la disponibilité
+          des <strong>jurys</strong> et des <strong>salles</strong>, en respectant toutes les règles institutionnelles.
+        </p>
+        <button class="btn btn-gold" [disabled]="isProcessing()" (click)="lancerAlgorithme()">
+          {{ isProcessing() ? '⏳ Calcul du planning en cours...' : '🤖 Lancer la planification automatique' }}
+        </button>
+        @if (generationSuccess()) {
+          <div class="alert alert-success" style="margin-top:16px">
+            ✅ <strong>Planning généré avec succès !</strong>
+            Un brouillon du calendrier est disponible pour vérification avant publication.
+            <a routerLink="/calendrier" style="color:var(--success);font-weight:700;margin-left:8px">Voir le calendrier →</a>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

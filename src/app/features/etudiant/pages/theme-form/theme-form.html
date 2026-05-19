@@ -1,0 +1,33 @@
+<div class="form-container card-white">
+  <h2 class="font-playfair color-navy">Soumettre mon Theme</h2>
+  <p class="text-ink3">Decrivez precisement votre sujet pour validation par la Direction.</p>
+
+  <form [formGroup]="themeForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="titre">Titre du Memoire</label>
+      <input id="titre" formControlName="titre" type="text" placeholder="Ex: IA et diagnostic cardiaque..." />
+      @if (themeForm.get('titre')?.invalid && themeForm.get('titre')?.touched) {
+        <small class="error">Le titre doit comporter au moins 10 caracteres.</small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="domaine">Domaine technologique</label>
+      <select id="domaine" formControlName="domaine">
+        <option value="">Selectionner un domaine</option>
+        <option value="GL">Genie Logiciel</option>
+        <option value="ASSR">Reseaux & Securite</option>
+        <option value="DATA">Data Science</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description detaillee</label>
+      <textarea id="description" formControlName="description" rows="5"></textarea>
+    </div>
+
+    <button type="submit" [disabled]="themeForm.invalid || isSubmitting" class="btn-gold">
+      {{ isSubmitting ? 'Envoi en cours...' : 'Soumettre le sujet' }}
+    </button>
+  </form>
+</div>

@@ -1,0 +1,151 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#4e342e">DM</div>
+      <div>
+        <div class="avatar-name">Dr. Kofi Mensah</div>
+        <div class="avatar-role">Directeur de mémoire</div>
+      </div>
+    </div>
+    <div class="sidebar-section">Encadrement</div>
+    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item"><span class="ico">📖</span> Mes étudiants</a>
+    <a class="nav-item"><span class="ico">💡</span> Proposer un thème</a>
+    <a class="nav-item"><span class="ico">✅</span> Valider les mémoires</a>
+    <div class="sidebar-section">Disponibilités</div>
+    <a class="nav-item"><span class="ico">📅</span> Mon calendrier</a>
+  </aside>
+
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dr. Kofi Mensah</div>
+        <div class="page-subtitle">Directeur de mémoire — {{ mesEtudiants().length }} étudiants encadrés</div>
+      </div>
+      <button class="btn btn-primary">💡 Proposer un thème</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Étudiants encadrés</div>
+        <div class="stat-value">{{ mesEtudiants().length || 5 }}</div>
+        <div class="stat-sub">Capacité max : 6</div>
+        <div class="stat-icon">🎓</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Mémoires à valider</div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">En attente de ma signature</div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Thèmes proposés</div>
+        <div class="stat-value">8</div>
+        <div class="stat-sub">Dont 3 disponibles</div>
+        <div class="stat-icon">💡</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Soutenances imminentes</div>
+        <div class="stat-value">3</div>
+        <div class="stat-sub">Dans les 30 prochains jours</div>
+        <div class="stat-icon">📅</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- Tableau des étudiants -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📖 Mes étudiants</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Titre mémoire</th>
+              <th>Avancement</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of mesEtudiants(); track item.id) {
+              <tr>
+                <td>
+                  <strong>{{ item.nom }} {{ item.prenom }}</strong>
+                  <div style="font-size:11px;color:var(--ink3)">{{ item.filiere }}</div>
+                </td>
+                <td style="font-size:12px;max-width:160px">{{ item.theme_titre }}</td>
+                <td>
+                  <div class="progress" style="width:80px">
+                    <div class="progress-bar blue" [style.width]="item.memoire_depose ? '82%' : '45%'"></div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" [class.badge-pending]="!item.memoire_depose" [class.badge-success]="item.memoire_depose">
+                    {{ item.memoire_depose ? 'À valider !' : 'En rédaction' }}
+                  </span>
+                </td>
+                <td>
+                  @if (item.memoire_depose && item.theme_statut !== 'ACCEPTE') {
+                    <button class="btn btn-gold btn-sm" (click)="validerVersionFinale(item.theme_id)">
+                      Valider
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" style="text-align:center;padding:40px;color:var(--ink3)">
+                  Aucun étudiant encadré pour le moment.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Formulaire de validation mémoire -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">✅ Valider un mémoire</span>
+        </div>
+        <div class="card-form">
+          <div class="alert alert-info" style="margin-bottom:16px">
+            📖 Mémoire v2.1 déposé le 28 Mai 2026 — 98 pages
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label>Étudiant</label>
+            <select>
+              <option>Ama Koffi — Master 2 Informatique</option>
+              <option>Kwame Oti — Master 1</option>
+              <option>Efua Darko — Licence 3</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:16px">
+            <label>Décision</label>
+            <select>
+              <option>Sélectionner une décision...</option>
+              <option>✅ Valider le mémoire</option>
+              <option>📖 Demander des corrections</option>
+              <option>❌ Refuser</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:20px">
+            <label>Commentaires pour l'étudiant</label>
+            <textarea placeholder="Vos remarques et suggestions..." rows="4">Bon travail globalement. Revoir la section 4.2 et compléter la bibliographie avec des références récentes (2022-2026).</textarea>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-secondary">Annuler</button>
+            <button class="btn btn-primary">Enregistrer la décision</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

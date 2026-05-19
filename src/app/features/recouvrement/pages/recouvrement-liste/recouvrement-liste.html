@@ -1,0 +1,110 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#1B5E20">SR</div>
+      <div>
+        <div class="avatar-name">Service Recouvrement</div>
+        <div class="avatar-role">Gestion financière</div>
+      </div>
+    </div>
+    <div class="sidebar-section">Paiements</div>
+    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item"><span class="ico">💳</span> Vérifier paiements</a>
+    <a class="nav-item"><span class="ico">🧾</span> Émettre un reçu</a>
+    <a class="nav-item"><span class="ico">⚠</span> Alertes impayés</a>
+    <div class="sidebar-section">Rapports</div>
+    <a class="nav-item"><span class="ico">📊</span> Rapport financier</a>
+  </aside>
+
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Service Recouvrement</div>
+        <div class="page-subtitle">Gestion des frais de soutenance — Session Juillet 2026</div>
+      </div>
+      <button class="btn btn-primary">📊 Rapport financier</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Total frais attendus</div>
+        <div class="stat-value" style="font-size:22px">
+          {{ stats()?.total_encaisse ? (stats()!.total_encaisse + stats()!.total_impayes | number:'1.0-0') : '1 740 000' }}
+        </div>
+        <div class="stat-sub">FCFA — 87 étudiants</div>
+        <div class="stat-icon">💰</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Frais encaissés</div>
+        <div class="stat-value" style="font-size:22px">
+          {{ stats()?.total_encaisse ? (stats()!.total_encaisse | number:'1.0-0') : '1 450 000' }}
+        </div>
+        <div class="stat-sub">FCFA — 72 réglés</div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Impayés</div>
+        <div class="stat-value" style="font-size:22px">
+          {{ stats()?.total_impayes ? (stats()!.total_impayes | number:'1.0-0') : '290 000' }}
+        </div>
+        <div class="stat-sub">FCFA — 15 étudiants</div>
+        <div class="stat-icon">⚠</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Reçus émis</div>
+        <div class="stat-value">72</div>
+        <div class="stat-sub">Ce mois</div>
+        <div class="stat-icon">🧾</div>
+      </div>
+    </div>
+
+    <!-- Tableau des paiements -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">💳 Suivi des paiements</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Étudiant</th>
+            <th>Niveau</th>
+            <th>Montant (FCFA)</th>
+            <th>Mode</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of paiements(); track p.id) {
+            <tr>
+              <td><strong>Matricule #{{ p.etudiant_id }}</strong></td>
+              <td>—</td>
+              <td style="font-family:'DM Mono',monospace">{{ p.montant | number:'1.0-0' }}</td>
+              <td>—</td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px">{{ p.date_paiement | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="badge badge-pending">En vérification</span>
+              </td>
+              <td style="white-space:nowrap">
+                <button class="btn btn-gold btn-sm" (click)="confirmerPaiement(p.id)">✅ Valider</button>
+                <a [href]="p.recu_url" target="_blank" class="btn btn-secondary btn-sm" style="margin-left:6px">🧾 Reçu</a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" style="text-align:center;padding:48px;color:var(--ink3)">
+                Aucune transaction en attente.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
