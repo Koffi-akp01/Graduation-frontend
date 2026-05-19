@@ -12,23 +12,46 @@ import { AuthService, StudentRegisterPayload } from '../../../../core/services/a
 })
 export class RegisterComponent {
   form: StudentRegisterPayload & { confirmPassword: string } = {
-    username: '',
-    email: '',
-    password: '',
+    username:        '',
+    email:           '',
+    password:        '',
     confirmPassword: '',
-    first_name: '',
-    last_name: '',
-    matricule: '',
+    first_name:      '',
+    last_name:       '',
+    matricule:       '',
   };
 
-  isLoading = false;
-  errorMessage = '';
+  isLoading      = false;
+  errorMessage   = '';
   successMessage = '';
+  showPwd        = false;
+  showConfirm    = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
+  // ── Force du mot de passe ──────────────────────────────
+  private get pwdScore(): number {
+    const pwd = this.form.password;
+    if (!pwd) return 0;
+    let s = 0;
+    if (pwd.length >= 8)          s++;
+    if (/[A-Z]/.test(pwd))        s++;
+    if (/[0-9]/.test(pwd))        s++;
+    if (/[^A-Za-z0-9]/.test(pwd)) s++;
+    return s;
+  }
+
+  get pwdStrengthPct():   string { return `${this.pwdScore * 25}%`; }
+  get pwdStrengthClass(): string {
+    return ['', 'weak', 'fair', 'good', 'strong'][this.pwdScore] ?? '';
+  }
+  get pwdStrengthLabel(): string {
+    return ({ weak: 'Faible', fair: 'Moyen', good: 'Bon', strong: 'Fort' } as Record<string,string>)[this.pwdStrengthClass] ?? '';
+  }
+
+  // ── Inscription ────────────────────────────────────────
   onRegister(): void {
-    this.errorMessage = '';
+    this.errorMessage   = '';
     this.successMessage = '';
 
     if (this.form.password !== this.form.confirmPassword) {
@@ -41,12 +64,12 @@ export class RegisterComponent {
 
     this.authService.registerStudent(payload).subscribe({
       next: () => {
-        this.successMessage = 'Compte etudiant cree. Vous pouvez maintenant vous connecter.';
-        setTimeout(() => this.router.navigate(['/login']), 900);
+        this.successMessage = 'Compte créé ! Redirection vers la connexion…';
+        setTimeout(() => this.router.navigate(['/login']), 1500);
       },
       error: (err) => {
-        console.error('Erreur inscription etudiant', err);
-        this.errorMessage = "Inscription impossible. Verifiez les informations saisies.";
+        const detail = err?.error?.detail ?? err?.error?.email?.[0] ?? err?.error?.username?.[0];
+        this.errorMessage = detail ?? 'Inscription impossible. Vérifiez les informations saisies.';
         this.isLoading = false;
       },
     });

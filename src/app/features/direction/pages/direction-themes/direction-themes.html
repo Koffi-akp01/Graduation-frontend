@@ -1,34 +1,189 @@
-<div class="direction-container">
-  <h2 class="font-playfair color-navy">Validation des Themes</h2>
-  <p class="text-ink3">Consultez et validez les sujets de memoire soumis par les etudiants.</p>
+<app-top-nav></app-top-nav>
 
-  <div class="table-responsive card-white">
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th>Etudiant</th>
-          <th>Theme propose</th>
-          <th>Domaine</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (theme of themesEnAttente(); track theme.id) {
+<div class="app-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#1A3C5E">DA</div>
+      <div>
+        <div class="avatar-name">Direction Acad.</div>
+        <div class="avatar-role">Administration</div>
+      </div>
+    </div>
+    <div class="sidebar-section">Gestion</div>
+    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item"><span class="ico">👨‍🏫</span> Affecter directeurs</a>
+    <a class="nav-item"><span class="ico">⚖</span> Constituer les jurys</a>
+    <a class="nav-item"><span class="ico">✅</span> Valider les résultats</a>
+    <div class="sidebar-section">Sessions</div>
+    <a class="nav-item"><span class="ico">📅</span> Calendrier mensuel</a>
+    <a class="nav-item"><span class="ico">📊</span> Statistiques</a>
+  </aside>
+
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Direction Académique</div>
+        <div class="page-subtitle">Session de soutenance — Juillet 2026</div>
+      </div>
+      <button class="btn btn-primary">✚ Nouvelle session</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Soutenances planifiées</div>
+        <div class="stat-value">34</div>
+        <div class="stat-sub">Session Juillet 2026</div>
+        <div class="stat-icon">🎓</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Jurys à constituer</div>
+        <div class="stat-value">8</div>
+        <div class="stat-sub">En attente d'affectation</div>
+        <div class="stat-icon">⚖</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Directeurs affectés</div>
+        <div class="stat-value">51</div>
+        <div class="stat-sub">Encadrements actifs</div>
+        <div class="stat-icon">👨‍🏫</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Résultats à valider</div>
+        <div class="stat-value">12</div>
+        <div class="stat-sub">PV en attente de signature</div>
+        <div class="stat-icon">📋</div>
+      </div>
+    </div>
+
+    <!-- Thèmes en attente de validation -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📋 Thèmes en attente de validation</span>
+        <button class="btn btn-primary btn-sm" (click)="chargerThemes()">🔄 Actualiser</button>
+      </div>
+      <table>
+        <thead>
           <tr>
-            <td><strong>{{ theme.etudiant_nom }}</strong></td>
-            <td>{{ theme.titre }}</td>
-            <td><span class="badge-info">{{ theme.domaine }}</span></td>
-            <td class="actions">
-              <button class="btn-success" (click)="valider(theme.id!)">Valider</button>
-              <button class="btn-warn" (click)="demanderCorrection(theme.id!)">Corriger</button>
-            </td>
+            <th>Étudiant</th>
+            <th>Thème proposé</th>
+            <th>Domaine</th>
+            <th>Actions</th>
           </tr>
-        } @empty {
+        </thead>
+        <tbody>
+          @for (theme of themesEnAttente(); track theme.id) {
+            <tr>
+              <td><strong>{{ theme.etudiant_nom }}</strong></td>
+              <td>{{ theme.titre }}</td>
+              <td><span class="badge badge-info">{{ theme.domaine }}</span></td>
+              <td style="white-space:nowrap">
+                <button class="btn btn-gold btn-sm" (click)="valider(theme.id!)">✅ Valider</button>
+                <button class="btn btn-secondary btn-sm" style="margin-left:6px" (click)="demanderCorrection(theme.id!)">💬 Corriger</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" style="text-align:center;padding:40px;color:var(--ink3)">
+                ✅ Aucun thème en attente de validation.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Constitution des jurys -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚖ Constitution des jurys</span>
+        <button class="btn btn-primary btn-sm">+ Constituer un jury</button>
+      </div>
+      <table>
+        <thead>
           <tr>
-            <td colspan="4" class="empty-msg">Aucun theme en attente de validation.</td>
+            <th>Étudiant</th>
+            <th>Niveau</th>
+            <th>Directeur mémoire</th>
+            <th>Président jury</th>
+            <th>Examinateur</th>
+            <th>Règle Doctorat</th>
+            <th>Statut</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Ama Koffi</strong></td>
+            <td>Master 2</td>
+            <td>Dr. Kofi Mensah</td>
+            <td>Pr. Jean Asante</td>
+            <td>Dr. Afia Boateng</td>
+            <td><span class="badge badge-success">2 Docteurs ✓</span></td>
+            <td><span class="badge badge-success">Complet</span></td>
+          </tr>
+          <tr>
+            <td><strong>Kofi Asante</strong></td>
+            <td>Master 2</td>
+            <td>Dr. Yaw Darko</td>
+            <td>—</td>
+            <td>Dr. Esi Quaye</td>
+            <td><span class="badge badge-warn">1/2 Docteurs</span></td>
+            <td><span class="badge badge-warn">Incomplet</span></td>
+          </tr>
+          <tr>
+            <td><strong>Abena Adjei</strong></td>
+            <td>Licence 3</td>
+            <td>M. Kwesi Adu</td>
+            <td>Dr. Ama Sarpong</td>
+            <td>M. Fiifi Osei</td>
+            <td><span class="badge badge-info">N/A (Licence)</span></td>
+            <td><span class="badge badge-success">Complet</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Calendrier mensuel -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📅 Calendrier mensuel — Juillet 2026</span>
+      </div>
+      <div style="padding:16px">
+        <div class="cal-grid">
+          <div class="cal-header">Lun</div><div class="cal-header">Mar</div><div class="cal-header">Mer</div>
+          <div class="cal-header">Jeu</div><div class="cal-header">Ven</div><div class="cal-header">Sam</div><div class="cal-header">Dim</div>
+          <div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><div class="day-num">01</div></div>
+          <div class="cal-day"><div class="day-num">02</div></div><div class="cal-day"><div class="day-num">03</div></div>
+          <div class="cal-day"><div class="day-num">04</div></div><div class="cal-day"><div class="day-num">05</div></div>
+          <div class="cal-day"><div class="day-num">07</div></div><div class="cal-day"><div class="day-num">08</div></div>
+          <div class="cal-day"><div class="day-num">09</div></div><div class="cal-day"><div class="day-num">10</div></div>
+          <div class="cal-day"><div class="day-num">11</div></div><div class="cal-day"><div class="day-num">12</div></div>
+          <div class="cal-day"><div class="day-num">13</div></div>
+          <div class="cal-day has-event">
+            <div class="day-num">14</div>
+            <div class="cal-event">A. Koffi 09h30</div>
+            <div class="cal-event gold">K. Asante 14h00</div>
+          </div>
+          <div class="cal-day has-event">
+            <div class="day-num">15</div>
+            <div class="cal-event">Y. Boateng 10h00</div>
+          </div>
+          <div class="cal-day"><div class="day-num">16</div></div><div class="cal-day"><div class="day-num">17</div></div>
+          <div class="cal-day"><div class="day-num">18</div></div><div class="cal-day"><div class="day-num">19</div></div>
+          <div class="cal-day"><div class="day-num">20</div></div>
+          <div class="cal-day has-event">
+            <div class="day-num">21</div>
+            <div class="cal-event green">A. Mensah 09h00</div>
+          </div>
+          <div class="cal-day"><div class="day-num">22</div></div><div class="cal-day"><div class="day-num">23</div></div>
+          <div class="cal-day"><div class="day-num">24</div></div><div class="cal-day"><div class="day-num">25</div></div>
+          <div class="cal-day"><div class="day-num">26</div></div><div class="cal-day"><div class="day-num">27</div></div>
+          <div class="cal-day"><div class="day-num">28</div></div><div class="cal-day"><div class="day-num">29</div></div>
+          <div class="cal-day"><div class="day-num">30</div></div><div class="cal-day"><div class="day-num">31</div></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

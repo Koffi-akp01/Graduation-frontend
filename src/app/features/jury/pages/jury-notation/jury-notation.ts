@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { JuryService } from '../../../../core/services/jury/jury';
 
 @Component({
   selector: 'app-jury-notation',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TopNav],
   templateUrl: './jury-notation.html',
   styleUrl: './jury-notation.scss',
 })

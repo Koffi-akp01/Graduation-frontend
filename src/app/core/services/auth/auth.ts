@@ -30,30 +30,42 @@ export interface StudentRegisterPayload {
   matricule: string;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+// Mapping rôle → route
+const ROLE_ROUTES: Record<string, string> = {
+  STUDENT:              '/etudiant',
+  ETUDIANT:             '/etudiant',
+  etudiant:             '/etudiant',
+  ADMIN_ACADEMIC:       '/direction/themes',
+  DIRECTION:            '/direction/themes',
+  direction:            '/direction/themes',
+  CHEF_SERVICE_EXAM:    '/examen/conformite',
+  examen:               '/examen/conformite',
+  SERVICE_RECOUVREMENT: '/recouvrement',
+  recouvrement:         '/recouvrement',
+  CHARGE_ORGANISATION:  '/organisation/planification',
+  organisation:         '/organisation/planification',
+  INTERNAL_TRAINER:     '/directeur/suivi',
+  EXTERNAL_TRAINER:     '/directeur/suivi',
+  directeur:            '/directeur/suivi',
+  EXAMINER:             '/jury/notation',
+  PRESIDENT_JURY:       '/jury/notation',
+  jury:                 '/jury/notation',
+  ADMIN:                '/admin',
+  admin:                '/admin',
+};
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
+  private http   = inject(HttpClient);
   private router = inject(Router);
   private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   currentUser = signal<UserInfo | null>(null);
-  isLoading = signal(false);
-  error = signal('');
+  isLoading   = signal(false);
+  error       = signal('');
 
-  login(credentials: { username: string; password: string }): Observable<LoginResponse>;
-  login(username: string, password: string): Observable<LoginResponse>;
-  login(
-    credentialsOrUsername: { username: string; password: string } | string,
-    password?: string
-  ): Observable<LoginResponse> {
-    const credentials =
-      typeof credentialsOrUsername === 'string'
-        ? { username: credentialsOrUsername, password: password ?? '' }
-        : credentialsOrUsername;
-    const shouldLoadCurrentUser = typeof credentialsOrUsername === 'string';
-
+  // ── Login ──────────────────────────────────────────────
+  login(credentials: { username: string; password: string }): Observable<LoginResponse> {
     this.isLoading.set(true);
     this.error.set('');
 
@@ -62,35 +74,35 @@ export class AuthService {
         localStorage.setItem('access_token', response.access);
         localStorage.setItem('refresh_token', response.refresh);
 
-        const role = this.extractUserRole(response);
+        // 1. Essayer d'extraire le rôle du token / de la réponse
+        const role = this.extractRole(response);
+
         if (role) {
           localStorage.setItem('user_role', role);
-        }
-
-        if (shouldLoadCurrentUser) {
+          this.redirectByRole(role);
+        } else {
+          // 2. Fallback : appeler /me/ pour récupérer le profil
           this.loadCurrentUser();
         }
       }),
-      finalize(() => {
-        this.isLoading.set(false);
-      })
+      finalize(() => this.isLoading.set(false))
     );
   }
 
+  // ── Refresh token ──────────────────────────────────────
   refreshToken(): Observable<LoginResponse> {
     const refresh = localStorage.getItem('refresh_token');
-
     return this.http.post<LoginResponse>(`${this.apiUrl}/token/refresh/`, { refresh }).pipe(
-      tap((response) => {
-        localStorage.setItem('access_token', response.access);
-      })
+      tap((r) => localStorage.setItem('access_token', r.access))
     );
   }
 
+  // ── Inscription étudiant ───────────────────────────────
   registerStudent(payload: StudentRegisterPayload): Observable<UserInfo> {
     return this.http.post<UserInfo>(`${this.apiUrl}/register/student/`, payload);
   }
 
+  // ── Chargement profil (/me/) ───────────────────────────
   loadCurrentUser(): void {
     this.http.get<UserInfo>(`${this.apiUrl}/me/`).subscribe({
       next: (user) => {
@@ -98,10 +110,15 @@ export class AuthService {
         localStorage.setItem('user_role', user.role);
         this.redirectByRole(user.role);
       },
-      error: () => this.logout(),
+      error: () => {
+        // /me/ indisponible → utiliser le rôle déjà stocké ou défaut
+        const stored = localStorage.getItem('user_role');
+        this.redirectByRole(stored ?? '');
+      },
     });
   }
 
+  // ── Déconnexion ────────────────────────────────────────
   logout(): void {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -110,61 +127,29 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('access_token');
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
-
+  getToken(): string | null   { return localStorage.getItem('access_token'); }
+  isLoggedIn(): boolean       { return !!this.getToken(); }
   hasRole(role: string): boolean {
-    const currentRole = this.currentUser()?.role ?? localStorage.getItem('user_role');
-    return currentRole === role;
+    const cur = this.currentUser()?.role ?? localStorage.getItem('user_role');
+    return cur === role;
   }
 
-  private extractUserRole(response: any): string | null {
-    if (response.role) {
-      return response.role;
-    }
+  // ── Redirect selon rôle ────────────────────────────────
+  redirectByRole(role: string): void {
+    const route = ROLE_ROUTES[role] ?? '/etudiant';
+    this.router.navigate([route]);
+  }
 
-    if (response.user?.role) {
-      return response.user.role;
-    }
-
-    if (!response.access) {
-      return null;
-    }
+  // ── Extraction du rôle depuis la réponse / JWT ─────────
+  private extractRole(response: LoginResponse): string | null {
+    if (response.role)       return response.role;
+    if (response.user?.role) return response.user.role;
 
     try {
       const payload = JSON.parse(atob(response.access.split('.')[1]));
-      return payload.role ?? payload.user_role ?? null;
+      return payload.role ?? payload.user_role ?? payload.user?.role ?? null;
     } catch {
       return null;
     }
-  }
-
-  private redirectByRole(role: string): void {
-    const routes: Record<string, string> = {
-      etudiant: '/etudiant/dashboard',
-      STUDENT: '/etudiant',
-      ETUDIANT: '/etudiant',
-      directeur: '/directeur/suivi',
-      jury: '/jury/notation',
-      direction: '/direction/themes',
-      organisation: '/organisation/planification',
-      recouvrement: '/recouvrement/dashboard',
-      examen: '/examen',
-      admin: '/admin',
-      ADMIN_ACADEMIC: '/direction/themes',
-      DIRECTION: '/direction/themes',
-      CHEF_SERVICE_EXAM: '/examen',
-      SERVICE_RECOUVREMENT: '/recouvrement',
-      CHARGE_ORGANISATION: '/organisation/planification',
-      EXAMINER: '/jury/notation',
-      PRESIDENT_JURY: '/jury/notation',
-    };
-
-    this.router.navigate([routes[role] ?? '/etudiant/dashboard']);
   }
 }

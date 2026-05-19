@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { PlanificationService } from '../../../../core/services/planification/planification';
 
 @Component({
   selector: 'app-organisation-planif',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TopNav],
   templateUrl: './organisation-planif.html',
   styleUrl: './organisation-planif.scss',
 })

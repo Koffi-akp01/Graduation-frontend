@@ -1,41 +1,212 @@
-<div class="examen-container">
-  <h2 class="font-playfair color-navy">Verification de Conformite & Anti-Plagiat</h2>
+<app-top-nav></app-top-nav>
 
-  <div class="table-container card-white">
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th>Etudiant</th>
-          <th>Score Plagiat</th>
-          <th>Detection IA</th>
-          <th>Document</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (m of memoiresAverifier(); track m.id) {
-          <tr>
-            <td><strong>{{ m.etudiant_nom }}</strong></td>
-            <td>
-              <span class="score-pill" [class.danger]="m.score_plagiat > 25">
-                {{ m.score_plagiat }}%
-              </span>
-            </td>
-            <td>
-              <span class="badge" [class.badge-danger]="m.detecte_IA">
-                {{ m.detecte_IA ? 'Suspecte' : 'Propre' }}
-              </span>
-            </td>
-            <td>
-              <button class="btn-outline">Ouvrir le Viewer</button>
-            </td>
-            <td>
-              <button class="btn-success" (click)="validerTechnique(m.id, 'VALIDE')">Approuver</button>
-              <button class="btn-danger" (click)="validerTechnique(m.id, 'REJETE')">Rejeter</button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-</div>
+<div class="app-page">
+
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#DC2626">SE</div>
+      <div>
+        <div class="avatar-name">Service Examen</div>
+        <div class="avatar-role">Vérification &amp; Contrôle</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Vérifications</div>
+    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item"><span class="ico">🔍</span> Vérifier les mémoires</a>
+    <a class="nav-item"><span class="ico">🔬</span> Détection IA / plagiat</a>
+
+    <div class="sidebar-section">Dossiers</div>
+    <a class="nav-item"><span class="ico">📄</span> Dossiers en attente</a>
+    <a class="nav-item"><span class="ico">✅</span> Dossiers validés</a>
+    <a class="nav-item"><span class="ico">✗</span> Dossiers rejetés</a>
+
+    <div class="sidebar-section">Rapports</div>
+    <a class="nav-item"><span class="ico">📊</span> Statistiques</a>
+  </aside>
+
+  <!-- ═══ CONTENU PRINCIPAL ══════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- En-tête page -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Service Examen</div>
+        <div class="page-subtitle">Vérification des dossiers — Session Juillet 2025</div>
+      </div>
+      <button class="btn btn-primary">📊 Exporter rapport</button>
+    </div>
+
+    <!-- ── Stat cards ──────────────────────────────────────────────────────── -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Total dossiers</div>
+        <div class="stat-value">{{ stats().total }}</div>
+        <div class="stat-sub">Session Juillet 2025</div>
+        <div class="stat-icon">📁</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">En attente</div>
+        <div class="stat-value">{{ stats().enAttente }}</div>
+        <div class="stat-sub">À vérifier</div>
+        <div class="stat-icon">⏳</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Validés</div>
+        <div class="stat-value">{{ stats().valides }}</div>
+        <div class="stat-sub">Éligibles à soutenir</div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Rejetés</div>
+        <div class="stat-value">{{ stats().rejetes }}</div>
+        <div class="stat-sub">Non conformes</div>
+        <div class="stat-icon">✗</div>
+      </div>
+    </div>
+
+    <!-- ── Table des dossiers ──────────────────────────────────────────────── -->
+    @if (!selectedDossier()) {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📄 Dossiers en attente de vérification</span>
+          <div class="ex-filters">
+            <input
+              class="ex-search"
+              type="text"
+              placeholder="Rechercher un étudiant..."
+              [value]="searchTerm()"
+              (input)="searchTerm.set($any($event.target).value)"
+            />
+            <select class="ex-select" (change)="niveauFilter.set($any($event.target).value)">
+              <option value="">Tous niveaux</option>
+              <option value="Master 2">Master 2</option>
+              <option value="Master 1">Master 1</option>
+              <option value="Licence">Licence 3</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Niveau</th>
+              <th>Titre du mémoire</th>
+              <th>UE</th>
+              <th>Paiement</th>
+              <th>Anti-IA</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of filteredDossiers(); track d.id) {
+              <tr>
+                <td>
+                  <strong>{{ d.etudiant_nom }}</strong>
+                  <div class="td-sub">{{ d.matricule }}</div>
+                </td>
+                <td>{{ d.niveau }}</td>
+                <td class="td-titre">{{ d.titre_memoire }}</td>
+                <td>
+                  <span class="ex-badge ue">● {{ d.ue }}</span>
+                </td>
+                <td>
+                  <span class="ex-badge"
+                    [class.paye]="d.paiement === 'PAYE'"
+                    [class.nonpaye]="d.paiement === 'NON_PAYE'">
+                    ● {{ d.paiement === 'PAYE' ? 'Payé' : 'Non payé' }}
+                  </span>
+                </td>
+                <td>
+                  @switch (d.anti_ia) {
+                    @case ('EN_COURS')   { <span class="ex-badge cours">● En cours</span> }
+                    @case ('VALIDE')     { <span class="ex-badge valid">● Validé</span> }
+                    @case ('SUSPICION')  { <span class="ex-badge susp">● Suspicion IA</span> }
+                    @default             { <span class="ex-badge neut">• —</span> }
+                  }
+                </td>
+                <td>
+                  <button class="btn btn-sm"
+                    [class.btn-primary]="actionLabel(d) === 'Vérifier'"
+                    [class.btn-gold]="actionLabel(d) === 'Valider'"
+                    [class.btn-danger]="actionLabel(d) === 'Bloquer' || actionLabel(d) === 'Rejeter'"
+                    (click)="doAction(d)">
+                    {{ actionLabel(d) }}
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Aucun dossier en attente de vérification.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ── Panneau de vérification anti-plagiat ────────────────────────────── -->
+    @if (selectedDossier(); as d) {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🔬 Vérification anti-plagiat / anti-IA — {{ d.etudiant_nom }}</span>
+          <button class="btn btn-secondary btn-sm" (click)="retourListe()">← Retour à la liste</button>
+        </div>
+        <div style="padding:24px;display:flex;flex-direction:column;gap:20px">
+
+          <!-- Infos étudiant -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
+              <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">Étudiant</div>
+              <div style="font-size:15px;font-weight:700;margin-top:4px">{{ d.etudiant_nom }}</div>
+              <div style="font-size:12px;color:var(--ink3)">{{ d.matricule }} — {{ d.niveau }}</div>
+            </div>
+            <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
+              <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">Titre du mémoire</div>
+              <div style="font-size:13px;font-weight:600;margin-top:4px">{{ d.titre_memoire }}</div>
+            </div>
+          </div>
+
+          <!-- Scores -->
+          <div class="stats-grid">
+            <div class="stat-card" [class.red]="d.score_plagiat > 25" [class.green]="d.score_plagiat <= 25">
+              <div class="stat-label">Score similarité</div>
+              <div class="stat-value">{{ d.score_plagiat }}%</div>
+              <div class="stat-sub">Seuil acceptable : 25%</div>
+              <div class="stat-icon">📊</div>
+            </div>
+            <div class="stat-card" [class.red]="d.anti_ia === 'SUSPICION'" [class.green]="d.anti_ia !== 'SUSPICION'">
+              <div class="stat-label">Détection IA</div>
+              <div class="stat-value">{{ d.anti_ia === 'SUSPICION' ? 'Suspecté' : 'Propre' }}</div>
+              <div class="stat-sub">Analyse automatique</div>
+              <div class="stat-icon">🤖</div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-label">UE validées</div>
+              <div class="stat-value">{{ d.ue }}</div>
+              <div class="stat-sub">Unités d'enseignement</div>
+              <div class="stat-icon">📚</div>
+            </div>
+            <div class="stat-card" [class.green]="d.paiement === 'PAYE'" [class.red]="d.paiement === 'NON_PAYE'">
+              <div class="stat-label">Paiement</div>
+              <div class="stat-value">{{ d.paiement === 'PAYE' ? 'Réglé' : 'Impayé' }}</div>
+              <div class="stat-sub">Frais de soutenance</div>
+              <div class="stat-icon">💳</div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-gold" (click)="validerTechnique(d.id, 'VALIDE')">✅ Approuver le dossier</button>
+            <button class="btn btn-danger" (click)="validerTechnique(d.id, 'REJETE')">❌ Rejeter</button>
+            <button class="btn btn-secondary" (click)="retourListe()">← Retour</button>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div><!-- /main -->
+</div><!-- /app-page -->

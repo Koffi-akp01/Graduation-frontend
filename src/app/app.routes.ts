@@ -5,6 +5,7 @@ import { roleGuard } from './core/guards/role.guard';
 import { AdminDashboardComponent } from './features/admin/pages/admin-dashboard/admin-dashboard';
 import { LoginComponent } from './features/auth/pages/login/login';
 import { RegisterComponent } from './features/auth/pages/register/register';
+import { CalendrierComponent } from './features/calendrier/calendrier';
 import { DirectionThemesComponent } from './features/direction/pages/direction-themes/direction-themes';
 import { DirecteurSuiviComponent } from './features/directeur/pages/directeur-suivi/directeur-suivi';
 import { DashboardComponent } from './features/etudiant/pages/dashboard/dashboard';
@@ -41,6 +42,7 @@ export const routes: Routes = [
   { path: 'examen/conformite', component: ExamenCheckComponent },
   { path: 'jury/notation', component: JuryNotationComponent },
   { path: 'admin', component: AdminDashboardComponent },
+  { path: 'calendrier', component: CalendrierComponent },
   { path: '', component: AccueilComponent },
   { path: '**', redirectTo: '' },
 ];

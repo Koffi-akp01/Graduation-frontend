@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../../../shared/shared-module';
+import { TopNav } from '../../../core/components/top-nav/top-nav';
 import { ToastService } from '../../../shared/services/toast';
 import { RecouvrementService } from '../../../core/services/recouvrement';
 
@@ -19,8 +20,9 @@ interface Paiement {
 @Component({
   selector: 'app-recouvrement',
   standalone: true,
-  imports: [CommonModule, FormsModule, SharedModule],
+  imports: [CommonModule, FormsModule, SharedModule, TopNav],
   template: `
+    <app-top-nav></app-top-nav>
     <div class="recouvrement-layout">
       <!-- Sidebar -->
       <aside class="sidebar">
@@ -94,7 +96,8 @@ interface Paiement {
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let p of paiements()">
+                @for (p of paiements(); track p.etudiant) {
+                <tr>
                   <td>
                     <div class="etudiant-nom">{{ p.etudiant }}</div>
                     <div class="etudiant-matricule">{{ p.matricule }}</div>
@@ -107,13 +110,17 @@ interface Paiement {
                     <app-badge [text]="p.statut" [variant]="p.statutVariant"></app-badge>
                   </td>
                   <td class="actions-cell">
-                    <button *ngIf="p.statut !== 'Validé'" class="btn-valider" (click)="validerPaiement(p)">Valider</button>
+                    @if (p.statut !== 'Validé') {
+                      <button class="btn-valider" (click)="validerPaiement(p)">Valider</button>
+                    }
                     <button class="btn-recu" (click)="telechargerRecu(p)">🧾 Reçu</button>
                   </td>
                 </tr>
-                <tr *ngIf="paiements().length === 0">
+                } @empty {
+                <tr>
                   <td colspan="7" class="empty-row">Aucun paiement trouvé</td>
                 </tr>
+                }
               </tbody>
             </table>
           </div>

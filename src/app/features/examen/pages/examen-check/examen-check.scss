@@ -1,28 +1,76 @@
-.examen-container {
-  padding: 2rem;
+// ══ FILTRES RECHERCHE / NIVEAU ═══════════════════════════════════════════════
+.ex-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.table-container {
-  overflow-x: auto;
-  padding: 1rem;
+.ex-search {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+  width: 220px;
+  transition: border-color .15s;
+
+  &::placeholder { color: var(--ink3); }
+  &:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px #2B6CB018; }
 }
 
-.score-pill {
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  background-color: var(--success-light);
-  color: var(--success);
-  font-weight: bold;
+.ex-select {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+  cursor: pointer;
+  outline: none;
 
-  &.danger {
-    background-color: #fee2e2;
-    color: var(--danger);
-  }
+  &:focus { border-color: var(--accent2); }
 }
 
-.badge-danger {
-  background-color: var(--danger);
-  color: white;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+// ══ TABLE : sous-texte matricule et titre tronqué ═════════════════════════════
+.td-sub {
+  font-size: 11px;
+  color: var(--ink3);
+  margin-top: 2px;
+}
+
+.td-titre {
+  font-size: 12px;
+  max-width: 200px;
+  color: var(--ink2);
+}
+
+// ══ BADGES STATUTS ═══════════════════════════════════════════════════════════
+.ex-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  // UE — toujours vert
+  &.ue    { background: #D1FAE5; color: #065F46; }
+
+  // Paiement
+  &.paye    { background: #D1FAE5; color: #065F46; }
+  &.nonpaye { background: #FEE2E2; color: #991B1B; }
+
+  // Anti-IA
+  &.cours { background: #FEF3C7; color: #92400E; }
+  &.valid { background: #D1FAE5; color: #065F46; }
+  &.susp  { background: #FEE2E2; color: #991B1B; }
+  &.neut  { background: #F3F4F6; color: #6B7280; }
 }

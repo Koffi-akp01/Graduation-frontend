@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 
+import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { Theme } from '../../../../core/models/theme.model';
 import { ThemeService } from '../../../../core/services/theme/theme';
 
 @Component({
   selector: 'app-direction-themes',
-  imports: [CommonModule],
+  imports: [CommonModule, TopNav],
   templateUrl: './direction-themes.html',
   styleUrl: './direction-themes.scss',
 })

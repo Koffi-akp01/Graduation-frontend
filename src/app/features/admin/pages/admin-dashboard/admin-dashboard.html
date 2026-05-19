@@ -1,45 +1,186 @@
-<div class="admin-container">
-  <div class="admin-header">
-    <h2 class="font-playfair color-navy">Administration Systeme</h2>
-    <button class="btn-gold" (click)="exporterDonnees()">Exporter Rapport Annuel</button>
-  </div>
+<app-top-nav></app-top-nav>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <span class="label">Etudiants Inscrits</span>
-      <span class="value color-navy">{{ stats()?.total_etudiants }}</span>
+<div class="app-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#0F0E0C">AD</div>
+      <div>
+        <div class="avatar-name">Administrateur</div>
+        <div class="avatar-role">Système — Accès total</div>
+      </div>
     </div>
-    <div class="stat-card">
-      <span class="label">Soutenances Validees</span>
-      <span class="value color-success">{{ stats()?.soutenances_terminees }}</span>
-    </div>
-    <div class="stat-card">
-      <span class="label">Revenus Totaux</span>
-      <span class="value color-gold">{{ stats()?.total_paiements }} FCFA</span>
-    </div>
-  </div>
+    <div class="sidebar-section">Système</div>
+    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item"><span class="ico">👥</span> Gestion utilisateurs</a>
+    <a class="nav-item"><span class="ico">🔑</span> Gestion des rôles</a>
+    <div class="sidebar-section">Monitoring</div>
+    <a class="nav-item"><span class="ico">📊</span> Statistiques globales</a>
+    <a class="nav-item"><span class="ico">📋</span> Journal d'audit</a>
+    <a class="nav-item"><span class="ico">🔒</span> Sécurité & accès</a>
+    <div class="sidebar-section">Paramètres</div>
+    <a class="nav-item"><span class="ico">⚙</span> Configuration système</a>
+    <a class="nav-item"><span class="ico">💾</span> Sauvegarde</a>
+  </aside>
 
-  <div class="audit-section card-white">
-    <h3 class="color-navy">Journal d'Audit & Securite</h3>
-    <table class="audit-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Utilisateur</th>
-          <th>Action effectuee</th>
-          <th>IP</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (log of logs(); track log.id) {
-          <tr>
-            <td>{{ log.date | date:'short' }}</td>
-            <td><strong>{{ log.utilisateur }}</strong></td>
-            <td>{{ log.action }}</td>
-            <td class="text-mono">{{ log.ip_address }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Administration système</div>
+        <div class="page-subtitle">IPNET — Tableau de bord global</div>
+      </div>
+      <button class="btn btn-primary" (click)="exporterDonnees()">📤 Créer un utilisateur</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Utilisateurs actifs</div>
+        <div class="stat-value">{{ stats()?.total_etudiants || 143 }}</div>
+        <div class="stat-sub">Sur 158 comptes créés</div>
+        <div class="stat-icon">👥</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Sessions actives</div>
+        <div class="stat-value">12</div>
+        <div class="stat-sub">En ce moment</div>
+        <div class="stat-icon">🟢</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Soutenances archivées</div>
+        <div class="stat-value">{{ stats()?.soutenances_terminees || 312 }}</div>
+        <div class="stat-sub">Depuis 2022</div>
+        <div class="stat-icon">📋</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Alertes système</div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">À traiter</div>
+        <div class="stat-icon">🔔</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- Gestion des utilisateurs -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">👥 Gestion utilisateurs</span>
+          <button class="btn btn-primary btn-sm">+ Ajouter</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Rôle</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ama Koffi</strong></td>
+              <td><span class="badge badge-info">Étudiant</span></td>
+              <td><span class="badge badge-success">Actif</span></td>
+              <td><button class="btn btn-secondary btn-sm">✏</button></td>
+            </tr>
+            <tr>
+              <td><strong>Dr. Kofi Mensah</strong></td>
+              <td><span class="badge badge-pending">Directeur</span></td>
+              <td><span class="badge badge-success">Actif</span></td>
+              <td><button class="btn btn-secondary btn-sm">✏</button></td>
+            </tr>
+            <tr>
+              <td><strong>Pr. Jean Asante</strong></td>
+              <td><span class="badge badge-neutral">Jury</span></td>
+              <td><span class="badge badge-success">Actif</span></td>
+              <td><button class="btn btn-secondary btn-sm">✏</button></td>
+            </tr>
+            <tr>
+              <td><strong>Mme. Esi Quaye</strong></td>
+              <td><span class="badge badge-info">Organisation</span></td>
+              <td><span class="badge badge-warn">Inactif</span></td>
+              <td><button class="btn btn-secondary btn-sm">✏</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Journal d'audit -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Journal d'audit récent</span>
+        </div>
+        <div class="timeline">
+          @for (log of logs(); track log.id) {
+            <div class="tl-item">
+              <div class="tl-dot done"></div>
+              <div class="tl-content">
+                <div class="tl-title">{{ log.action }}</div>
+                <div class="tl-desc">{{ log.utilisateur }}</div>
+                <div class="tl-date">{{ log.date | date:'yyyy-MM-dd HH:mm' }} — IP : {{ log.ip_address }}</div>
+              </div>
+            </div>
+          } @empty {
+            <div class="tl-item">
+              <div class="tl-dot done"></div>
+              <div class="tl-content">
+                <div class="tl-title">Mémoire validé par Dr. Mensah</div>
+                <div class="tl-desc">Ama Koffi — v2.1 approuvée</div>
+                <div class="tl-date">2026-06-02 14:32</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot done"></div>
+              <div class="tl-content">
+                <div class="tl-title">Paiement validé</div>
+                <div class="tl-desc">Ama Koffi — 20 000 FCFA</div>
+                <div class="tl-date">2026-05-28 09:14</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot active"></div>
+              <div class="tl-content">
+                <div class="tl-title">Tentative connexion échouée</div>
+                <div class="tl-desc">IP : 197.234.x.x — Compte bloqué</div>
+                <div class="tl-date">2026-06-02 08:02</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot wait"></div>
+              <div class="tl-content">
+                <div class="tl-title">Jury constitué</div>
+                <div class="tl-desc">Soutenance Yaw Boateng — Juillet</div>
+                <div class="tl-date">2026-06-01 16:45</div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistiques financières -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">💰 Revenus totaux</span>
+        <button class="btn btn-secondary btn-sm" (click)="exporterDonnees()">📤 Exporter rapport annuel</button>
+      </div>
+      <div style="padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;font-weight:600;margin-bottom:8px">Frais encaissés</div>
+          <div style="font-size:28px;font-weight:700;color:var(--success);font-family:'DM Mono',monospace">
+            {{ stats()?.total_paiements ? (stats()!.total_paiements | number:'1.0-0') : '1 450 000' }} FCFA
+          </div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;font-weight:600;margin-bottom:8px">Taux de recouvrement</div>
+          <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace">83%</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;font-weight:600;margin-bottom:8px">Impayés en cours</div>
+          <div style="font-size:28px;font-weight:700;color:var(--warn);font-family:'DM Mono',monospace">290 000 FCFA</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

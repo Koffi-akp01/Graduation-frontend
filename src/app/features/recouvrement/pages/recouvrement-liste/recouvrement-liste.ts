@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 
+import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { Paiement, StatsPaiement } from '../../../../core/models/paiement.model';
 import { PaiementService } from '../../../../core/services/paiement/paiement';
 
 @Component({
   selector: 'app-recouvrement-liste',
-  imports: [CommonModule],
+  imports: [CommonModule, TopNav],
   templateUrl: './recouvrement-liste.html',
   styleUrl: './recouvrement-liste.scss',
 })

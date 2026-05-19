@@ -1,42 +1,105 @@
-<main class="login-page">
-  <section class="login-panel">
-    <h1>Connexion</h1>
+<!-- ══ NAVBAR RÔLES ══ -->
+<nav class="login-nav">
+  <a routerLink="/" class="login-nav-brand">
+    <div class="brand-icon">🎓</div>
+    <div>
+      <div class="brand-name">Graduation Plan</div>
+      <div class="brand-back">← ACCUEIL</div>
+    </div>
+  </a>
+  <div class="login-nav-tabs">
+    <a class="ln-tab active">🔒 Connexion</a>
+    <a routerLink="/etudiant" class="ln-tab">🎓 Étudiant</a>
+    <a routerLink="/examen/conformite" class="ln-tab">📋 Service Examen</a>
+    <a routerLink="/direction/themes" class="ln-tab">🏛 Direction Académique</a>
+    <a routerLink="/directeur/suivi" class="ln-tab">📘 Directeur Mémoire</a>
+    <a routerLink="/jury/notation" class="ln-tab">⚖ Jury / Président</a>
+    <a routerLink="/organisation/planification" class="ln-tab">🗓 Organisation</a>
+    <a routerLink="/recouvrement" class="ln-tab">💰 Recouvrement</a>
+    <a routerLink="/admin" class="ln-tab">⚙ Administrateur</a>
+    <a routerLink="/calendrier" class="ln-tab">📅 Calendrier</a>
+  </div>
+</nav>
 
-    <form (ngSubmit)="onLogin()" class="login-form">
-      <label>
-        Nom d'utilisateur
+<!-- ══ FOND + CARD ══ -->
+<div class="login-bg">
+  <div class="login-card">
+
+    <!-- En-tête -->
+    <div class="lc-header">
+      <div class="lc-title">Graduation Plan</div>
+      <div class="lc-subtitle">PLATEFORME DE GESTION DES SOUTENANCES</div>
+    </div>
+
+    <!-- Sélecteur de rôle -->
+    <div class="lc-role-label">CONNEXION EN TANT QUE</div>
+    <div class="role-grid">
+      <button class="role-btn" [class.sel]="selectedRole==='STUDENT'" (click)="selectedRole='STUDENT'">
+        <span class="role-ico">🎓</span>
+        <span class="role-lbl">Étudiant</span>
+      </button>
+      <button class="role-btn" [class.sel]="selectedRole==='EXAMEN'" (click)="selectedRole='EXAMEN'">
+        <span class="role-ico">📋</span>
+        <span class="role-lbl">Examen</span>
+      </button>
+      <button class="role-btn" [class.sel]="selectedRole==='DIRECTION'" (click)="selectedRole='DIRECTION'">
+        <span class="role-ico">🏛</span>
+        <span class="role-lbl">Direction</span>
+      </button>
+      <button class="role-btn" [class.sel]="selectedRole==='DIRECTEUR'" (click)="selectedRole='DIRECTEUR'">
+        <span class="role-ico">📘</span>
+        <span class="role-lbl">Directeur</span>
+      </button>
+      <button class="role-btn" [class.sel]="selectedRole==='JURY'" (click)="selectedRole='JURY'">
+        <span class="role-ico">⚖</span>
+        <span class="role-lbl">Jury</span>
+      </button>
+      <button class="role-btn" [class.sel]="selectedRole==='ADMIN'" (click)="selectedRole='ADMIN'">
+        <span class="role-ico">⚙</span>
+        <span class="role-lbl">Admin</span>
+      </button>
+    </div>
+
+    <!-- Formulaire -->
+    <form (ngSubmit)="onLogin()" autocomplete="on" style="margin-top:8px">
+
+      <div class="field-group">
+        <label for="username">Identifiant / Email institutionnel</label>
         <input
+          id="username"
           type="text"
           name="username"
           [(ngModel)]="credentials.username"
+          placeholder="etudiant@ipnet.edu"
           autocomplete="username"
-          required
-        />
-      </label>
+          required />
+      </div>
 
-      <label>
-        Mot de passe
+      <div class="field-group">
+        <label for="password">Mot de passe</label>
         <input
+          id="password"
           type="password"
           name="password"
           [(ngModel)]="credentials.password"
+          placeholder="••••••••"
           autocomplete="current-password"
-          required
-        />
-      </label>
+          required />
+      </div>
 
       @if (errorMessage) {
-        <p class="error-message">{{ errorMessage }}</p>
+        <div class="error-alert">{{ errorMessage }}</div>
       }
 
-      <button type="submit" [disabled]="isLoading">
-        {{ isLoading ? 'Connexion...' : 'Se connecter' }}
+      <button type="submit" class="btn-submit" [disabled]="isLoading">
+        {{ isLoading ? 'Connexion en cours…' : 'Se connecter →' }}
       </button>
-    </form>
 
-    <div class="register-link">
-      <span>Pas encore de compte etudiant ?</span>
-      <a routerLink="/register">Creer un compte</a>
-    </div>
-  </section>
-</main>
+      <p class="forgot-link">
+        Pas encore de compte ?
+        <a routerLink="/register">Créer un compte</a>
+      </p>
+
+    </form>
+  </div>
+</div>

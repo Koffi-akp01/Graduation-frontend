@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../../../shared/shared-module';
+import { TopNav } from '../../../core/components/top-nav/top-nav';
 import { ToastService } from '../../../shared/services/toast';
 import { ExamenService } from '../../../core/services/examen/examen';
 
@@ -25,8 +26,9 @@ interface Dossier {
 @Component({
   selector: 'app-examen',
   standalone: true,
-  imports: [CommonModule, FormsModule, SharedModule],
+  imports: [CommonModule, FormsModule, SharedModule, TopNav],
   template: `
+    <app-top-nav></app-top-nav>
     <div class="examen-layout">
       <!-- Sidebar -->
       <aside class="sidebar">
@@ -118,7 +120,8 @@ interface Dossier {
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let d of dossiersFiltres">
+                @for (d of dossiersFiltres; track d.id) {
+                <tr>
                   <td class="cell-etudiant">
                     <div class="etudiant-nom">{{ d.etudiant }}</div>
                     <div class="etudiant-matricule">{{ d.matricule }}</div>
@@ -132,9 +135,11 @@ interface Dossier {
                     <button class="btn-verifier" (click)="ouvrirModal(d)">Vérifier</button>
                   </td>
                 </tr>
-                <tr *ngIf="dossiersFiltres.length === 0">
+                } @empty {
+                <tr>
                   <td colspan="7" class="empty-row">Aucun dossier trouvé</td>
                 </tr>
+                }
               </tbody>
             </table>
           </div>
@@ -143,7 +148,8 @@ interface Dossier {
     </div>
 
     <!-- Modal de vérification -->
-    <div class="modal-overlay" *ngIf="dossierSelectionne" (click)="fermerModal()">
+    @if (dossierSelectionne) {
+    <div class="modal-overlay" (click)="fermerModal()">
       <div class="modal-container" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>🤖 Vérification anti-plagiat / anti-IA — {{ dossierSelectionne.etudiant }}</h3>
@@ -197,6 +203,7 @@ interface Dossier {
         </div>
       </div>
     </div>
+    }
   `,
   styles: [`
     .examen-layout {

@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap } from 'rxjs';
 
+import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { EtudiantService } from '../../../../core/services/etudiant/etudiant';
 import { EligibiliteStatus, EtudiantProfile } from '../../../../core/models/etudiant.model';
 
@@ -53,7 +54,7 @@ export interface SoutenanceScheduleInfo {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, TopNav],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 
+import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { AuditLog, GlobalStats } from '../../../../core/models/admin.model';
 import { AdminService } from '../../../../core/services/admin/admin';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, TopNav],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss',
 })
