@@ -1,0 +1,337 @@
+/* ===== CALENDRIER ACADÉMIQUE ===== */
+
+/* Layout principal */
+.app-page {
+  display: flex;
+  min-height: 100vh;
+  background: #F7F5F0;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid #E2DDD4;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-avatar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px;
+  border-bottom: 1px solid #E2DDD4;
+  background: #FAF8F3;
+}
+
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #C8963E;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.avatar-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F2237;
+}
+
+.avatar-role {
+  font-size: 11px;
+  color: #718096;
+  margin-top: 2px;
+}
+
+.sidebar-section {
+  padding: 20px 20px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  font-size: 13px;
+  color: #4A5568;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: #FAF8F3;
+  color: #1A3C5E;
+}
+
+.nav-item.active {
+  background: #FDF3E0;
+  color: #C8963E;
+  border-left-color: #C8963E;
+  font-weight: 600;
+}
+
+.ico {
+  font-size: 18px;
+  width: 24px;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #1A3C5E;
+  margin-bottom: 8px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #718096;
+}
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: #D8F3DC;
+  color: #276749;
+}
+
+.badge-info {
+  background: #EBF4FF;
+  color: #2B6CB0;
+}
+
+.badge-pending {
+  background: #FFF3CD;
+  color: #7B4F00;
+}
+
+.badge-neutral {
+  background: #EEECE8;
+  color: #3A3935;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #E2DDD4;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.card-header {
+  padding: 16px 20px;
+  background: #FAF8F3;
+  border-bottom: 1px solid #E2DDD4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A3C5E;
+}
+
+/* ===== TABLEAU DES PHASES ===== */
+.cal-phase-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 200px 180px 120px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #E2DDD4;
+  transition: background 0.15s;
+}
+
+.cal-phase-row:hover {
+  background: #FAFAF7;
+}
+
+/* Phase terminée */
+.cal-phase-row.ph-done {
+  border-left: 3px solid #276749;
+}
+
+.cal-phase-row.ph-done .ph-num {
+  background: #276749;
+  color: white;
+}
+
+/* Phase active */
+.cal-phase-row.ph-actif {
+  border-left: 3px solid #C8963E;
+  background: #FDF3E0;
+}
+
+.cal-phase-row.ph-actif .ph-num {
+  background: #C8963E;
+  color: white;
+}
+
+/* Phase à venir */
+.cal-phase-row.ph-wait {
+  border-left: 3px solid #E2DDD4;
+}
+
+.cal-phase-row.ph-wait .ph-num {
+  background: #E2DDD4;
+  color: #718096;
+}
+
+/* Phase finale */
+.cal-phase-row.ph-final {
+  border-left: 3px solid #1A3C5E;
+  background: #EEF4FF;
+}
+
+.cal-phase-row.ph-final .ph-num {
+  background: #1A3C5E;
+  color: white;
+}
+
+/* Numéro de phase */
+.ph-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  font-family: 'DM Mono', monospace;
+}
+
+/* Titre et description */
+.ph-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F0E0C;
+  margin-bottom: 4px;
+}
+
+.ph-desc {
+  font-size: 12px;
+  color: #718096;
+  line-height: 1.5;
+}
+
+/* Période et durée */
+.ph-period {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: #2D3748;
+  font-weight: 600;
+}
+
+.ph-dur {
+  font-size: 11px;
+  color: #718096;
+  margin-top: 2px;
+}
+
+/* Acteurs */
+.ph-actors {
+  font-size: 12px;
+  color: #2D3748;
+  line-height: 1.6;
+}
+
+/* ===== RÈGLES ===== */
+.cal-rule-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  background: #FAF8F3;
+  border-radius: 8px;
+  border: 1px solid #E2DDD4;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .cal-phase-row {
+    grid-template-columns: 36px 1fr;
+    gap: 8px;
+  }
+  
+  .cal-phase-row > div:nth-child(3),
+  .cal-phase-row > div:nth-child(4),
+  .cal-phase-row > div:nth-child(5) {
+    grid-column: span 2;
+    margin-left: 44px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+  
+  .main {
+    padding: 16px;
+  }
+  
+  .page-title {
+    font-size: 22px;
+  }
+  
+  .cal-phase-row {
+    padding: 12px 16px;
+  }
+  
+  .ph-title {
+    font-size: 13px;
+  }
+  
+  .ph-desc {
+    font-size: 11px;
+  }
+}
