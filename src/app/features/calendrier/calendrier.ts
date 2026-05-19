@@ -7,6 +7,7 @@ import { TopNav } from '../../core/components/top-nav/top-nav';
   standalone: true,
   imports: [TopNav, RouterLink],
   templateUrl: './calendrier.html',
+  styleUrls: ['./calendrier.scss'],
 })
 export class CalendrierComponent {
   phases = [

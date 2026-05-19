@@ -25,6 +25,7 @@ import { ExamenCheckComponent } from './features/examen/pages/examen-check/exame
 import { JuryNotationComponent } from './features/jury/pages/jury-notation/jury-notation';
 import { OrganisationPlanifComponent } from './features/organisation/pages/organisation-planif/organisation-planif';
 import { RecouvrementListeComponent } from './features/recouvrement/pages/recouvrement-liste/recouvrement-liste';
+// import { DirectionComponent } from './features/directeur/directeur';
 
 export const routes: Routes = [
   // Routes publiques
@@ -35,11 +36,11 @@ export const routes: Routes = [
   { path: 'calendrier', component: CalendrierComponent },
 
   // Routes NIKA
-  { path: 'etudiant/memoire', component: UploadMemoireComponent },
-  { path: 'examen', component: ExamenComponent },
-  { path: 'recouvrement', component: RecouvrementComponent },
-  { path: 'jury', component: JuryComponent },
-  { path: 'direction', component: DirectionComponent },
+  // { path: 'etudiant/memoire', component: UploadMemoireComponent },
+  // { path: 'examen', component: ExamenComponent },
+  // { path: 'recouvrement', component: RecouvrementComponent },
+  // { path: 'jury', component: JuryComponent },
+  // { path: 'direction', component: DirectionComponent },
 
   // Routes AFOLA
   { path: 'etudiant', component: DashboardComponent, canActivate: [roleGuard], data: { role: 'STUDENT' } },

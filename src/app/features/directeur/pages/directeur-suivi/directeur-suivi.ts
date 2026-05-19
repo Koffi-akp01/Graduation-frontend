@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
-
 import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { EtudiantService } from '../../../../core/services/etudiant/etudiant';
 import { ThemeService } from '../../../../core/services/theme/theme';
 
 @Component({
   selector: 'app-directeur-suivi',
+  standalone: true,
   imports: [CommonModule, TopNav],
   templateUrl: './directeur-suivi.html',
-  styleUrl: './directeur-suivi.scss',
+  styleUrls: ['./directeur-suivi.scss'],  // ← styleUrl → styleUrls (tableau)
 })
 export class DirecteurSuiviComponent implements OnInit {
   mesEtudiants = signal<any[]>([]);
