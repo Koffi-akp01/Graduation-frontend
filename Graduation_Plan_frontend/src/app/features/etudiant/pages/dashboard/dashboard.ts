@@ -1,9 +1,27 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { catchError, forkJoin, interval, of } from 'rxjs';
 
-import { EtudiantService } from '../../../../core/services/etudiant/etudiant';
+import { TopNav } from '../../../../core/components/top-nav/top-nav';
+import { AuthService } from '../../../../core/services/auth/auth';
+import { AffectationService, Affectation } from '../../../../core/services/affectation/affectation';
+import { EtudiantService, MemoireInfo, SoutenanceInfo } from '../../../../core/services/etudiant/etudiant';
+import { ThemeService } from '../../../../core/services/theme/theme';
+import { SuiviService, SuiviMemoire } from '../../../../core/services/suivi/suivi';
+import { Theme } from '../../../../core/models/theme.model';
 import { EligibiliteStatus, EtudiantProfile } from '../../../../core/models/etudiant.model';
+
+export interface DossierDisplayStep {
+  id: string;
+  label: string;
+  isSuivi: boolean;
+  completed: boolean;
+  active: boolean;
+  stepNumber?: number;
+}
 
 export interface DashboardStatCard {
   label: string;
@@ -53,7 +71,7 @@ export interface SoutenanceScheduleInfo {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive, TopNav, FormsModule, DatePipe, DecimalPipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -63,77 +81,128 @@ export class DashboardComponent implements OnInit {
   statsCards = signal<DashboardStatCard[]>(this.defaultStatCards());
   checklistItems = signal<ChecklistItem[]>(this.defaultChecklist());
   eligibilityProgress = signal<EligibilityProgress>({ done: 0, total: 7, percent: 0 });
-  memoireInfo = signal<MemoireDashboardInfo>(this.defaultMemoireInfo());
+  memoireInfo = signal<MemoireDashboardInfo>({
+    titre: '—', directeur: '—', niveauLabel: '—', version: '—',
+    statusLabel: 'Chargement…', statusVariant: 'neutral',
+    pagesCurrent: 0, pagesTarget: 120, commentBody: '',
+  });
   soutenanceSchedule = signal<SoutenanceScheduleInfo>(this.defaultSoutenanceSchedule());
 
-  /** Phases backend a partir desquelles chaque etape dossier (1–6) est consideree comme franchie. */
-  private readonly dossierMilestonePhases = [3, 4, 6, 7, 10, 11];
 
-  dossierSteps = [
-    { id: 1, label: 'Thème validé' },
-    { id: 2, label: 'Directeur affecté' },
-    { id: 3, label: 'Mémoire déposé' },
-    { id: 4, label: 'Validation mémoire' },
-    { id: 5, label: 'Soutenance planifiée' },
-    { id: 6, label: 'Résultats publiés' },
-  ];
+  loading = signal<boolean>(false);
+  lastRefreshed = signal<string>('');
 
-  constructor(private etudiantService: EtudiantService) {}
+  suivi             = signal<SuiviMemoire | null>(null);
+  suiviLoading      = signal(false);
+  suiviAffectationId = signal<number | null>(null);
 
-  /** Index 1–6 de l’etape dossier en cours, ou 0 si tout est termine (phase >= 11). */
-  activeDossierStep(phase: number): number {
-    const p = phase ?? 1;
-    if (p >= 11) {
-      return 0;
-    }
-    for (let i = 0; i < this.dossierMilestonePhases.length; i++) {
-      if (p < this.dossierMilestonePhases[i]) {
-        return i + 1;
+  private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
+
+  /** Nom affiché immédiatement depuis AuthService, mis à jour dès que le profil arrive. */
+  displayPrenom = computed(() => {
+    const profile = this.etudiantData();
+    if (profile?.prenom) return profile.prenom;
+    const u = this.authService.currentUser();
+    if (u?.first_name) return u.first_name;
+    return localStorage.getItem('user_first_name') ?? 'Étudiant';
+  });
+
+  displayNom = computed(() => {
+    const profile = this.etudiantData();
+    if (profile?.nom) return profile.nom;
+    const u = this.authService.currentUser();
+    return u?.last_name ?? localStorage.getItem('user_last_name') ?? '';
+  });
+
+  constructor(
+    private etudiantService: EtudiantService,
+    private themeService: ThemeService,
+    private affectationService: AffectationService,
+    private suiviService: SuiviService,
+  ) {}
+
+  /** Étapes dossier dynamiques : phases principales + étapes suivi mémoire intercalées. */
+  get allDossierSteps(): DossierDisplayStep[] {
+    const phase = this.currentStep();
+    const s = this.suivi();
+    const steps: DossierDisplayStep[] = [];
+    let phaseNum = 0;
+
+    const addPhase = (id: string, label: string, completed: boolean, active: boolean) => {
+      phaseNum++;
+      steps.push({ id, label, isSuivi: false, completed, active, stepNumber: phaseNum });
+    };
+    const addSuivi = (id: string, label: string, completed: boolean, active: boolean) => {
+      steps.push({ id, label, isSuivi: true, completed, active });
+    };
+
+    addPhase("theme",     "Thème validé",      phase >= 3, phase >= 1 && phase < 3);
+    addPhase("directeur", "Directeur affecté", phase >= 4, phase >= 3 && phase < 4);
+
+    if (s) {
+      for (const etape of s.etapes) {
+        addSuivi(
+          `suivi_${etape.id}`,
+          etape.titre,
+          etape.statut === "VALIDE",
+          ["EN_COURS", "SOUMIS", "EN_REVISION"].includes(etape.statut),
+        );
       }
     }
-    return 6;
+
+    // suiviComplete est false tant que le suivi n'est pas chargé ou pas terminé
+    const suiviComplete = s !== null && (s.etapes.length === 0 || s.etapes.every(e => e.statut === "VALIDE"));
+    addPhase("memoire_depose", "Mémoire déposé",       suiviComplete && phase >= 6,  s !== null && suiviComplete && phase >= 4 && phase < 6);
+    addPhase("validation",     "Validation mémoire",   suiviComplete && phase >= 7,  suiviComplete && phase >= 6 && phase < 7);
+    addPhase("soutenance",     "Soutenance planifiée",  suiviComplete && phase >= 10, suiviComplete && phase >= 7 && phase < 10);
+    addPhase("resultats",      "Résultats publiés",     suiviComplete && phase >= 11, suiviComplete && phase >= 10 && phase < 11);
+
+    return steps;
   }
 
-  dossierStepCompleted(phase: number, stepId: number): boolean {
-    const idx = stepId - 1;
-    return (phase ?? 1) >= this.dossierMilestonePhases[idx];
+  /** Vrai si l’étudiant peut déposer son mémoire (suivi chargé et toutes étapes validées). */
+  get canDeposeMemoire(): boolean {
+    const s = this.suivi();
+    if (s === null) return false;
+    if (s.etapes.length === 0) return true;
+    return s.etapes.every(e => e.statut === "VALIDE");
   }
 
-  dossierStepActive(phase: number, stepId: number): boolean {
-    const cur = this.activeDossierStep(phase);
-    return cur !== 0 && cur === stepId;
-  }
-
-  dossierStepDisabled(phase: number, stepId: number): boolean {
-    const cur = this.activeDossierStep(phase);
-    return cur !== 0 && cur < stepId;
-  }
-
-  dossierLineActive(phase: number, afterStepId: number): boolean {
-    return this.dossierStepCompleted(phase, afterStepId);
-  }
-
-  ngOnInit(): void {
-    this.etudiantService
-      .getProfile()
-      .pipe(
-        switchMap((data) =>
-          this.etudiantService.getEligibilite().pipe(
-            catchError(() => of(null)),
-            map((elig) => ({ data, elig })),
-          ),
-        ),
-      )
-      .subscribe(({ data, elig }) => {
+  charger(): void {
+    this.loading.set(true);
+    forkJoin({
+      data:         this.etudiantService.getProfile(),
+      elig:         this.etudiantService.getEligibilite().pipe(catchError(() => of(null))),
+      memoire:      this.etudiantService.getMemoire().pipe(catchError(() => of(null))),
+      soutenance:   this.etudiantService.getSoutenance().pipe(catchError(() => of(null))),
+      theme:        this.themeService.getMyTheme().pipe(catchError(() => of(null))),
+      affectations: this.affectationService.getAffectations().pipe(catchError(() => of([] as Affectation[]))),
+    }).subscribe({
+      next: ({ data, elig, memoire, soutenance, theme, affectations }) => {
         this.etudiantData.set(data);
         this.currentStep.set(data.current_phase ?? 1);
         this.statsCards.set(this.buildStatCards(data, elig));
         const items = this.buildChecklist(data, elig);
         this.checklistItems.set(items);
         this.eligibilityProgress.set(this.computeEligibilityProgress(items));
-        this.memoireInfo.set(this.buildMemoireInfo(data));
-        this.soutenanceSchedule.set(this.buildSoutenanceSchedule(data));
-      });
+        this.memoireInfo.set(this.buildMemoireInfoFromApi(data, memoire, theme, affectations));
+        this.soutenanceSchedule.set(this.buildSoutenanceFromApi(soutenance));
+        const accepted = affectations.find(a => a.statut === 'ACCEPTE');
+        if (accepted) { this.chargerSuivi(accepted.id); }
+        this.lastRefreshed.set(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  ngOnInit(): void {
+    this.charger();
+    // Rafraîchissement automatique toutes les 30 secondes
+    interval(30_000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.charger());
   }
 
   private defaultStatCards(): DashboardStatCard[] {
@@ -180,12 +249,13 @@ export class DashboardComponent implements OnInit {
       { label: 'STATUT DOSSIER', value: dossier.value, sub: dossier.sub, icon: '📁' },
       {
         label: 'UE VALIDÉES',
-        value: '14/15',
-        sub:
-          elig == null
-            ? 'Détail non disponible'
+        value: `${profile.ue_validees_count ?? 0}/${profile.ue_total ?? 0}`,
+        sub: elig == null
+          ? 'Détail non disponible'
+          : (profile.ue_validees_count ?? 0) >= (profile.ue_total ?? 1) && (profile.ue_total ?? 0) > 0
+            ? 'Toutes les UE validées'
             : elig.ue_validees
-              ? '1 UE en attente de note'
+              ? 'Presque complet'
               : 'UE à compléter',
         icon: '📚',
       },
@@ -222,10 +292,11 @@ export class DashboardComponent implements OnInit {
   private buildChecklist(profile: EtudiantProfile, elig: EligibiliteStatus | null): ChecklistItem[] {
     const phase = profile.current_phase ?? 1;
     const ueOk = elig?.ue_validees === true;
-    const themeOk = phase >= 3;
+    // Utilise theme_valide de l'API d'éligibilité en priorité, puis phase >= 3 en fallback
+    const themeOk = elig?.theme_valide === true || phase >= 3;
     const directeurOk = phase >= 4;
     const memoireState: ChecklistItemState =
-      elig == null ? 'pending' : elig.memoire_valide ? 'done' : phase >= 5 ? 'pending' : 'pending';
+      elig == null ? 'pending' : elig.memoire_valide ? 'done' : 'pending';
     const notesUeState: ChecklistItemState =
       elig == null ? 'pending' : ueOk ? 'done' : 'failed';
     const antiPlagiatOk = phase >= 6;
@@ -254,38 +325,49 @@ export class DashboardComponent implements OnInit {
     return { done, total, percent };
   }
 
-  private defaultMemoireInfo(): MemoireDashboardInfo {
-    return {
-      titre: "Système de détection d'intrusions basé sur le Machine Learning",
-      directeur: 'Dr. Kofi Mensah',
-      niveauLabel: 'Master 2',
-      version: 'V.2.1',
-      statusLabel: 'En révision',
-      statusVariant: 'warning',
-      pagesCurrent: 88,
-      pagesTarget: 120,
-      commentBody: 'Merci de revoir la section 4.2 — bibliographie incomplète.',
-    };
-  }
+  private buildMemoireInfoFromApi(
+    profile: EtudiantProfile,
+    memoire: MemoireInfo | null,
+    theme: Theme | null,
+    affectations: Affectation[],
+  ): MemoireDashboardInfo {
+    const accepted    = affectations.find(a => a.statut === 'ACCEPTE');
+    const directeurNom = accepted?.directeur_nom ?? 'Non assigné';
+    const themeTitre   = theme?.titre ?? '—';
+    const niveauLabel  = profile.niveau?.trim() || 'Licence 3';
 
-  private buildMemoireInfo(profile: EtudiantProfile): MemoireDashboardInfo {
-    const phase = profile.current_phase ?? 1;
-    const base = this.defaultMemoireInfo();
-    let statusLabel = base.statusLabel;
-    let statusVariant: MemoireStatusVariant = base.statusVariant;
-    if (phase >= 6) {
-      statusLabel = 'En validation';
-      statusVariant = 'neutral';
+    if (!memoire) {
+      return {
+        titre:         themeTitre,
+        directeur:     directeurNom,
+        niveauLabel,
+        version:       '—',
+        statusLabel:   'Non déposé',
+        statusVariant: 'neutral',
+        pagesCurrent:  0,
+        pagesTarget:   120,
+        commentBody:   '',
+      };
     }
-    if (phase >= 7) {
-      statusLabel = 'Validé';
-      statusVariant = 'success';
-    }
+
+    const statusMap: Record<string, { label: string; variant: MemoireStatusVariant }> = {
+      en_attente:  { label: 'En attente',  variant: 'neutral'  },
+      en_revision: { label: 'En révision', variant: 'warning'  },
+      valide:      { label: 'Validé',      variant: 'success'  },
+      rejete:      { label: 'Rejeté',      variant: 'warning'  },
+    };
+    const statusInfo = statusMap[memoire.statut] ?? { label: memoire.statut, variant: 'neutral' as MemoireStatusVariant };
+
     return {
-      ...base,
-      niveauLabel: profile.niveau?.trim() || base.niveauLabel,
-      statusLabel,
-      statusVariant,
+      titre:         themeTitre,
+      directeur:     memoire.directeur  || directeurNom,
+      niveauLabel:   niveauLabel        || memoire.niveau,
+      version:       memoire.version    || 'V.1',
+      statusLabel:   statusInfo.label,
+      statusVariant: statusInfo.variant,
+      pagesCurrent:  memoire.pages,
+      pagesTarget:   memoire.pages_max,
+      commentBody:   memoire.commentaire || '',
     };
   }
 
@@ -307,24 +389,23 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  private buildSoutenanceSchedule(profile: EtudiantProfile): SoutenanceScheduleInfo {
-    const phase = profile.current_phase ?? 1;
-    if (phase < 9) {
-      return {
-        isPlanned: false,
-        dateHeure: 'Non communiquée',
-        salle: '—',
-        presidentJury: '—',
-        examinateur: '—',
-        convocationUrl: null,
-      };
+  private buildSoutenanceFromApi(soutenance: SoutenanceInfo | null): SoutenanceScheduleInfo {
+    if (!soutenance) {
+      return this.defaultSoutenanceSchedule();
     }
+    const dateObj = new Date(soutenance.date);
+    const dateHeure = isNaN(dateObj.getTime())
+      ? soutenance.date
+      : dateObj.toLocaleString('fr-FR', {
+          day: '2-digit', month: 'short', year: 'numeric',
+          hour: '2-digit', minute: '2-digit',
+        });
     return {
-      isPlanned: true,
-      dateHeure: '15 Juil. 2026 à 09:30',
-      salle: 'Salle B204 (Bâtiment B — 2ème étage)',
-      presidentJury: 'Pr. Jean Asante',
-      examinateur: 'Dr. Afia Boateng',
+      isPlanned:     true,
+      dateHeure,
+      salle:         `${soutenance.salle} (${soutenance.batiment})`,
+      presidentJury: soutenance.president,
+      examinateur:   soutenance.examinateur,
       convocationUrl: null,
     };
   }
@@ -334,5 +415,42 @@ export class DashboardComponent implements OnInit {
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
+  }
+
+  // ── Suivi mémoire ──────────────────────────────────────────────────────
+
+  chargerSuivi(affectationId: number): void {
+    this.suiviAffectationId.set(affectationId);
+    this.suiviLoading.set(true);
+    this.suiviService.getSuivi(affectationId).subscribe({
+      next:  data => { this.suivi.set(data); this.suiviLoading.set(false); },
+      error: ()   => this.suiviLoading.set(false),
+    });
+  }
+
+  get nbEtapesValidees(): number {
+    return this.suivi()?.etapes.filter(e => e.statut === 'VALIDE').length ?? 0;
+  }
+
+  suiviStatutClass(statut: string): string {
+    const map: Record<string, string> = {
+      VERROUILLE:  'etape-locked',
+      EN_COURS:    'etape-active',
+      SOUMIS:      'etape-soumis',
+      EN_REVISION: 'etape-revision',
+      VALIDE:      'etape-valide',
+    };
+    return map[statut] ?? '';
+  }
+
+  suiviStatutLabel(statut: string): string {
+    const map: Record<string, string> = {
+      VERROUILLE:  '🔒 Verrouillé',
+      EN_COURS:    '✏️ En cours',
+      SOUMIS:      '📤 Soumis',
+      EN_REVISION: '🔄 Correction demandée',
+      VALIDE:      '✅ Validé',
+    };
+    return map[statut] ?? statut;
   }
 }

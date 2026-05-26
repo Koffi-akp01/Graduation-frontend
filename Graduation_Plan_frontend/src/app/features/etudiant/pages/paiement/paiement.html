@@ -1,0 +1,130 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">💳</div>
+      <div>
+        <div class="avatar-name">Frais de soutenance</div>
+        <div class="avatar-role">Gestion de mon paiement</div>
+      </div>
+    </div>
+    <div class="sidebar-section">Navigation</div>
+    <a class="nav-item" routerLink="/etudiant"><span class="ico">🏠</span> Tableau de bord</a>
+    <a class="nav-item active"><span class="ico">💳</span> Paiement des frais</a>
+    <a class="nav-item" routerLink="/etudiant/memoire"><span class="ico">📄</span> Mon mémoire</a>
+  </aside>
+
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Paiement des frais de soutenance</div>
+        <div class="page-subtitle">Session 3 – 22 Août 2026</div>
+      </div>
+      <button class="btn btn-gold" (click)="ouvrirModal()">➕ Soumettre un bordereau</button>
+    </div>
+
+    <!-- Liste des bordereaux soumis -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🧾 Mes bordereaux de paiement</span>
+      </div>
+
+      @if (bordereaux().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">💳</div>
+          <div class="empty-title">Aucun bordereau soumis</div>
+          <div class="empty-sub">Cliquez sur « Soumettre un bordereau » pour déclarer votre paiement.</div>
+        </div>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>N° Bordereau</th>
+              <th>Banque</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Preuve</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of bordereaux(); track b.id) {
+              <tr>
+                <td style="font-family:'DM Mono',monospace">{{ b.numero_bordereau }}</td>
+                <td>{{ b.banque }}</td>
+                <td style="font-family:'DM Mono',monospace">{{ montantLabel(b.montant) }}</td>
+                <td style="font-size:12px">{{ b.date_depot | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  @if (b.est_valide) {
+                    <span class="badge badge-success">✅ Validé</span>
+                  } @else {
+                    <span class="badge badge-pending">⏳ En vérification</span>
+                  }
+                </td>
+                <td>
+                  @if (b.image_bordereau) {
+                    <a [href]="b.image_bordereau" target="_blank" class="btn btn-secondary btn-sm">👁 Voir</a>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL soumission bordereau ═══════════════════════════════════════ -->
+@if (showModal) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">Soumettre un bordereau de paiement</span>
+        <button class="modal-close" (click)="fermerModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="field-group">
+          <label>N° du bordereau <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.numero_bordereau" placeholder="Ex : BRD-2026-00142" />
+        </div>
+
+        <div class="field-group">
+          <label>Banque de dépôt</label>
+          <input type="text" value="CORIS BANK" disabled class="field-readonly" />
+          <span class="field-hint">Les paiements s'effectuent exclusivement à CORIS BANK</span>
+        </div>
+
+        <div class="field-group">
+          <label>Montant <span class="req">*</span></label>
+          <select [(ngModel)]="form.montant">
+            <option [ngValue]="100000">100 000 FCFA — Licence</option>
+            <option [ngValue]="150000">150 000 FCFA — Master</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label>Scan du bordereau <span class="req">*</span></label>
+          <input type="file" accept="image/*,.pdf" (change)="onFileSelected($event)" />
+          <span class="field-hint">Photo ou PDF du reçu bancaire</span>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert-msg error">❌ {{ errorMessage }}</div>
+        }
+        @if (successMessage) {
+          <div class="alert-msg success">✅ {{ successMessage }}</div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerModal()">Annuler</button>
+        <button class="btn btn-gold" (click)="soumettre()" [disabled]="isLoading">
+          @if (isLoading) { Envoi en cours… } @else { Soumettre }
+        </button>
+      </div>
+    </div>
+  </div>
+}

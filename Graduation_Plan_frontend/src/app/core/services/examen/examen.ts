@@ -3,48 +3,81 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { VerificationMemoire } from '../../models/examen.model';
 
-export interface MemoireAVerifier {
+export interface DossierExamen {
   id: number;
+  etudiant_id: number;
   etudiant_nom: string;
-  titre: string;
-  score_similarite: number;
-  score_ia: number;
-  nb_pages: number;
+  matricule: string;
+  filiere: string;
+  niveau: string;
+  titre_memoire: string;
+  statut: 'PENDING' | 'VALIDATED' | 'REJECTED';
+  ue: string;
+  paiement: 'PAYE' | 'NON_PAYE';
+  anti_ia: 'EN_COURS' | 'VALIDE' | 'SUSPICION' | null;
+  score_plagiat: number;
+  verifie_plagiat: boolean;
+  verifie_ia: boolean;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
-export class ExamenService {
-  private readonly apiUrl = `${environment.apiUrl}/examens/memoires/`;
+export type NoteStatut = 'VALIDE' | 'ECHOUE' | 'RATTRAPAGE' | 'NON_SAISI';
 
+export interface UeNote {
+  ue_id:            number;
+  code_ue:          string;
+  libelle:          string;
+  semestre:         number;
+  credits:          number;
+  est_informatique: boolean;
+  note:             number | null;
+  statut:           NoteStatut;
+  annee:            string;
+}
+
+export interface NotesEtudiant {
+  etudiant_id:  number;
+  etudiant_nom: string;
+  matricule:    string;
+  filiere:      string;
+  ues:          UeNote[];
+}
+
+export interface SaisieNote {
+  ue_id: number;
+  note:  number;
+}
+
+export interface NotifierResult {
+  message:     string;
+  nb_echouees: number;
+  nb_saisies:  number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class ExamenService {
   constructor(private http: HttpClient) {}
 
-  getMemoiresEnAttente(): Observable<VerificationMemoire[]> {
-    return this.http.get<VerificationMemoire[]>(`${this.apiUrl}en-attente/`);
+  getDossiersExamen(): Observable<DossierExamen[]> {
+    return this.http.get<DossierExamen[]>(`${environment.apiUrl}/themes/dossiers_examen/`);
   }
 
-  updateConformite(
-    id: number,
-    data: { statut: 'VALIDE' | 'REJETE'; observations: string }
-  ): Observable<VerificationMemoire> {
-    return this.http.patch<VerificationMemoire>(`${this.apiUrl}${id}/conformite/`, data);
+  updateStatutTheme(id: number, statut: 'VALIDATED' | 'REJECTED', remarques: string): Observable<unknown> {
+    return this.http.patch(`${environment.apiUrl}/themes/${id}/`, { statut, remarques_examinateur: remarques });
   }
 
-  getMemoiresAVerifier(): Observable<MemoireAVerifier[]> {
-    return this.http.get<MemoireAVerifier[]>(`${environment.apiUrl}/examen/memoires/en_attente/`);
+  verifierAntiPlagiat(themeId: number, data: { verifie_plagiat: boolean; verifie_ia: boolean; commentaire: string }): Observable<unknown> {
+    return this.http.post(`${environment.apiUrl}/themes/${themeId}/verifier/`, data);
   }
 
-  verifierMemoire(
-    id: number,
-    decision: 'valider' | 'rejeter' | 'correction',
-    commentaire?: string
-  ): Observable<unknown> {
-    return this.http.post(`${environment.apiUrl}/examen/memoires/${id}/verifier/`, {
-      decision,
-      commentaire,
-    });
+  getNotesEtudiant(etudiantId: number): Observable<NotesEtudiant> {
+    return this.http.get<NotesEtudiant>(`${environment.apiUrl}/examen/etudiants/${etudiantId}/notes/`);
+  }
+
+  saisirEtNotifier(etudiantId: number, annee: string, notes: SaisieNote[]): Observable<NotifierResult> {
+    return this.http.post<NotifierResult>(
+      `${environment.apiUrl}/examen/etudiants/${etudiantId}/saisir/`,
+      { annee, notes },
+    );
   }
 }

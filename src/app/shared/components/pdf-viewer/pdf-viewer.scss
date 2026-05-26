@@ -1,0 +1,23 @@
+.pdf-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pdf-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 1000px;
+  overflow: hidden;
+}
+.pdf-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #E2DDD4;
+}

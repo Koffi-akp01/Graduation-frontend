@@ -1,0 +1,245 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">{{ initiales }}</div>
+      <div>
+        <div class="avatar-name">{{ prenom() }} {{ nom() }}</div>
+        <div class="avatar-role">Directeur de mémoire</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Encadrement</div>
+    <a class="nav-item" routerLink="/directeur/suivi" routerLinkActive="active"
+       [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item active" routerLink="/directeur/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+      @if (nbSoumisTotal() > 0) {
+        <span class="badge-pill">{{ nbSoumisTotal() }}</span>
+      }
+    </a>
+    <a class="nav-item" routerLink="/directeur/planning" routerLinkActive="active">
+      <span class="ico">📅</span> Planning
+    </a>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">📋 Suivi mémoire</div>
+        <div class="page-subtitle">
+          {{ etudiants().length }} étudiant(s) — {{ nbSoumisTotal() }} étape(s) en attente de validation
+        </div>
+      </div>
+      <button class="btn btn-secondary" (click)="charger()" [disabled]="isLoading()">
+        ↺ Actualiser
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-card">Chargement…</div>
+    }
+
+    @if (!isLoading() && etudiants().length === 0) {
+      <div class="empty-card">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">Aucun étudiant encadré</div>
+        <div class="empty-sub">Les étudiants apparaissent ici après validation de l'affectation.</div>
+      </div>
+    }
+
+    <div class="students-list">
+      @for (et of etudiants(); track et.affectation_id) {
+
+        <div class="student-card" [class.expanded]="openId() === et.affectation_id">
+
+          <!-- En-tête cliquable -->
+          <div class="student-card-header" (click)="toggle(et.affectation_id)">
+            <div class="student-avatar">{{ et.etudiant_nom[0] }}</div>
+            <div class="student-info">
+              <div class="student-name">{{ et.etudiant_nom }}</div>
+              <div class="student-meta">{{ et.matricule }}</div>
+            </div>
+            <div class="student-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="progress(et)"></div>
+              </div>
+              <span class="progress-txt">{{ et.nb_validees }}/{{ et.nb_etapes }}</span>
+            </div>
+            @if (et.nb_soumises > 0) {
+              <span class="badge-soumis">{{ et.nb_soumises }} à valider</span>
+            }
+            <span class="chevron">{{ openId() === et.affectation_id ? '▲' : '▼' }}</span>
+          </div>
+
+          <!-- ── Étapes dépliées ── -->
+          @if (openId() === et.affectation_id) {
+            <div class="steps-grid">
+              @for (etape of et.etapes; track etape.id) {
+                <div class="step-card" [class]="statutClass(etape.statut)">
+
+                  <!-- En-tête étape -->
+                  <div class="step-top">
+                    <span class="step-num">{{ etape.ordre }}</span>
+                    <div class="step-body">
+                      <div class="step-titre">{{ etape.titre }}</div>
+                      <div class="step-desc">{{ etape.description }}</div>
+                    </div>
+                    <span class="step-statut">{{ statutLabel(etape.statut) }}</span>
+                  </div>
+
+                  <!-- Document soumis par l'étudiant -->
+                  @if (etape.fichier_url) {
+                    <div class="doc-actions">
+                      <!-- Aperçu inline -->
+                      <button class="btn-doc"
+                        [class.btn-doc-active]="apercuAffId() === et.affectation_id && apercuEtapeId() === etape.id"
+                        (click)="ouvrirApercu(et.affectation_id, etape.id)">
+                        @if (apercuLoading() && apercuEtapeId() === etape.id) {
+                          ⏳ Chargement…
+                        } @else if (apercuAffId() === et.affectation_id && apercuEtapeId() === etape.id) {
+                          🔼 Fermer l'aperçu
+                        } @else {
+                          👁 Voir le document
+                        }
+                      </button>
+                      <!-- Télécharger Word pour annotation -->
+                      <button class="btn-word" (click)="telechargerWord(et.affectation_id, etape.id)">
+                        📝 Annoter (Word)
+                      </button>
+                    </div>
+
+                    <!-- Panneau aperçu PDF inline -->
+                    @if (apercuAffId() === et.affectation_id && apercuEtapeId() === etape.id && apercuUrl()) {
+                      <div class="apercu-panel">
+                        <div class="apercu-header">
+                          <span class="apercu-title">📄 {{ etape.fichier_nom || 'Document' }}</span>
+                          <button class="btn-close-apercu" (click)="fermerApercu()">✕</button>
+                        </div>
+                        <iframe [src]="apercuUrl()!" class="apercu-iframe" title="Aperçu document"></iframe>
+                      </div>
+                    }
+                  }
+
+                  <!-- Remarques existantes -->
+                  @if (etape.remarques) {
+                    <div class="step-remarques">
+                      <strong>Remarques envoyées :</strong> {{ etape.remarques }}
+                    </div>
+                  }
+
+                  <!-- Dates -->
+                  @if (etape.date_soumission) {
+                    <div class="step-date">
+                      Soumis le {{ etape.date_soumission | date:'dd/MM/yyyy à HH:mm' }}
+                    </div>
+                  }
+                  @if (etape.date_validation) {
+                    <div class="step-date">
+                      Validé le {{ etape.date_validation | date:'dd/MM/yyyy à HH:mm' }}
+                      @if (etape.valide_par_nom) { · <em>{{ etape.valide_par_nom }}</em> }
+                    </div>
+                  }
+
+                  <!-- Correction déjà déposée -->
+                  @if (etape.fichier_correction_url) {
+                    <div class="correction-deposee">
+                      ✅ Correction déposée : <em>{{ etape.fichier_correction_nom || 'document_corrigé' }}</em>
+                    </div>
+                  }
+
+                  <!-- Réinitialiser (seulement si VALIDE) -->
+                  @if (etape.statut === 'VALIDE') {
+                    <div class="step-actions">
+                      <button class="btn btn-sm btn-outline-warning"
+                        [disabled]="inProgress() === etape.id"
+                        (click)="resetEtape(et.affectation_id, etape.id)">
+                        @if (inProgress() === etape.id) { … }
+                        @else { ↺ Réinitialiser }
+                      </button>
+                    </div>
+                  }
+
+                  <!-- Actions (seulement si SOUMIS) -->
+                  @if (etape.statut === 'SOUMIS') {
+                    <div class="step-actions">
+
+                      <!-- Dépôt de correction documentaire -->
+                      @if (correctionInProgress() === etape.id) {
+                        <span class="action-hint">Dépôt en cours…</span>
+                      } @else if (correctionFor() === etape.id) {
+                        <div class="correction-upload">
+                          <label class="btn-upload-correction">
+                            📎 Choisir le fichier corrigé (Word/PDF)
+                            <input type="file" accept=".docx,.doc,.pdf"
+                              (change)="onCorrectionChange($event, et.affectation_id, etape.id)" hidden />
+                          </label>
+                          <button class="btn btn-sm btn-secondary" (click)="annulerDepotCorrection()">
+                            Annuler
+                          </button>
+                        </div>
+                      } @else {
+
+                        <!-- Bouton Déposer correction documentaire -->
+                        <button class="btn btn-sm btn-orange"
+                          (click)="ouvrirDepotCorrection(et.affectation_id, etape.id)">
+                          📤 Déposer correction
+                        </button>
+
+                        <!-- Correction textuelle (remarques) -->
+                        @if (remarquesFor() === etape.id) {
+                          <div class="remarques-form">
+                            <textarea class="step-textarea" [(ngModel)]="remarques"
+                              rows="2" placeholder="Remarques de correction…"></textarea>
+                            <div class="step-btns">
+                              <button class="btn btn-sm btn-danger"
+                                [disabled]="inProgress() === etape.id"
+                                (click)="envoyerCorrection(et.affectation_id, etape.id)">
+                                @if (inProgress() === etape.id) { Envoi… }
+                                @else { 🔄 Envoyer remarques }
+                              </button>
+                              <button class="btn btn-sm btn-secondary"
+                                (click)="ouvrirRemarques(etape.id)">Annuler</button>
+                            </div>
+                          </div>
+                        } @else {
+                          <button class="btn btn-sm btn-secondary"
+                            (click)="ouvrirRemarques(etape.id)">
+                            ✏️ Remarques textuelles
+                          </button>
+                        }
+
+                        <!-- Valider -->
+                        <button class="btn btn-sm btn-success"
+                          [disabled]="inProgress() === etape.id"
+                          (click)="validerEtape(et.affectation_id, etape.id)">
+                          @if (inProgress() === etape.id) { … }
+                          @else { ✅ Valider }
+                        </button>
+                      }
+                    </div>
+                  }
+
+                </div>
+              }
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

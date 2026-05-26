@@ -1,0 +1,36 @@
+<div class="directeur-container">
+  <header class="header">
+    <h2 class="font-playfair color-navy">Suivi des Etudiants</h2>
+    <p class="text-ink3">Gerez les memoires et validez les passages en soutenance.</p>
+  </header>
+
+  <div class="grid-etudiants">
+    @for (item of mesEtudiants(); track item.id) {
+      <div class="student-card card-white">
+        <div class="card-header">
+          <span class="filiere-badge">{{ item.filiere }}</span>
+          <h3 class="student-name">{{ item.nom }} {{ item.prenom }}</h3>
+        </div>
+
+        <div class="card-body">
+          <p class="theme-title"><strong>Theme :</strong> {{ item.theme_titre }}</p>
+
+          <div class="status-indicator">
+            <span class="dot" [class.dot-success]="item.memoire_depose"></span>
+            {{ item.memoire_depose ? 'Memoire depose' : 'En redaction' }}
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button class="btn-outline" [disabled]="!item.memoire_url">Consulter PDF</button>
+
+          @if (item.memoire_depose && item.theme_statut !== 'ACCEPTE') {
+            <button class="btn-success" (click)="validerVersionFinale(item.theme_id)">
+              Valider pour Soutenance
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

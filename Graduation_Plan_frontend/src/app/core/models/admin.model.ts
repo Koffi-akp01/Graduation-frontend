@@ -11,4 +11,14 @@ export interface GlobalStats {
   soutenances_terminees: number;
   taux_reussite: number;
   total_paiements: number;
+  total_utilisateurs: number;
+  utilisateurs_actifs: number;
+}
+
+export interface UserListItem {
+  id: number;
+  nom: string;
+  role: string;
+  role_code: string;
+  actif: boolean;
 }

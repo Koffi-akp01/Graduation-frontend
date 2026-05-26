@@ -1,0 +1,42 @@
+<main class="login-page">
+  <section class="login-panel">
+    <h1>Connexion</h1>
+
+    <form (ngSubmit)="onLogin()" class="login-form">
+      <label>
+        Nom d'utilisateur
+        <input
+          type="text"
+          name="username"
+          [(ngModel)]="credentials.username"
+          autocomplete="username"
+          required
+        />
+      </label>
+
+      <label>
+        Mot de passe
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="credentials.password"
+          autocomplete="current-password"
+          required
+        />
+      </label>
+
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Connexion...' : 'Se connecter' }}
+      </button>
+    </form>
+
+    <div class="register-link">
+      <span>Pas encore de compte etudiant ?</span>
+      <a routerLink="/register">Creer un compte</a>
+    </div>
+  </section>
+</main>

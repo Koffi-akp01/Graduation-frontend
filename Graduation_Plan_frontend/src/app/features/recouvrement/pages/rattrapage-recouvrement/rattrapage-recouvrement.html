@@ -1,0 +1,163 @@
+<app-top-nav></app-top-nav>
+
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1>Service de Recouvrement</h1>
+      <p>Gestion des factures de rattrapage et validation des paiements.</p>
+    </div>
+  </div>
+
+  @if (successMsg()) { <div class="alert alert-success">✅ {{ successMsg() }}</div> }
+  @if (errorMsg())   { <div class="alert alert-error">❌ {{ errorMsg() }}</div> }
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab() === 'facturation'" (click)="setTab('facturation')">
+      💳 Facturation en attente
+      @if (pendingFactures().length > 0) {
+        <span class="badge-count">{{ pendingFactures().length }}</span>
+      }
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'validation'" (click)="setTab('validation')">
+      ✔ Validation paiements
+      @if (aValider().length > 0) {
+        <span class="badge-count">{{ aValider().length }}</span>
+      }
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'historique'" (click)="setTab('historique')">
+      🗂 Historique
+    </button>
+  </div>
+
+  <!-- ══ TAB : FACTURATION ══════════════════════════════════════════════ -->
+  @if (activeTab() === 'facturation') {
+    @if (facturesLoading()) {
+      <div class="loading">Chargement…</div>
+    } @else if (pendingFactures().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">💳</div>
+        <p>Aucune facturation en attente.</p>
+      </div>
+    } @else {
+      @for (item of pendingFactures(); track item.etudiant_id) {
+        <div class="facture-card">
+          <div class="facture-header">
+            <div>
+              <strong>{{ item.nom }}</strong>
+              <span class="matricule-tag">{{ item.matricule }}</span>
+              <span class="filiere-tag">{{ item.filiere }}</span>
+            </div>
+            <div class="total-estime">
+              Total estimé : <strong>{{ item.total_estime | number:'1.0-0' }} FCFA</strong>
+            </div>
+          </div>
+
+          <table class="ue-table">
+            <thead>
+              <tr>
+                <th>Code UE</th>
+                <th>Libellé</th>
+                <th>Crédits</th>
+                <th>Type</th>
+                <th>Tarif/crédit</th>
+                <th>Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of item.rattrapages; track r.id) {
+                <tr>
+                  <td><code>{{ r.ue_code }}</code></td>
+                  <td>{{ r.ue_libelle }}</td>
+                  <td class="num">{{ r.credits }}</td>
+                  <td>
+                    @if (r.est_informatique) {
+                      <span class="badge badge-info">Informatique</span>
+                    } @else {
+                      <span class="badge badge-neutral">Non-informatique</span>
+                    }
+                  </td>
+                  <td class="num">{{ r.tarif_credit | number:'1.0-0' }} FCFA</td>
+                  <td class="num montant">{{ r.montant | number:'1.0-0' }} FCFA</td>
+                </tr>
+              }
+              <tr class="total-row">
+                <td colspan="5"><strong>TOTAL</strong></td>
+                <td class="num montant"><strong>{{ item.total_estime | number:'1.0-0' }} FCFA</strong></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="facture-actions">
+            <button
+              class="btn-envoyer"
+              [disabled]="factureInProgress() === item.etudiant_id"
+              (click)="envoyerFacture(item.etudiant_id)"
+            >
+              @if (factureInProgress() === item.etudiant_id) {
+                Envoi en cours…
+              } @else {
+                📤 Envoyer la facture à l'étudiant
+              }
+            </button>
+          </div>
+        </div>
+      }
+    }
+  }
+
+  <!-- ══ TAB : VALIDATION PAIEMENTS ════════════════════════════════════ -->
+  @if (activeTab() === 'validation') {
+    @if (isLoading()) {
+      <div class="loading">Chargement…</div>
+    } @else if (aValider().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">✔</div>
+        <p>Aucun paiement en attente de validation.</p>
+      </div>
+    } @else {
+      @for (r of aValider(); track r.id) {
+        <div class="card">
+          <div class="card-info">
+            <div class="info-row"><span>Étudiant</span><strong>{{ r.etudiant_nom }}</strong></div>
+            <div class="info-row"><span>UE</span><strong>{{ r.ue_code }} — {{ r.ue_libelle }}</strong></div>
+            <div class="info-row"><span>Date rattrapage</span><strong>{{ r.date | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div class="info-row"><span>Frais à régler</span><strong>{{ r.frais | number:'1.0-0' }} FCFA</strong></div>
+            @if (r.preuve_paiement) {
+              <div class="info-row">
+                <span>Preuve</span>
+                <a [href]="r.preuve_paiement" target="_blank" class="link-preuve">Voir le justificatif</a>
+              </div>
+            }
+          </div>
+          <div class="card-action">
+            <button class="btn-valider" [disabled]="inProgress() === r.id" (click)="valider(r.id)">
+              ✓ Valider le paiement
+            </button>
+          </div>
+        </div>
+      }
+    }
+  }
+
+  <!-- ══ TAB : HISTORIQUE ═══════════════════════════════════════════════ -->
+  @if (activeTab() === 'historique') {
+    @if (historique().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🗂</div>
+        <p>Aucun paiement validé pour le moment.</p>
+      </div>
+    } @else {
+      @for (r of historique(); track r.id) {
+        <div class="card card-done">
+          <div class="card-info">
+            <div class="info-row"><span>Étudiant</span><strong>{{ r.etudiant_nom }}</strong></div>
+            <div class="info-row"><span>UE</span><strong>{{ r.ue_code }}</strong></div>
+            <div class="info-row"><span>Frais réglés</span><strong>{{ r.frais | number:'1.0-0' }} FCFA</strong></div>
+            <div class="info-row"><span>Statut</span><span class="statut-ok">✅ Validé</span></div>
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

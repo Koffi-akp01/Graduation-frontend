@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../../core/services/auth/auth';
 
@@ -10,54 +10,36 @@ import { AuthService } from '../../../../core/services/auth/auth';
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class LoginComponent {
-  credentials = { username: '', password: '' };
-  isLoading = false;
-  errorMessage = '';
+export class LoginComponent implements OnInit {
+  credentials     = { username: '', password: '' };
+  isLoading       = false;
+  errorMessage    = '';
+  justRegistered  = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    const pending = sessionStorage.getItem('pending_login_username');
+    if (pending) {
+      this.credentials.username = pending;
+      this.justRegistered = true;
+      sessionStorage.removeItem('pending_login_username');
+    }
+  }
 
   onLogin(): void {
-    this.isLoading = true;
+    this.isLoading    = true;
     this.errorMessage = '';
 
     this.authService.login(this.credentials).subscribe({
-      next: (response: any) => {
-        console.log('Réponse du serveur:', response); 
-        
-        if (response.access) {
-          localStorage.setItem('access_token', response.access);
-        }
-      
-        const role = response.role || localStorage.getItem('user_role');
-        
-        console.log('Rôle détecté:', role);
-
-        if (role) {
-          this.redirectByUserRole(role);
-        } else {
-          
-          console.warn("Aucun rôle trouvé, redirection par défaut vers étudiant");
-          this.router.navigate(['/dashboard-etudiant']); 
-        }
+      next: () => {
+        // La redirection est gérée par AuthService.login()
+        // selon le rôle détecté dans le token JWT ou via /me/
       },
-      error: (err) => {
-        console.error('Erreur de connexion', err);
+      error: () => {
         this.errorMessage = 'Identifiants incorrects ou serveur indisponible.';
-        this.isLoading = false;
+        this.isLoading    = false;
       },
     });
-  }
-
-  private redirectByUserRole(role: string | null): void {
-    if (role === 'STUDENT' || role === 'ETUDIANT') this.router.navigate(['/etudiant']);
-    else if (role === 'ADMIN_ACADEMIC' || role === 'DIRECTION') this.router.navigate(['/direction']);
-    else if (role === 'CHEF_SERVICE_EXAM') this.router.navigate(['/service-examen']);
-    else if (role === 'SERVICE_RECOUVREMENT') this.router.navigate(['/recouvrement']);
-    else if (role === 'CHARGE_ORGANISATION') this.router.navigate(['/organisation']);
-    else if (role === 'INTERNAL_TRAINER' || role === 'EXTERNAL_TRAINER') this.router.navigate(['/encadreur']);
-    else if (role === 'EXAMINER' || role === 'PRESIDENT_JURY') this.router.navigate(['/jury']);
-    else if (role === 'MC') this.router.navigate(['/ceremonie']);
-    else this.router.navigate(['/']);
   }
 }

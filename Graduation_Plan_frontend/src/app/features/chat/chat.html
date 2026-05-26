@@ -1,0 +1,96 @@
+<app-top-nav></app-top-nav>
+
+<div class="chat-page">
+
+  <!-- ── Messages ──────────────────────────────────────────────────────── -->
+  <div class="chat-pane">
+    <header class="chat-header">
+      <span class="partner-name">{{ partnerName() }}</span>
+      <span class="chat-label">Messagerie directeur / étudiant</span>
+    </header>
+
+    @if (successMsg()) {
+      <div class="alert success">{{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert error">{{ errorMsg() }}</div>
+    }
+
+    <div class="messages-list" #msgList>
+      @for (msg of messages(); track msg.id) {
+        <div class="message" [class.mine]="msg.expediteur === currentUserId()">
+          <div class="bubble">
+            <span class="sender">{{ msg.expediteur === currentUserId() ? 'Vous' : msg.expediteur_nom }}</span>
+            <p class="content">{{ msg.contenu }}</p>
+            <span class="time">{{ msg.date_envoi | date:'dd/MM HH:mm' }}</span>
+          </div>
+        </div>
+      }
+      @if (!messages().length) {
+        <p class="empty-chat">Aucun message. Démarrez la conversation.</p>
+      }
+    </div>
+
+    <div class="input-row">
+      <textarea
+        [(ngModel)]="newMessage"
+        placeholder="Votre message (Entrée pour envoyer, Maj+Entrée pour saut de ligne)…"
+        rows="2"
+        (keydown.enter)="sendMessage($event)">
+      </textarea>
+      <button class="btn-send" (click)="sendMessage()">Envoyer</button>
+    </div>
+  </div>
+
+  <!-- ── Rendez-vous ────────────────────────────────────────────────────── -->
+  <aside class="rdv-pane">
+    <header class="rdv-header">
+      <h3>Rendez-vous</h3>
+      <button class="btn-propose" (click)="showRdvForm = !showRdvForm">
+        {{ showRdvForm ? '✕ Fermer' : '+ Proposer' }}
+      </button>
+    </header>
+
+    @if (showRdvForm) {
+      <div class="rdv-form">
+        <label>Date et heure *
+          <input type="datetime-local" [(ngModel)]="rdvForm.date_heure">
+        </label>
+        <label>Lieu
+          <input type="text" [(ngModel)]="rdvForm.lieu" placeholder="Salle, bureau, en ligne…">
+        </label>
+        <label>Ordre du jour
+          <textarea [(ngModel)]="rdvForm.description" rows="3" placeholder="Points à aborder…"></textarea>
+        </label>
+        <button class="btn-primary" (click)="proposerRdv()">Proposer</button>
+      </div>
+    }
+
+    <div class="rdv-list">
+      @for (rdv of rendezVous(); track rdv.id) {
+        <div class="rdv-card rdv-{{ rdv.statut.toLowerCase() }}">
+          <div class="rdv-meta">
+            <span class="rdv-date">{{ rdv.date_heure | date:'dd/MM/yyyy HH:mm' }}</span>
+            @if (rdv.lieu) { <span class="rdv-lieu">📍 {{ rdv.lieu }}</span> }
+            @if (rdv.description) { <p class="rdv-desc">{{ rdv.description }}</p> }
+            <span class="rdv-badge badge-{{ rdv.statut.toLowerCase() }}">{{ statutLabel(rdv.statut) }}</span>
+          </div>
+
+          @if (rdv.statut === 'PROPOSE' && rdv.propose_par !== proposePar()) {
+            <div class="rdv-actions">
+              <button class="btn-confirm" (click)="confirmerRdv(rdv.id)">Confirmer</button>
+              <button class="btn-cancel"  (click)="annulerRdv(rdv.id)">Refuser</button>
+            </div>
+          }
+          @if (rdv.statut === 'CONFIRME') {
+            <button class="btn-cancel sm" (click)="annulerRdv(rdv.id)">Annuler</button>
+          }
+        </div>
+      }
+      @if (!rendezVous().length) {
+        <p class="empty-rdv">Aucun rendez-vous planifié.</p>
+      }
+    </div>
+  </aside>
+
+</div>

@@ -1,0 +1,43 @@
+<div class="eligibilite-container card-white">
+  <h2 class="font-playfair color-navy">Verification de l'eligibilite</h2>
+  <p class="text-ink3">Tous les voyants doivent etre au vert pour valider votre dossier de soutenance.</p>
+
+  @if (isLoading()) {
+    <div class="loader">Analyse de votre dossier en cours...</div>
+  } @else {
+    <ul class="checklist">
+      <li [class.valid]="status()?.ue_validees" [class.invalid]="!status()?.ue_validees">
+        <span class="icon"></span>
+        <div class="content">
+          <p class="label">Unites d'Enseignement (UE)</p>
+          <p class="desc">{{ status()?.ue_validees ? 'Toutes les UE sont validees.' : 'UE manquantes detectees.' }}</p>
+        </div>
+      </li>
+
+      <li [class.valid]="status()?.frais_payes" [class.invalid]="!status()?.frais_payes">
+        <span class="icon"></span>
+        <div class="content">
+          <p class="label">Situation Financiere (Comptabilite)</p>
+          <p class="desc">{{ status()?.frais_payes ? 'Scolarite a jour.' : 'Reliquat de scolarite a regler.' }}</p>
+        </div>
+      </li>
+
+      <li [class.valid]="status()?.memoire_valide" [class.invalid]="!status()?.memoire_valide">
+        <span class="icon"></span>
+        <div class="content">
+          <p class="label">Depot du Memoire</p>
+          <p class="desc">{{ status()?.memoire_valide ? 'Document valide par le directeur.' : 'Memoire non depose ou en correction.' }}</p>
+        </div>
+      </li>
+    </ul>
+
+    <div class="status-summary" [class.all-clear]="status()?.ue_validees && status()?.frais_payes && status()?.memoire_valide">
+      @if (status()?.ue_validees && status()?.frais_payes && status()?.memoire_valide) {
+        <p class="success-msg">Felicitations ! Vous etes eligible pour la soutenance.</p>
+        <button class="btn-gold">Prendre rendez-vous</button>
+      } @else {
+        <p class="error-msg">Veuillez regulariser les elements en rouge pour continuer.</p>
+      }
+    </div>
+  }
+</div>

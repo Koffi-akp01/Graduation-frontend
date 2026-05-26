@@ -1,48 +1,247 @@
-<div class="recouvrement-container">
-  <h2 class="font-playfair color-navy">Gestion du Recouvrement</h2>
+<app-top-nav></app-top-nav>
 
-  <div class="stats-grid">
-    <div class="stat-card border-success">
-      <span class="label">Total Encaisse</span>
-      <span class="value">{{ stats()?.total_encaisse }} FCFA</span>
+<div class="app-page">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#1B5E20">SR</div>
+      <div>
+        <div class="avatar-name">Service Recouvrement</div>
+        <div class="avatar-role">Gestion financière</div>
+      </div>
     </div>
-    <div class="stat-card border-danger">
-      <span class="label">Impayes</span>
-      <span class="value">{{ stats()?.total_impayes }} FCFA</span>
-    </div>
-  </div>
 
-  <div class="table-container card-white">
-    <h3 class="color-navy">Paiements en attente de validation</h3>
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th>Etudiant</th>
-          <th>Type de Frais</th>
-          <th>Montant</th>
-          <th>Date</th>
-          <th>Preuve</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (p of paiements(); track p.id) {
-          <tr>
-            <td><strong>Matricule #{{ p.etudiant_id }}</strong></td>
-            <td><span class="badge">{{ p.type_frais }}</span></td>
-            <td class="amount">{{ p.montant }} FCFA</td>
-            <td>{{ p.date_paiement | date:'shortDate' }}</td>
-            <td>
-              <a [href]="p.recu_url" target="_blank" class="link-gold">Voir le recu</a>
-            </td>
-            <td>
-              <button class="btn-success" (click)="confirmerPaiement(p.id)">Valider</button>
-            </td>
-          </tr>
-        } @empty {
-          <tr><td colspan="6" class="empty">Aucune transaction en attente.</td></tr>
-        }
-      </tbody>
-    </table>
+    <div class="sidebar-section">Paiements</div>
+    <button class="nav-item" [class.active]="vue() === 'bordereaux'" (click)="afficherVue('bordereaux')">
+      <span class="ico">💳</span> Bordereaux reçus
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'alertes'" (click)="afficherVue('alertes')">
+      <span class="ico">⚠</span> Alertes impayés
+    </button>
+
+    <div class="sidebar-section">Rapports</div>
+    <button class="nav-item" [class.active]="vue() === 'rapport'" (click)="afficherVue('rapport')">
+      <span class="ico">📊</span> Rapport financier
+    </button>
+  </aside>
+
+  <!-- Contenu principal -->
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Service Recouvrement</div>
+        <div class="page-subtitle">Gestion des frais de soutenance — Session 3 – 22 Août 2026</div>
+      </div>
+    </div>
+
+    <!-- Stat cards (toujours visibles) -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Bordereaux reçus</div>
+        <div class="stat-value">{{ stats()?.total ?? '—' }}</div>
+        <div class="stat-sub">Soumissions étudiants</div>
+        <div class="stat-icon">📋</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Paiements validés</div>
+        <div class="stat-value">{{ stats()?.valides ?? '—' }}</div>
+        <div class="stat-sub">Étudiants en règle</div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">En attente</div>
+        <div class="stat-value">{{ stats()?.en_attente ?? '—' }}</div>
+        <div class="stat-sub">À vérifier</div>
+        <div class="stat-icon">⚠</div>
+      </div>
+    </div>
+
+    <!-- ── Vue : Bordereaux reçus ──────────────────────────────────────────── -->
+    @if (vue() === 'bordereaux') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">💳 Bordereaux de paiement</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>N° Bordereau</th>
+              <th>Banque</th>
+              <th>Montant (FCFA)</th>
+              <th>Date dépôt</th>
+              <th>Statut</th>
+              <th>Preuve</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of bordereaux(); track b.id) {
+              <tr>
+                <td><strong>{{ b.etudiant_nom }}</strong></td>
+                <td style="font-family:'DM Mono',monospace">{{ b.numero_bordereau }}</td>
+                <td>{{ b.banque }}</td>
+                <td style="font-family:'DM Mono',monospace">{{ b.montant | number:'1.0-0' }}</td>
+                <td style="font-family:'DM Mono',monospace;font-size:12px">{{ b.date_depot | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  @if (b.est_valide) {
+                    <span class="badge badge-success">Validé</span>
+                  } @else {
+                    <span class="badge badge-pending">En attente</span>
+                  }
+                </td>
+                <td>
+                  @if (b.image_bordereau) {
+                    <a [href]="b.image_bordereau" target="_blank" class="btn btn-secondary btn-sm">👁 Voir</a>
+                  } @else {
+                    <span style="color:var(--ink3)">—</span>
+                  }
+                </td>
+                <td>
+                  @if (!b.est_valide) {
+                    <button class="btn btn-gold btn-sm" (click)="confirmerPaiement(b.id)">✅ Valider</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Aucun bordereau reçu pour le moment.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ── Vue : Alertes impayés ───────────────────────────────────────────── -->
+    @if (vue() === 'alertes') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚠ Alertes — Étudiants non en règle</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Matricule</th>
+              <th>Nom &amp; Prénom</th>
+              <th>Filière</th>
+              <th>Email</th>
+              <th>Bordereau soumis</th>
+              <th>N° Bordereau</th>
+              <th>Montant (FCFA)</th>
+              <th>Date soumission</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of alertes(); track a.etudiant_id) {
+              <tr [class.row-warning]="!a.bordereau_soumis">
+                <td style="font-family:'DM Mono',monospace">{{ a.matricule }}</td>
+                <td><strong>{{ a.nom }}</strong> {{ a.prenom }}</td>
+                <td>{{ a.filiere }}</td>
+                <td style="font-size:12px">{{ a.email }}</td>
+                <td>
+                  @if (a.bordereau_soumis) {
+                    <span class="badge badge-pending">⏳ En vérification</span>
+                  } @else {
+                    <span class="badge badge-danger">❌ Non soumis</span>
+                  }
+                </td>
+                <td style="font-family:'DM Mono',monospace">{{ a.numero_bordereau ?? '—' }}</td>
+                <td style="font-family:'DM Mono',monospace">
+                  {{ a.montant != null ? (a.montant | number:'1.0-0') : '—' }}
+                </td>
+                <td style="font-size:12px">
+                  {{ a.date_soumission ? (a.date_soumission | date:'dd/MM/yyyy') : '—' }}
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Tous les étudiants sont en règle. ✅
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ── Vue : Rapport financier ─────────────────────────────────────────── -->
+    @if (vue() === 'rapport') {
+      <!-- Résumé financier -->
+      <div class="stats-grid" style="margin-bottom:0">
+        <div class="stat-card green">
+          <div class="stat-label">Montant encaissé</div>
+          <div class="stat-value" style="font-size:22px">{{ totalEncaisse() | number:'1.0-0' }}</div>
+          <div class="stat-sub">FCFA — paiements validés</div>
+          <div class="stat-icon">💰</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Montant en attente</div>
+          <div class="stat-value" style="font-size:22px">{{ totalEnAttente() | number:'1.0-0' }}</div>
+          <div class="stat-sub">FCFA — à confirmer</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Total prévu</div>
+          <div class="stat-value" style="font-size:22px">{{ (totalEncaisse() + totalEnAttente()) | number:'1.0-0' }}</div>
+          <div class="stat-sub">FCFA — bordereaux soumis</div>
+          <div class="stat-icon">📊</div>
+        </div>
+      </div>
+
+      <!-- Tableau des paiements validés -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-header">
+          <span class="card-title">✅ Paiements confirmés ({{ bordereauValides().length }})</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Étudiant</th>
+              <th>N° Bordereau</th>
+              <th>Banque</th>
+              <th>Montant (FCFA)</th>
+              <th>Date dépôt</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of bordereauValides(); track b.id; let i = $index) {
+              <tr>
+                <td style="color:var(--ink3);font-size:12px">{{ i + 1 }}</td>
+                <td><strong>{{ b.etudiant_nom }}</strong></td>
+                <td style="font-family:'DM Mono',monospace">{{ b.numero_bordereau }}</td>
+                <td>{{ b.banque }}</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:600;color:#1B5E20">
+                  {{ b.montant | number:'1.0-0' }}
+                </td>
+                <td style="font-size:12px">{{ b.date_depot | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Aucun paiement confirmé pour le moment.
+                </td>
+              </tr>
+            }
+          </tbody>
+          @if (bordereauValides().length > 0) {
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4" style="text-align:right;font-weight:700">TOTAL ENCAISSÉ</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700;color:#1B5E20">
+                  {{ totalEncaisse() | number:'1.0-0' }} FCFA
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
+          }
+        </table>
+      </div>
+    }
+
   </div>
 </div>

@@ -1,36 +1,359 @@
-<div class="directeur-container">
-  <header class="header">
-    <h2 class="font-playfair color-navy">Suivi des Etudiants</h2>
-    <p class="text-ink3">Gerez les memoires et validez les passages en soutenance.</p>
-  </header>
+<app-top-nav></app-top-nav>
 
-  <div class="grid-etudiants">
-    @for (item of mesEtudiants(); track item.id) {
-      <div class="student-card card-white">
+<div class="app-page">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">{{ initiales }}</div>
+      <div>
+        <div class="avatar-name">{{ prenom() }} {{ nom() }}</div>
+        <div class="avatar-role">Directeur de mémoire</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Encadrement</div>
+    <a class="nav-item" routerLink="/directeur/suivi" routerLinkActive="active"
+       [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/directeur/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+    </a>
+    <a class="nav-item" routerLink="/directeur/planning" routerLinkActive="active">
+      <span class="ico">📅</span> Planning
+      @if (nbRdvAConfirmer > 0) {
+        <span class="badge-pill">{{ nbRdvAConfirmer }}</span>
+      }
+    </a>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+    <a class="nav-item" routerLink="/calendrier" routerLinkActive="active">
+      <span class="ico">🗓</span> Calendrier
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Tableau de bord</div>
+        <div class="page-subtitle">{{ nbEtudiants }} étudiant(s) encadré(s)</div>
+      </div>
+      <button class="btn btn-secondary" (click)="charger()">↺ Actualiser</button>
+    </div>
+
+    <!-- Alertes -->
+    @if (successMsg()) {
+      <div class="alert alert-success mb-16">{{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-16">{{ errorMsg() }}</div>
+    }
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Étudiants encadrés</div>
+        <div class="stat-value">{{ nbEtudiants }}</div>
+        <div class="stat-icon">🎓</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Mémoires déposés</div>
+        <div class="stat-value">{{ nbMemoiresDeposes }}</div>
+        <div class="stat-icon">📄</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">RDV à confirmer</div>
+        <div class="stat-value">{{ nbRdvAConfirmer }}</div>
+        <div class="stat-icon">⏳</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Prochains RDV (7j)</div>
+        <div class="stat-value">{{ nbRdvProchains }}</div>
+        <div class="stat-icon">📅</div>
+      </div>
+    </div>
+
+    <!-- ── Rendez-vous à confirmer ───────────────────────────────────── -->
+    @if (rdvAConfirmer().length) {
+      <div class="card mb-24">
         <div class="card-header">
-          <span class="filiere-badge">{{ item.filiere }}</span>
-          <h3 class="student-name">{{ item.nom }} {{ item.prenom }}</h3>
+          <span class="card-title">⏳ Rendez-vous en attente de confirmation ({{ rdvAConfirmer().length }})</span>
+          <a routerLink="/directeur/planning" class="btn btn-sm btn-secondary">Voir tout le planning</a>
         </div>
-
-        <div class="card-body">
-          <p class="theme-title"><strong>Theme :</strong> {{ item.theme_titre }}</p>
-
-          <div class="status-indicator">
-            <span class="dot" [class.dot-success]="item.memoire_depose"></span>
-            {{ item.memoire_depose ? 'Memoire depose' : 'En redaction' }}
-          </div>
-        </div>
-
-        <div class="card-footer">
-          <button class="btn-outline" [disabled]="!item.memoire_url">Consulter PDF</button>
-
-          @if (item.memoire_depose && item.theme_statut !== 'ACCEPTE') {
-            <button class="btn-success" (click)="validerVersionFinale(item.theme_id)">
-              Valider pour Soutenance
-            </button>
+        <div class="rdv-list">
+          @for (rdv of rdvAConfirmer(); track rdv.id) {
+            <div class="rdv-item">
+              <div class="rdv-info">
+                <span class="rdv-student">{{ rdv.etudiant_nom }}</span>
+                <span class="rdv-date">{{ rdv.date_heure | date:'EEE dd MMM yyyy · HH:mm' }}</span>
+                @if (rdv.lieu) { <span class="rdv-lieu">📍 {{ rdv.lieu }}</span> }
+                @if (rdv.description) { <span class="rdv-desc">{{ rdv.description }}</span> }
+              </div>
+              <div class="rdv-actions">
+                <button class="btn btn-sm btn-success" (click)="confirmerRdv(rdv.id)">✓ Confirmer</button>
+                <button class="btn btn-sm btn-danger"  (click)="annulerRdv(rdv.id)">✕ Refuser</button>
+                <a [routerLink]="['/chat', rdv.affectation]" class="btn btn-sm btn-secondary">💬 Chat</a>
+              </div>
+            </div>
           }
         </div>
       </div>
     }
+
+    <!-- ── Prochains rendez-vous confirmés ──────────────────────────── -->
+    @if (rdvProchains().length) {
+      <div class="card mb-24">
+        <div class="card-header">
+          <span class="card-title">📅 Prochains rendez-vous confirmés</span>
+          <a routerLink="/directeur/planning" class="btn btn-sm btn-secondary">Planning complet</a>
+        </div>
+        <div class="rdv-list">
+          @for (rdv of rdvProchains(); track rdv.id) {
+            <div class="rdv-item confirme">
+              <div class="rdv-info">
+                <span class="rdv-student">{{ rdv.etudiant_nom }}</span>
+                <span class="rdv-date">{{ rdv.date_heure | date:'EEE dd MMM yyyy · HH:mm' }}</span>
+                @if (rdv.lieu) { <span class="rdv-lieu">📍 {{ rdv.lieu }}</span> }
+              </div>
+              <div class="rdv-actions">
+                <button class="btn btn-sm btn-danger-outline" (click)="annulerRdv(rdv.id)">Annuler</button>
+                <a [routerLink]="['/chat', rdv.affectation]" class="btn btn-sm btn-secondary">💬 Chat</a>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── Mes étudiants ─────────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📖 Mes étudiants encadrés</span>
+      </div>
+
+      @if (isLoading()) {
+        <div class="loading-row">Chargement…</div>
+      }
+
+      <!-- Formulaire correction inline -->
+      @if (correctionEnCours) {
+        <div class="correction-form">
+          <span class="correction-label">Motif de correction :</span>
+          <textarea [(ngModel)]="correctionEnCours.motif" rows="2"
+            placeholder="Décrivez les corrections à apporter…"></textarea>
+          <div class="correction-actions">
+            <button class="btn btn-sm btn-danger" (click)="envoyerCorrection()">Envoyer la correction</button>
+            <button class="btn btn-sm btn-secondary" (click)="annulerCorrection()">Annuler</button>
+          </div>
+        </div>
+      }
+
+      <!-- Formulaire proposition de thème inline -->
+      @if (propositionEnCours) {
+        <div class="correction-form">
+          <span class="correction-label">💡 Proposer un thème :</span>
+          <input type="text" class="form-input" [(ngModel)]="propositionEnCours.titre"
+            placeholder="Titre du thème…" style="margin-bottom:8px" />
+          <select class="form-input" [(ngModel)]="propositionEnCours.domaine" style="margin-bottom:8px">
+            <option value="">— Domaine —</option>
+            @for (d of domaines; track d.value) {
+              <option [value]="d.value">{{ d.label }}</option>
+            }
+          </select>
+          <textarea [(ngModel)]="propositionEnCours.description" rows="3"
+            placeholder="Description détaillée du thème…"></textarea>
+          <div class="correction-actions">
+            <button class="btn btn-sm btn-gold" [disabled]="isSavingTheme" (click)="envoyerProposition()">
+              @if (isSavingTheme) { Envoi… } @else { 📤 Envoyer le thème }
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="annulerProposition()">Annuler</button>
+          </div>
+        </div>
+      }
+
+      <table>
+        <thead>
+          <tr>
+            <th>Étudiant</th>
+            <th>Filière</th>
+            <th>Thème</th>
+            <th>Statut thème</th>
+            <th>Mémoire</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of mesEtudiants(); track e.id) {
+
+            <!-- ── Ligne étudiant ── -->
+            <tr [class.row-expanded]="suiviAffectationId() === e.affectation_id">
+              <td>
+                <strong>{{ e.prenom }} {{ e.nom }}</strong>
+                <div class="sub">{{ e.matricule }}</div>
+              </td>
+              <td>{{ e.filiere }}</td>
+              <td class="theme-cell">
+                <span class="theme-titre">{{ e.theme_titre }}</span>
+              </td>
+              <td>
+                @if (e.theme_statut) {
+                  <span class="badge" [class]="themeBadge(e.theme_statut)">
+                    {{ themeLabel(e.theme_statut) }}
+                  </span>
+                } @else {
+                  <span class="sub">Aucun thème</span>
+                }
+              </td>
+              <td>
+                @if (e.memoire_depose) {
+                  <span class="badge badge-info">{{ e.memoire_version }}</span>
+                } @else {
+                  <span class="sub">Non déposé</span>
+                }
+              </td>
+              <td>
+                <div class="action-row">
+                  <a [routerLink]="['/chat', e.affectation_id]" class="btn btn-sm btn-secondary">
+                    💬 Chat
+                  </a>
+                  <button class="btn btn-sm btn-blue"
+                    [class.btn-blue-active]="suiviAffectationId() === e.affectation_id"
+                    (click)="toggleSuivi(e.affectation_id)">
+                    📋 Voir
+                    <span class="btn-chevron">
+                      {{ suiviAffectationId() === e.affectation_id ? '▲' : '▼' }}
+                    </span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ── Ligne suivi expandée ── -->
+            @if (suiviAffectationId() === e.affectation_id) {
+              <tr class="suivi-expand-row">
+                <td colspan="6">
+
+                  @if (suiviLoading()) {
+                    <div class="suivi-inline-loading">Chargement du suivi…</div>
+                  }
+
+                  @if (suivi(); as s) {
+                    <!-- En-tête progress -->
+                    <div class="suivi-inline-header">
+                      <div class="suivi-inline-title">
+                        Suivi mémoire — <em>{{ s.etudiant }}</em>
+                      </div>
+                      <div class="suivi-inline-progress">
+                        <div class="suivi-inline-bar">
+                          <div class="suivi-inline-fill"
+                               [style.width.%]="(nbEtapesValidees / s.etapes.length) * 100">
+                          </div>
+                        </div>
+                        <span class="suivi-inline-count">
+                          {{ nbEtapesValidees }}/{{ s.etapes.length }} validées
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Grille des étapes -->
+                    <div class="suivi-steps-grid">
+                      @for (etape of s.etapes; track etape.id) {
+                        <div class="step-card" [class]="suiviStatutClass(etape.statut)">
+
+                          <div class="step-card-top">
+                            <span class="step-num">{{ etape.ordre }}</span>
+                            <div class="step-info">
+                              <div class="step-titre">{{ etape.titre }}</div>
+                              <div class="step-desc">{{ etape.description }}</div>
+                            </div>
+                            <span class="step-badge">{{ suiviStatutLabel(etape.statut) }}</span>
+                          </div>
+
+                          <!-- Document soumis par l'étudiant -->
+                          @if (etape.fichier_url) {
+                            <button class="btn-doc" (click)="ouvrirDoc(etape.fichier_url!)">
+                              📄 {{ etape.fichier_nom || 'Voir le document' }}
+                            </button>
+                          }
+
+                          @if (etape.remarques) {
+                            <div class="step-remarques">
+                              <strong>Remarques :</strong> {{ etape.remarques }}
+                            </div>
+                          }
+
+                          @if (etape.date_soumission) {
+                            <div class="step-date">
+                              Soumis le {{ etape.date_soumission | date:'dd/MM/yyyy HH:mm' }}
+                            </div>
+                          }
+                          @if (etape.date_validation) {
+                            <div class="step-date">
+                              Validé le {{ etape.date_validation | date:'dd/MM/yyyy HH:mm' }}
+                            </div>
+                          }
+
+                          @if (etape.statut === 'SOUMIS') {
+                            <div class="step-actions">
+                              @if (suiviRemarquesFor() === etape.id) {
+                                <textarea class="step-textarea" [(ngModel)]="suiviRemarques"
+                                  rows="2" placeholder="Vos remarques…"></textarea>
+                                <div class="step-btns">
+                                  <button class="btn btn-sm btn-danger"
+                                    [disabled]="suiviInProgress() === etape.id"
+                                    (click)="envoyerCorrectionSuivi(etape.id)">
+                                    @if (suiviInProgress() === etape.id) { Envoi… }
+                                    @else { 🔄 Corriger }
+                                  </button>
+                                  <button class="btn btn-sm btn-secondary"
+                                    (click)="ouvrirRemarques(-1)">Annuler</button>
+                                </div>
+                              } @else {
+                                <button class="btn btn-sm btn-secondary"
+                                  (click)="ouvrirRemarques(etape.id)">
+                                  ✏️ Correction
+                                </button>
+                                <button class="btn btn-sm btn-success"
+                                  [disabled]="suiviInProgress() === etape.id"
+                                  (click)="validerEtape(etape.id)">
+                                  @if (suiviInProgress() === etape.id) { … }
+                                  @else { ✅ Valider }
+                                </button>
+                              }
+                            </div>
+                          }
+
+                        </div>
+                      }
+                    </div>
+                  }
+
+                </td>
+              </tr>
+            }
+
+          } @empty {
+            @if (!isLoading()) {
+              <tr>
+                <td colspan="6" class="empty-table">
+                  Aucun étudiant encadré. Les étudiants apparaissent ici après avoir choisi votre profil et que la direction ait validé l'affectation.
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
   </div>
 </div>

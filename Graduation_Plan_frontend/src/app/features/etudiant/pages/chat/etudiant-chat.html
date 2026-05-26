@@ -1,0 +1,190 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire" routerLinkActive="active">
+      <span class="ico">📁</span> Déposer un document
+    </a>
+    <a class="nav-item" routerLink="/etudiant/theme/nouveau" routerLinkActive="active">
+      <span class="ico">💡</span> Mes thèmes
+    </a>
+
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item active" routerLink="/etudiant/chat">
+      <span class="ico">💬</span> Chat directeur
+    </a>
+    <a class="nav-item" routerLink="/etudiant/eligibilite" routerLinkActive="active">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+    <a class="nav-item" routerLink="/etudiant/paiement" routerLinkActive="active">
+      <span class="ico">💳</span> Paiement des frais
+    </a>
+
+    <div class="sidebar-section">Ressources</div>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+    <a class="nav-item" routerLink="/calendrier" routerLinkActive="active">
+      <span class="ico">📅</span> Calendrier
+    </a>
+  </aside>
+
+  <!-- ═══ CONTENU PRINCIPAL ══════════════════════════════════════════════════ -->
+  <div class="main chat-main">
+
+    <!-- En-tête -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">💬 Chat avec mon directeur</div>
+        @if (affectation()) {
+          <div class="page-subtitle">Directeur : <strong>{{ directeurNom() }}</strong></div>
+        } @else if (!isLoadingAff()) {
+          <div class="page-subtitle">Aucun directeur affecté</div>
+        }
+      </div>
+      <a class="btn btn-secondary btn-sm" routerLink="/etudiant">← Retour au tableau de bord</a>
+    </div>
+
+    <!-- Chargement initial -->
+    @if (isLoadingAff()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <span>Chargement…</span>
+      </div>
+    }
+
+    <!-- Pas d'affectation -->
+    @if (!isLoadingAff() && noAffectation()) {
+      <div class="card no-aff-card">
+        <div class="no-aff-icon">💬</div>
+        <div class="no-aff-title">Aucun directeur assigné</div>
+        <div class="no-aff-sub">
+          Vous pourrez discuter avec votre directeur de mémoire une fois l'affectation validée par la direction académique.
+        </div>
+        <a class="btn btn-gold btn-sm" routerLink="/etudiant/choisir-directeur">
+          👤 Choisir un directeur
+        </a>
+      </div>
+    }
+
+    <!-- Zone chat -->
+    @if (affectation()) {
+      <div class="chat-workspace">
+
+        <!-- Messages -->
+        @if (successMsg()) {
+          <div class="alert alert-success">{{ successMsg() }}</div>
+        }
+        @if (errorMsg()) {
+          <div class="alert alert-danger">{{ errorMsg() }}</div>
+        }
+
+        <div class="chat-body">
+
+          <!-- Panneau messages -->
+          <div class="chat-pane">
+            <div class="chat-pane-header">
+              <span class="partner-avatar">{{ directeurNom()[0] }}</span>
+              <div>
+                <div class="partner-name">{{ directeurNom() }}</div>
+                <div class="partner-role">Directeur de mémoire</div>
+              </div>
+            </div>
+
+            <div class="messages-list" #msgList>
+              @for (msg of messages(); track msg.id) {
+                <div class="message" [class.mine]="msg.expediteur === currentUserId()">
+                  <div class="bubble">
+                    <span class="sender">{{ msg.expediteur === currentUserId() ? 'Vous' : msg.expediteur_nom }}</span>
+                    <p class="content">{{ msg.contenu }}</p>
+                    <span class="time">{{ msg.date_envoi | date:'dd/MM HH:mm' }}</span>
+                  </div>
+                </div>
+              }
+              @if (!messages().length) {
+                <div class="empty-chat">
+                  <div class="empty-chat-icon">💬</div>
+                  <div>Démarrez la conversation avec votre directeur.</div>
+                </div>
+              }
+            </div>
+
+            <div class="input-row">
+              <textarea
+                [(ngModel)]="newMessage"
+                placeholder="Votre message… (Entrée pour envoyer, Maj+Entrée pour sauter une ligne)"
+                rows="2"
+                (keydown.enter)="sendMessage($event)">
+              </textarea>
+              <button class="btn-send" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+                Envoyer
+              </button>
+            </div>
+          </div>
+
+          <!-- Panneau rendez-vous -->
+          <aside class="rdv-pane">
+            <div class="rdv-pane-header">
+              <span>📅 Rendez-vous</span>
+              <button class="btn-propose-rdv" (click)="showRdvForm = !showRdvForm">
+                {{ showRdvForm ? '✕' : '+ Proposer' }}
+              </button>
+            </div>
+
+            @if (showRdvForm) {
+              <div class="rdv-form">
+                <label class="form-label">Date et heure *</label>
+                <input type="datetime-local" class="form-ctrl" [(ngModel)]="rdvForm.date_heure" />
+                <label class="form-label">Lieu</label>
+                <input type="text" class="form-ctrl" [(ngModel)]="rdvForm.lieu" placeholder="Salle, bureau, en ligne…" />
+                <label class="form-label">Ordre du jour</label>
+                <textarea class="form-ctrl" [(ngModel)]="rdvForm.description" rows="3"
+                  placeholder="Points à aborder…"></textarea>
+                <button class="btn btn-gold btn-sm" (click)="proposerRdv()">📤 Envoyer la demande</button>
+              </div>
+            }
+
+            <div class="rdv-list">
+              @for (rdv of rendezVous(); track rdv.id) {
+                <div class="rdv-card" [class.rdv-confirme]="rdv.statut === 'CONFIRME'"
+                  [class.rdv-annule]="rdv.statut === 'ANNULE'" [class.rdv-passe]="rdv.statut === 'PASSE'">
+                  <div class="rdv-date">{{ rdv.date_heure | date:'EEE dd MMM yyyy · HH:mm' }}</div>
+                  @if (rdv.lieu) { <div class="rdv-lieu">📍 {{ rdv.lieu }}</div> }
+                  @if (rdv.description) { <div class="rdv-desc">{{ rdv.description }}</div> }
+                  <span class="rdv-badge rdv-badge-{{ rdv.statut.toLowerCase() }}">{{ statutLabel(rdv.statut) }}</span>
+
+                  @if (rdv.statut === 'PROPOSE' && rdv.propose_par === 'DIRECTEUR') {
+                    <div class="rdv-actions">
+                      <button class="btn btn-sm btn-success" (click)="confirmerRdv(rdv.id)">✓ Confirmer</button>
+                      <button class="btn btn-sm btn-danger"  (click)="annulerRdv(rdv.id)">✕ Refuser</button>
+                    </div>
+                  }
+                  @if (rdv.statut === 'CONFIRME') {
+                    <button class="btn btn-sm btn-secondary rdv-cancel-btn" (click)="annulerRdv(rdv.id)">Annuler</button>
+                  }
+                </div>
+              }
+              @if (!rendezVous().length) {
+                <div class="rdv-empty">Aucun rendez-vous planifié.</div>
+              }
+            </div>
+          </aside>
+
+        </div><!-- /chat-body -->
+      </div><!-- /chat-workspace -->
+    }
+
+  </div><!-- /main -->
+</div><!-- /app-page -->

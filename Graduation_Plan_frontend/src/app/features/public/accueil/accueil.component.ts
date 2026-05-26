@@ -1,34 +1,41 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { LucideIconComponent } from 'lucide-angular';
+
+export interface DemoRole {
+  id: string;
+  icon: string;
+  label: string;
+  subtitle: string;
+}
 
 @Component({
   selector: 'app-accueil',
   standalone: true,
-  imports: [
-    CommonModule, 
-    RouterLink, 
-    LucideIconComponent
-  ],
-  templateUrl: './accueil.component.html'
+  imports: [CommonModule, RouterLink],
+  templateUrl: './accueil.component.html',
+  styleUrls: ['./accueil.component.scss']
 })
 export class AccueilComponent {
-  features = [
-    { icon: 'users', title: 'Gestion des acteurs', desc: 'Comptes sécurisés pour chaque acteur avec droits spécifiques. Contrôle d\'accès RBAC.', colorClass: 'text-blue-600' },
-    { icon: 'lightbulb', title: 'Dépôt des thèmes', desc: 'Soumission dématérialisée et validation progressive par la direction et l\'examinateur.', colorClass: 'text-amber-500' },
-    { icon: 'book', title: 'Encadrement', desc: 'Désignation des directeurs avec priorité aux formateurs internes de l\'IPNET.', colorClass: 'text-blue-400' },
-    { icon: 'check-circle', title: 'Vérifications & éligibilité', desc: 'Contrôle automatique des UE validées et paiement des frais de scolarité.', colorClass: 'text-green-500' },
-    { icon: 'folder', title: 'Gestion documentaire', desc: 'Archivage et vérification anti-plagiat / détection IA intégrée.', colorClass: 'text-amber-600' },
-    { icon: 'gavel', title: 'Composition des jurys', desc: 'Constitution automatique selon les règles (2 docteurs min pour Master).', colorClass: 'text-gray-700' },
+  mobileNavOpen = false;
+  demoOpen = false;
+  activeDemo = 'etudiant';
+
+  roles: DemoRole[] = [
+    { id: 'etudiant',      icon: '🎓', label: 'Étudiant',            subtitle: 'Tableau de bord personnel' },
+    { id: 'direction',     icon: '🏛', label: 'Direction académique', subtitle: 'Validation thèmes & jurys' },
+    { id: 'directeur',     icon: '📘', label: 'Directeur de mémoire', subtitle: 'Suivi étudiants encadrés' },
+    { id: 'jury',          icon: '⚖',  label: 'Jury / Président',     subtitle: 'Notation & procès-verbal' },
+    { id: 'organisation',  icon: '🗓', label: 'Organisation',         subtitle: 'Planification soutenances' },
+    { id: 'recouvrement',  icon: '💰', label: 'Recouvrement',         subtitle: 'Suivi des paiements' },
+    { id: 'admin',         icon: '⚙',  label: 'Administrateur',       subtitle: 'Système — accès total' },
   ];
 
-  processus = [
-    { step: 'Dépôt thème', icon: 'lightbulb' },
-    { step: 'Validation', icon: 'check-circle' },
-    { step: 'Dépôt mémoire', icon: 'file-text' },
-    { step: 'Constitution jury', icon: 'users' },
-    { step: 'Soutenance', icon: 'gavel' },
-    { step: 'Publication', icon: 'graduation-cap' }
-  ];
+  toggleMobileNav(): void { this.mobileNavOpen = !this.mobileNavOpen; }
+  closeMobileNav(): void  { this.mobileNavOpen = false; }
+  openDemo(): void        { this.demoOpen = true; document.body.style.overflow = 'hidden'; }
+  closeDemo(): void       { this.demoOpen = false; document.body.style.overflow = ''; }
+
+  @HostListener('document:keydown.escape')
+  onEsc(): void { if (this.demoOpen) this.closeDemo(); }
 }

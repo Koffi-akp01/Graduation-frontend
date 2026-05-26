@@ -1,34 +1,585 @@
-<div class="direction-container">
-  <h2 class="font-playfair color-navy">Validation des Themes</h2>
-  <p class="text-ink3">Consultez et validez les sujets de memoire soumis par les etudiants.</p>
+<app-top-nav></app-top-nav>
 
-  <div class="table-responsive card-white">
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th>Etudiant</th>
-          <th>Theme propose</th>
-          <th>Domaine</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (theme of themesEnAttente(); track theme.id) {
-          <tr>
-            <td><strong>{{ theme.etudiant_nom }}</strong></td>
-            <td>{{ theme.titre }}</td>
-            <td><span class="badge-info">{{ theme.domaine }}</span></td>
-            <td class="actions">
-              <button class="btn-success" (click)="valider(theme.id!)">Valider</button>
-              <button class="btn-warn" (click)="demanderCorrection(theme.id!)">Corriger</button>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="4" class="empty-msg">Aucun theme en attente de validation.</td>
-          </tr>
+<div class="app-page">
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#1A3C5E">DA</div>
+      <div>
+        <div class="avatar-name">Direction Acad.</div>
+        <div class="avatar-role">Administration</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Gestion</div>
+    <button class="nav-item" [class.active]="vue() === 'dashboard'" (click)="afficherVue('dashboard')">
+      <span class="ico">🏠</span> Tableau de bord
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'proposer_theme'" (click)="afficherVue('proposer_theme')">
+      <span class="ico">💡</span> Proposer un thème
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'affecter'" (click)="afficherVue('affecter')">
+      <span class="ico">👨‍🏫</span> Affecter directeurs
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'jury'" (click)="afficherVue('jury')">
+      <span class="ico">⚖</span> Constituer les jurys
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'resultats'" (click)="afficherVue('resultats')">
+      <span class="ico">✅</span> Valider les résultats
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'etudiants'" (click)="afficherVue('etudiants')">
+      <span class="ico">👥</span> Liste des étudiants
+    </button>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+    <a class="nav-item" routerLink="/calendrier" routerLinkActive="active">
+      <span class="ico">📅</span> Calendrier
+    </a>
+  </aside>
+
+  <!-- ══ CONTENU PRINCIPAL ═══════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- En-tête commun -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Direction Académique</div>
+        <div class="page-subtitle">Session de soutenance — Juillet 2026</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" (click)="actualiser()">🔄 Actualiser</button>
+        <button class="btn btn-primary" (click)="ouvrirSessionModal()">✚ Nouvelle session</button>
+      </div>
+    </div>
+
+    <!-- ══ VUE : TABLEAU DE BORD ════════════════════════════════════════════ -->
+    @if (vue() === 'dashboard') {
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Soutenances planifiées</div>
+          <div class="stat-value">{{ statsSession()?.total_soutenances ?? '—' }}</div>
+          <div class="stat-sub">Session en cours</div>
+          <div class="stat-icon">🎓</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">En attente affectation</div>
+          <div class="stat-value">{{ etudiantsSans().length || '—' }}</div>
+          <div class="stat-sub">Thèmes validés sans jury</div>
+          <div class="stat-icon">⚖</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Soutenances clôturées</div>
+          <div class="stat-value">{{ statsSession()?.soutenances_cloturees ?? '—' }}</div>
+          <div class="stat-sub">Résultats finalisés</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Thèmes à valider</div>
+          <div class="stat-value">{{ themesEnAttente().length }}</div>
+          <div class="stat-sub">En attente de décision</div>
+          <div class="stat-icon">📋</div>
+        </div>
+      </div>
+
+      <!-- Thèmes en attente -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Thèmes en attente de validation</span>
+          <button class="btn btn-primary btn-sm" (click)="chargerThemes()">🔄 Actualiser</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Thème proposé</th>
+              <th>Domaine</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (theme of themesEnAttente(); track theme.id) {
+              <tr>
+                <td><strong>{{ theme.etudiant_nom }}</strong></td>
+                <td>{{ theme.titre }}</td>
+                <td><span class="badge badge-info">{{ theme.domaine }}</span></td>
+                <td style="white-space:nowrap">
+                  <button class="btn btn-gold btn-sm" (click)="validerTheme(theme.id!)">✅ Valider</button>
+
+                  <button class="btn btn-secondary btn-sm" style="margin-left:6px" (click)="demanderCorrection(theme.id!)">💬 Corriger</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" style="text-align:center;padding:40px;color:var(--ink3)">
+                  ✅ Aucun thème en attente de validation.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ══ VUE : PROPOSER UN THÈME ══════════════════════════════════════════ -->
+    @if (vue() === 'proposer_theme') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">💡 Proposer un thème à un étudiant</span>
+        </div>
+        <div style="padding:24px;max-width:680px">
+
+          @if (themeMsg) {
+            <div class="alert" [class.alert-success]="themeMsgType==='success'" [class.alert-danger]="themeMsgType==='error'" style="margin-bottom:20px">
+              {{ themeMsg }}
+            </div>
+          }
+
+          <!-- Sélection étudiant -->
+          <div class="field-group">
+            <label>Étudiant <span class="req">*</span></label>
+            <select [(ngModel)]="themeForm.etudiant_id">
+              <option [value]="0">— Sélectionner un étudiant —</option>
+              @for (e of etudiants(); track e.id) {
+                <option [value]="e.id">{{ e.prenom }} {{ e.nom }} — {{ e.matricule }} ({{ e.filiere }})</option>
+              }
+            </select>
+            @if (!etudiants().length) {
+              <small style="color:#718096">Chargement de la liste…</small>
+            }
+          </div>
+
+          <!-- Titre -->
+          <div class="field-group">
+            <label>Titre du thème <span class="req">*</span></label>
+            <input type="text" [(ngModel)]="themeForm.titre"
+              placeholder="Ex : Système de détection d'intrusions réseau par Machine Learning" />
+          </div>
+
+          <!-- Domaine -->
+          <div class="field-group">
+            <label>Domaine <span class="req">*</span></label>
+            <select [(ngModel)]="themeForm.domaine">
+              <option value="">— Sélectionner un domaine —</option>
+              @for (d of domaines; track d.value) {
+                <option [value]="d.value">{{ d.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div class="field-group">
+            <label>Description détaillée <span class="req">*</span></label>
+            <textarea [(ngModel)]="themeForm.description" rows="6"
+              placeholder="Décrivez le sujet : contexte, objectifs, méthodologie, technologies…"></textarea>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:8px">
+            <button class="btn btn-gold" [disabled]="isSavingTheme" (click)="soumettreTheme()">
+              @if (isSavingTheme) { Envoi… } @else { 📤 Proposer ce thème }
+            </button>
+            <button class="btn btn-secondary" (click)="themeForm={etudiant_id:0,titre:'',domaine:'',description:''}; themeMsg=''">
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══ VUE : AFFECTER DIRECTEURS ════════════════════════════════════════ -->
+    @if (vue() === 'affecter') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">👨‍🏫 Étudiants — Planification soutenance</span>
+          <span style="color:var(--ink3);font-size:13px">
+            {{ etudiantsSans().length }} étudiant(s) avec thème validé sans jury affecté
+          </span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Matricule</th>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Thème</th>
+              <th>Éligibilité</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of etudiantsSans(); track e.etudiant_id) {
+              <tr>
+                <td style="font-family:'DM Mono',monospace;font-size:12px">{{ e.matricule }}</td>
+                <td><strong>{{ e.nom }}</strong> {{ e.prenom }}</td>
+                <td>{{ e.filiere }}</td>
+                <td style="font-size:12px;max-width:220px">{{ e.titre_theme }}</td>
+                <td>
+                  @if (e.est_eligible) {
+                    <span class="badge badge-success">✅ Éligible</span>
+                  } @else {
+                    <span class="badge badge-danger">⛔ Non éligible</span>
+                  }
+                </td>
+                <td>
+                  <button
+                    class="btn btn-gold btn-sm"
+                    (click)="ouvrirModal(e)"
+                    [disabled]="!e.est_eligible"
+                  >
+                    📅 Planifier
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" style="text-align:center;padding:48px;color:var(--ink3)">
+                  ✅ Tous les étudiants éligibles ont une soutenance planifiée.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ══ VUE : CONSTITUER LES JURYS ═══════════════════════════════════════ -->
+    @if (vue() === 'jury') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚖ Constitution des jurys</span>
+          <span style="color:var(--ink3);font-size:13px">{{ soutenances().length }} soutenance(s) planifiée(s)</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Directeur</th>
+              <th>Président jury</th>
+              <th>Examinateur</th>
+              <th>Date</th>
+              <th>Salle</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of soutenances(); track s.id) {
+              <tr>
+                <td><strong>{{ s.etudiant_details }}</strong></td>
+                <td style="font-size:12px">{{ s.filiere }}</td>
+                <td style="font-size:12px">{{ s.directeur_nom || '—' }}</td>
+                <td style="font-size:12px">{{ s.president_nom || '—' }}</td>
+                <td style="font-size:12px">{{ s.examinateur_nom || '—' }}</td>
+                <td style="font-family:'DM Mono',monospace;font-size:12px">
+                  {{ s.date_soutenance | date:'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td style="font-size:12px">{{ s.salle_nom || '—' }}</td>
+                <td>
+                  @if (s.est_cloturee) {
+                    <span class="badge badge-success">Clôturée</span>
+                  } @else if (s.president && s.examinateur && s.directeur_memoire) {
+                    <span class="badge badge-info">Jury complet</span>
+                  } @else {
+                    <span class="badge badge-warn">Incomplet</span>
+                  }
+                </td>
+                <td>
+                  @if (!s.est_cloturee) {
+                    <button class="btn btn-secondary btn-sm" (click)="ouvrirModalJury(s)">✏ Modifier</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Aucune soutenance planifiée. Utilisez « Affecter directeurs » pour commencer.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ══ VUE : VALIDER LES RÉSULTATS ══════════════════════════════════════ -->
+    @if (vue() === 'resultats') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📊 Résultats des soutenances</span>
+          <span style="color:var(--ink3);font-size:13px">{{ evaluations().length }} évaluation(s)</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Soutenance</th>
+              <th>Présentation /20</th>
+              <th>Maîtrise /20</th>
+              <th>Mémoire /20</th>
+              <th>Réponses /20</th>
+              <th>Moyenne</th>
+              <th>Mention</th>
+              <th>Signature jury</th>
+              <th>Action DA</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ev of evaluations(); track ev.id) {
+              <tr>
+                <td><strong>#{{ ev.soutenance }}</strong></td>
+                <td style="font-family:'DM Mono',monospace">{{ ev.note_presentation | number:'1.2-2' }}</td>
+                <td style="font-family:'DM Mono',monospace">{{ ev.note_maitrise | number:'1.2-2' }}</td>
+                <td style="font-family:'DM Mono',monospace">{{ ev.note_memoire | number:'1.2-2' }}</td>
+                <td style="font-family:'DM Mono',monospace">{{ ev.note_reponses | number:'1.2-2' }}</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700">{{ ev.note_finale | number:'1.2-2' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="mentionClass(ev.mention)">{{ ev.mention || '—' }}</span>
+                </td>
+                <td>
+                  @if (ev.est_signe_par_tous) {
+                    <span class="badge badge-success">✅ Signé</span>
+                  } @else {
+                    <span class="badge badge-pending">⏳ En attente</span>
+                  }
+                </td>
+                <td>
+                  @if (ev.est_signe_par_tous) {
+                    <button class="btn btn-gold btn-sm" (click)="cloturerSoutenance(ev.soutenance, 'Soutenance #' + ev.soutenance)">
+                      🔒 Clôturer
+                    </button>
+                  } @else {
+                    <span style="color:var(--ink3);font-size:12px">Attente signature</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Aucune évaluation disponible.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ══ VUE : LISTE DES ÉTUDIANTS ══════════════════════════════════════════ -->
+    @if (vue() === 'etudiants') {
+      <div class="section-title">👥 Liste des étudiants</div>
+
+      <div class="filters-bar">
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Rechercher par nom, prénom, matricule…"
+          [value]="etudiantsSearch()"
+          (input)="etudiantsSearch.set($any($event.target).value)"
+        />
+        <select [value]="etudiantsFiliereFilter()" (change)="etudiantsFiliereFilter.set($any($event.target).value)">
+          <option value="">Toutes les filières</option>
+          <option value="GL">Génie Logiciel</option>
+          <option value="RSS">Réseaux &amp; Sécurité</option>
+        </select>
+      </div>
+
+      @if (etudiantsLoading()) {
+        <div class="loading-state">Chargement…</div>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Matricule</th>
+                <th>Filière</th>
+                <th>UE validées</th>
+                <th>Avancement</th>
+                <th>Frais</th>
+                <th>Éligible</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of filteredTousEtudiants(); track e.id) {
+                <tr>
+                  <td><strong>{{ e.nom }} {{ e.prenom }}</strong></td>
+                  <td><span class="badge badge-neutral">{{ e.matricule }}</span></td>
+                  <td>{{ e.filiere_nom }}</td>
+                  <td>{{ e.ue_validees }} / {{ e.total_ue }}</td>
+                  <td><span class="badge {{ phaseBadge(e.phase) }}">{{ phaseLabel(e.phase) }}</span></td>
+                  <td>
+                    @if (e.has_paid_fees) {
+                      <span class="badge badge-success">Payé</span>
+                    } @else {
+                      <span class="badge badge-danger">Non payé</span>
+                    }
+                  </td>
+                  <td>
+                    @if (e.eligible) {
+                      <span class="badge badge-success">✔</span>
+                    } @else {
+                      <span class="badge badge-danger">✘</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="7" class="empty-row">Aucun étudiant trouvé.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">{{ filteredTousEtudiants().length }} étudiant(s)</div>
+      }
+    }
+
+  </div><!-- /main -->
+</div><!-- /app-page -->
+
+<!-- ══ MODAL : Planifier soutenance ════════════════════════════════════════ -->
+@if (showModal) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal-card modal-large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">
+          📅 Planifier soutenance — {{ selectedEtudiant?.prenom }} {{ selectedEtudiant?.nom }}
+        </span>
+        <button class="modal-close" (click)="fermerModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        @if (selectedEtudiant) {
+          <div class="modal-info-row">
+            <span>🎓 <strong>{{ selectedEtudiant.filiere }}</strong></span>
+            <span style="margin-left:16px">📄 {{ selectedEtudiant.titre_theme }}</span>
+          </div>
         }
-      </tbody>
-    </table>
+
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Directeur de mémoire <span class="req">*</span></label>
+            <select [(ngModel)]="form.directeur_memoire">
+              <option [ngValue]="0" disabled>— Choisir un directeur —</option>
+              @for (d of directeurs(); track d.id) {
+                <option [ngValue]="d.id">{{ membreNom(d) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Président du jury <span class="req">*</span></label>
+            <select [(ngModel)]="form.president">
+              <option [ngValue]="0" disabled>— Choisir un président —</option>
+              @for (p of presidents(); track p.id) {
+                <option [ngValue]="p.id">{{ membreNom(p) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Examinateur <span class="req">*</span></label>
+            <select [(ngModel)]="form.examinateur">
+              <option [ngValue]="0" disabled>— Choisir un examinateur —</option>
+              @for (e of examinateurs(); track e.id) {
+                <option [ngValue]="e.id">{{ membreNom(e) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Salle <span class="req">*</span></label>
+            <select [(ngModel)]="form.salle">
+              <option [ngValue]="0" disabled>— Choisir une salle —</option>
+              @for (s of salles(); track s.id) {
+                <option [ngValue]="s.id">{{ s.nom }} ({{ s.capacite }} places)</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Date et heure <span class="req">*</span></label>
+            <input type="datetime-local" [(ngModel)]="form.date_soutenance" />
+          </div>
+
+          <div class="field-group">
+            <label>Session <span class="req">*</span></label>
+            <select [(ngModel)]="form.session">
+              @for (s of SESSION_CHOICES; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group" style="grid-column:1/-1">
+            <label>Lien Meet (optionnel)</label>
+            <input type="url" [(ngModel)]="form.lien_meet" placeholder="https://meet.google.com/..." />
+          </div>
+        </div>
+
+        @if (errorMsg) {
+          <div class="alert-msg error">❌ {{ errorMsg }}</div>
+        }
+        @if (successMsg) {
+          <div class="alert-msg success">✅ {{ successMsg }}</div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerModal()">Annuler</button>
+        <button class="btn btn-gold" (click)="soumettreSoutenance()" [disabled]="isLoading">
+          @if (isLoading) { Enregistrement… } @else { 📅 Planifier la soutenance }
+        </button>
+      </div>
+    </div>
   </div>
-</div>
+}
+
+<!-- ══ MODAL : Nouvelle session ════════════════════════════════════════════ -->
+@if (showSessionModal) {
+  <div class="modal-overlay" (click)="fermerSessionModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">✚ Configurer une nouvelle session</span>
+        <button class="modal-close" (click)="fermerSessionModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Numéro de session</label>
+            <select [(ngModel)]="sessionForm.numero">
+              @for (s of SESSION_CHOICES; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Libellé (optionnel)</label>
+            <input type="text" [(ngModel)]="sessionForm.label" placeholder="Ex: Juillet 2026" />
+          </div>
+
+          <div class="field-group">
+            <label>Date de début <span class="req">*</span></label>
+            <input type="date" [(ngModel)]="sessionForm.date_debut" />
+          </div>
+
+          <div class="field-group">
+            <label>Date de fin <span class="req">*</span></label>
+            <input type="date" [(ngModel)]="sessionForm.date_fin" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerSessionModal()">Annuler</button>
+        <button class="btn btn-primary" (click)="confirmerNouvelleSession()">✚ Créer la session</button>
+      </div>
+    </div>
+  </div>
+}

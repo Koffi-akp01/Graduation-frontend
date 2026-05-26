@@ -1,0 +1,387 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-ico">🗄</span>
+      <span class="logo-txt">Archives</span>
+    </div>
+
+    <div class="sidebar-section">Filtres</div>
+    <button class="nav-item" [class.active]="filtreStatut()===''" (click)="filtreStatut.set(''); reload()">
+      <span class="ico">📋</span> Tous
+    </button>
+    <button class="nav-item" [class.active]="filtreStatut()==='EN_ATTENTE'" (click)="filtreStatut.set('EN_ATTENTE'); reload()">
+      <span class="ico">⏳</span> En attente
+    </button>
+    <button class="nav-item" [class.active]="filtreStatut()==='PV_PARTIEL'" (click)="filtreStatut.set('PV_PARTIEL'); reload()">
+      <span class="ico">✍</span> PV partiel
+    </button>
+    <button class="nav-item" [class.active]="filtreStatut()==='ARCHIVE'" (click)="filtreStatut.set('ARCHIVE'); reload()">
+      <span class="ico">✅</span> Archivé
+    </button>
+
+    <div class="sidebar-section">Actions</div>
+    <a class="nav-item" routerLink="/analyse">
+      <span class="ico">🔬</span> Analyse Plagiat/IA
+    </a>
+  </aside>
+
+  <!-- ═══ CONTENU ════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- En-tête -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Archives des dossiers de soutenance</div>
+        <div class="page-subtitle">
+          Gestion des PV, signatures et archivage final — {{ archives().length }} dossier(s)
+        </div>
+      </div>
+      @if (canManage()) {
+        <button class="btn-primary" (click)="showCreer.set(true)">
+          + Archiver un dossier
+        </button>
+      }
+    </div>
+
+    @if (error()) {
+      <div class="alert-danger">{{ error() }}</div>
+    }
+
+    <!-- ── MODAL CRÉATION ───────────────────────────────────────────────── -->
+    @if (showCreer()) {
+      <div class="modal-backdrop" (click)="showCreer.set(false)">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <span class="modal-title">Créer un dossier d'archive</span>
+            <button class="modal-close" (click)="showCreer.set(false)">✕</button>
+          </div>
+
+          @if (creerError) {
+            <div class="alert-danger">{{ creerError }}</div>
+          }
+
+          <div class="field-group">
+            <label>Étudiant <span class="req">*</span></label>
+            <select [(ngModel)]="creerForm.etudiant_id">
+              <option value="">— Sélectionner un étudiant —</option>
+              @for (e of etudiants(); track e.id) {
+                <option [value]="e.id">
+                  {{ e.prenom }} {{ e.nom }} — {{ e.matricule }}
+                  {{ e.memoire_valide ? '✅' : e.memoire_depose ? '📄' : '⚠' }}
+                </option>
+              }
+            </select>
+            <span class="field-hint">✅ mémoire validé · 📄 déposé · ⚠ non déposé</span>
+          </div>
+
+          <div class="two-col">
+            <div class="field-group">
+              <label>Note finale (/20)</label>
+              <input type="number" min="0" max="20" step="0.25"
+                     [(ngModel)]="creerForm.note_finale" placeholder="ex: 14.5" />
+            </div>
+            <div class="field-group">
+              <label>Mention</label>
+              <select [(ngModel)]="creerForm.mention">
+                <option value="">— Mention —</option>
+                @for (m of MENTIONS; track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>PV signé (PDF, optionnel)</label>
+            <input type="file" accept=".pdf" (change)="onPvFile($event)" />
+          </div>
+
+          <div class="field-group">
+            <label>Commentaire</label>
+            <textarea rows="2" [(ngModel)]="creerForm.commentaire"
+                      placeholder="Observations, conditions particulières…"></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="showCreer.set(false)">Annuler</button>
+            <button class="btn-primary" (click)="submitCreer()" [disabled]="creerLoading">
+              @if (creerLoading) { <span class="spinner-sm"></span> } Créer l'archive
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── MODAL PV ───────────────────────────────────────────────────────── -->
+    @if (activeArch(); as arch) {
+      <div class="modal-backdrop" (click)="activeArch.set(null)">
+        <div class="modal-card modal-card--pv" (click)="$event.stopPropagation()">
+
+          <!-- En-tête modal -->
+          <div class="modal-header">
+            <span class="modal-title">
+              Procès-Verbal de Soutenance
+              <span class="modal-sub">{{ arch.code_archive }}</span>
+            </span>
+            <button class="modal-close" (click)="activeArch.set(null)">✕</button>
+          </div>
+
+          @if (sigError) {
+            <div class="alert-danger">{{ sigError }}</div>
+          }
+
+          <!-- ══ Document PV ══════════════════════════════════════════════ -->
+          <div class="pv-document">
+
+            <!-- En-tête officiel -->
+            <div class="pv-header">
+              <div class="pv-institution">IPNET — Institut de Formation en Technologies</div>
+              <div class="pv-title-main">PROCÈS-VERBAL DE SOUTENANCE</div>
+              <div class="pv-code-badge">{{ arch.code_archive }}</div>
+            </div>
+
+            <!-- Étudiant -->
+            <div class="pv-section">
+              <div class="pv-section-title">Étudiant</div>
+              <div class="pv-row">
+                <span class="pv-label">Nom & Prénom</span>
+                <span class="pv-value">{{ arch.etudiant.prenom }} {{ arch.etudiant.nom | uppercase }}</span>
+              </div>
+              <div class="pv-row">
+                <span class="pv-label">Matricule</span>
+                <span class="pv-value">{{ arch.etudiant.matricule }}</span>
+              </div>
+              <div class="pv-row">
+                <span class="pv-label">Filière</span>
+                <span class="pv-value">{{ arch.etudiant.filiere }}</span>
+              </div>
+            </div>
+
+            <!-- Mémoire -->
+            @if (arch.soutenance_info) {
+              <div class="pv-section">
+                <div class="pv-section-title">Mémoire</div>
+                <div class="pv-row">
+                  <span class="pv-label">Titre</span>
+                  <span class="pv-value pv-value--titre">{{ arch.soutenance_info.titre_theme }}</span>
+                </div>
+              </div>
+
+              <!-- Jury -->
+              <div class="pv-section">
+                <div class="pv-section-title">Composition du jury</div>
+                <div class="pv-row">
+                  <span class="pv-label">Président du jury</span>
+                  <span class="pv-value">{{ arch.soutenance_info.president }}</span>
+                </div>
+                <div class="pv-row">
+                  <span class="pv-label">Examinateur</span>
+                  <span class="pv-value">{{ arch.soutenance_info.examinateur }}</span>
+                </div>
+                <div class="pv-row">
+                  <span class="pv-label">Directeur de mémoire</span>
+                  <span class="pv-value">{{ arch.soutenance_info.directeur }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- Résultats -->
+            <div class="pv-section">
+              <div class="pv-section-title">Résultats</div>
+              @if (arch.soutenance_info) {
+                <div class="pv-row">
+                  <span class="pv-label">Date de soutenance</span>
+                  <span class="pv-value">{{ arch.soutenance_info.date }}</span>
+                </div>
+                @if (arch.soutenance_info.salle) {
+                  <div class="pv-row">
+                    <span class="pv-label">Salle</span>
+                    <span class="pv-value">{{ arch.soutenance_info.salle }}</span>
+                  </div>
+                }
+              }
+              @if (arch.note_finale !== null) {
+                <div class="pv-row">
+                  <span class="pv-label">Note finale</span>
+                  <span class="pv-value pv-value--note">{{ arch.note_finale }}/20</span>
+                </div>
+              }
+              @if (arch.mention) {
+                <div class="pv-row">
+                  <span class="pv-label">Mention</span>
+                  <span class="pv-value">{{ arch.mention }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Signatures -->
+            <div class="pv-section">
+              <div class="pv-section-title">Signatures</div>
+              <div class="pv-sig-grid">
+
+                <div class="pv-sig-block">
+                  <div class="pv-sig-role">Président du jury</div>
+                  <div class="pv-sig-name">{{ arch.soutenance_info?.president || '—' }}</div>
+                  <div class="pv-sig-status" [class.pv-sig-ok]="arch.pv.signe_president">
+                    {{ arch.pv.signe_president ? '✅ Signé' : '⬜ En attente' }}
+                  </div>
+                  <div class="pv-sig-line"></div>
+                </div>
+
+                <div class="pv-sig-block">
+                  <div class="pv-sig-role">Examinateur</div>
+                  <div class="pv-sig-name">{{ arch.soutenance_info?.examinateur || '—' }}</div>
+                  <div class="pv-sig-status" [class.pv-sig-ok]="arch.pv.signe_examinateur">
+                    {{ arch.pv.signe_examinateur ? '✅ Signé' : '⬜ En attente' }}
+                  </div>
+                  <div class="pv-sig-line"></div>
+                </div>
+
+                <div class="pv-sig-block">
+                  <div class="pv-sig-role">Directeur de mémoire</div>
+                  <div class="pv-sig-name">{{ arch.soutenance_info?.directeur || '—' }}</div>
+                  <div class="pv-sig-status" [class.pv-sig-ok]="arch.pv.signe_directeur">
+                    {{ arch.pv.signe_directeur ? '✅ Signé' : '⬜ En attente' }}
+                  </div>
+                  <div class="pv-sig-line"></div>
+                </div>
+
+                <div class="pv-sig-block">
+                  <div class="pv-sig-role">L'Étudiant(e)</div>
+                  <div class="pv-sig-name">{{ arch.etudiant.prenom }} {{ arch.etudiant.nom }}</div>
+                  <div class="pv-sig-status pv-sig-ok">✅ Présent(e) à la soutenance</div>
+                  <div class="pv-sig-line"></div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+          <!-- ══ Fin document PV ══════════════════════════════════════════ -->
+
+          <!-- Barre d'actions -->
+          <div class="pv-actions-bar">
+
+            <!-- Contrôles signatures (seulement si gestionnaire et non clos) -->
+            @if (canManage() && arch.statut !== 'ARCHIVE') {
+              <div class="pv-sig-controls">
+                <span class="pv-sig-controls-label">Marquer comme signé :</span>
+                <label class="pv-sig-chk">
+                  <input type="checkbox" [(ngModel)]="sigForm.pv_signe_president" />
+                  Président
+                </label>
+                <label class="pv-sig-chk">
+                  <input type="checkbox" [(ngModel)]="sigForm.pv_signe_examinateur" />
+                  Examinateur
+                </label>
+                <label class="pv-sig-chk">
+                  <input type="checkbox" [(ngModel)]="sigForm.pv_signe_directeur" />
+                  Directeur
+                </label>
+                <button class="btn-save-sig" (click)="submitSig()" [disabled]="sigLoading">
+                  @if (sigLoading) { <span class="spinner-sm"></span> }
+                  💾 Enregistrer
+                </button>
+              </div>
+            }
+
+            <div class="pv-btns">
+              <button class="btn-secondary" (click)="activeArch.set(null)">Fermer</button>
+              <button class="btn-download-pv" (click)="telechargerPV(arch)">
+                📄 Télécharger PDF
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    }
+
+    <!-- ── LISTE DES ARCHIVES ───────────────────────────────────────────── -->
+    @if (loading()) {
+      <div class="loading-wrap">
+        <div class="spinner-lg"></div> Chargement…
+      </div>
+    } @else if (archives().length === 0) {
+      <div class="empty-state">
+        <div class="empty-ico">🗄</div>
+        <div class="empty-msg">Aucun dossier archivé pour ce filtre.</div>
+        <button class="btn-primary" (click)="showCreer.set(true)">Créer le premier dossier</button>
+      </div>
+    } @else {
+      <div class="archives-grid">
+        @for (arch of archives(); track arch.id) {
+          <div class="arch-card" [class]="'arch-card--' + arch.statut.toLowerCase()">
+
+            <!-- Header -->
+            <div class="arch-header">
+              <div class="arch-code">{{ arch.code_archive }}</div>
+              <span class="badge" [class]="statutClass(arch.statut)">{{ arch.statut_label }}</span>
+            </div>
+
+            <!-- Étudiant -->
+            <div class="arch-student">
+              <div class="arch-avatar">
+                {{ arch.etudiant.prenom[0] }}{{ arch.etudiant.nom[0] }}
+              </div>
+              <div>
+                <div class="arch-name">{{ arch.etudiant.prenom }} {{ arch.etudiant.nom }}</div>
+                <div class="arch-meta">{{ arch.etudiant.matricule }} · {{ arch.etudiant.filiere }}</div>
+              </div>
+            </div>
+
+            <!-- Note & Mention -->
+            @if (arch.note_finale !== null || arch.mention) {
+              <div class="arch-note">
+                @if (arch.note_finale !== null) {
+                  <span class="note-val">{{ arch.note_finale }}/20</span>
+                }
+                @if (arch.mention) {
+                  <span class="mention-badge">{{ arch.mention }}</span>
+                }
+              </div>
+            }
+
+            <!-- Signatures PV -->
+            <div class="sig-row">
+              <span class="sig-pill" [class.ok]="arch.pv.signe_president">
+                {{ arch.pv.signe_president ? '✅' : '⬜' }} Président
+              </span>
+              <span class="sig-pill" [class.ok]="arch.pv.signe_examinateur">
+                {{ arch.pv.signe_examinateur ? '✅' : '⬜' }} Examinateur
+              </span>
+              <span class="sig-pill" [class.ok]="arch.pv.signe_directeur">
+                {{ arch.pv.signe_directeur ? '✅' : '⬜' }} Directeur
+              </span>
+            </div>
+
+            <!-- Pied de carte -->
+            <div class="arch-footer">
+              <span class="arch-date">{{ formatDate(arch.date_archivage) }}</span>
+              <div class="arch-actions">
+                @if (arch.pv.url) {
+                  <a [href]="arch.pv.url" target="_blank" class="btn-icon" title="Télécharger PV">📄</a>
+                }
+                @if (arch.memoire?.url) {
+                  <a [href]="arch.memoire!.url!" target="_blank" class="btn-icon" title="Télécharger mémoire">📘</a>
+                }
+                @if (arch.statut !== 'ARCHIVE' && canManage()) {
+                  <button class="btn-sign" (click)="ouvrirSig(arch)">✍ Signer PV</button>
+                } @else {
+                  <span class="cloture-badge">🔒 Clos {{ formatDate(arch.date_cloture!) }}</span>
+                }
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

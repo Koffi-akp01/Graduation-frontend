@@ -1,42 +1,73 @@
-<main class="login-page">
-  <section class="login-panel">
-    <h1>Connexion</h1>
+<!-- ══ NAVBAR RÔLES ══ -->
+<nav class="login-nav">
+  <a routerLink="/" class="login-nav-brand">
+    <div class="brand-icon">🎓</div>
+    <div>
+      <div class="brand-name">Graduation Plan</div>
+      <div class="brand-back">← ACCUEIL</div>
+    </div>
+  </a>
+  <div class="login-nav-tabs">
+    <a class="ln-tab active">🔒 Connexion</a>
+    <a routerLink="/register" class="ln-tab">✏ Créer un compte</a>
+  </div>
+</nav>
 
-    <form (ngSubmit)="onLogin()" class="login-form">
-      <label>
-        Nom d'utilisateur
+<!-- ══ FOND + CARD ══ -->
+<div class="login-bg">
+  <div class="login-card">
+
+    <!-- En-tête -->
+    <div class="lc-header">
+      <div class="lc-title">Graduation Plan</div>
+      <div class="lc-subtitle">PLATEFORME DE GESTION DES SOUTENANCES</div>
+    </div>
+
+    <!-- Formulaire -->
+    <form (ngSubmit)="onLogin()" autocomplete="on" style="margin-top:8px">
+
+      <div class="field-group">
+        <label for="username">Identifiant (username) ou Email</label>
         <input
+          id="username"
           type="text"
           name="username"
           [(ngModel)]="credentials.username"
+          placeholder="ex: jean.dupont  ou  jean@ipnet.edu"
           autocomplete="username"
-          required
-        />
-      </label>
+          required />
+      </div>
 
-      <label>
-        Mot de passe
+      <div class="field-group">
+        <label for="password">Mot de passe</label>
         <input
+          id="password"
           type="password"
           name="password"
           [(ngModel)]="credentials.password"
+          placeholder="••••••••"
           autocomplete="current-password"
-          required
-        />
-      </label>
+          required />
+      </div>
 
+      @if (justRegistered) {
+        <div class="success-alert" style="margin-bottom:12px">
+          ✅ Compte créé ! Entrez votre mot de passe pour vous connecter.
+        </div>
+      }
       @if (errorMessage) {
-        <p class="error-message">{{ errorMessage }}</p>
+        <div class="error-alert">{{ errorMessage }}</div>
       }
 
-      <button type="submit" [disabled]="isLoading">
-        {{ isLoading ? 'Connexion...' : 'Se connecter' }}
+      <button type="submit" class="btn-submit" [disabled]="isLoading">
+        {{ isLoading ? 'Connexion en cours…' : 'Se connecter →' }}
       </button>
-    </form>
 
-    <div class="register-link">
-      <span>Pas encore de compte etudiant ?</span>
-      <a routerLink="/register">Creer un compte</a>
-    </div>
-  </section>
-</main>
+      <p class="forgot-link">
+        Pas encore de compte ?
+        <a routerLink="/register">Créer un compte</a>
+      </p>
+
+    </form>
+  </div>
+</div>

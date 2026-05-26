@@ -1,43 +1,130 @@
-<div class="eligibilite-container card-white">
-  <h2 class="font-playfair color-navy">Verification de l'eligibilite</h2>
-  <p class="text-ink3">Tous les voyants doivent etre au vert pour valider votre dossier de soutenance.</p>
+<app-top-nav></app-top-nav>
 
-  @if (isLoading()) {
-    <div class="loader">Analyse de votre dossier en cours...</div>
-  } @else {
-    <ul class="checklist">
-      <li [class.valid]="status()?.ue_validees" [class.invalid]="!status()?.ue_validees">
-        <span class="icon"></span>
-        <div class="content">
-          <p class="label">Unites d'Enseignement (UE)</p>
-          <p class="desc">{{ status()?.ue_validees ? 'Toutes les UE sont validees.' : 'UE manquantes detectees.' }}</p>
-        </div>
-      </li>
+<div class="app-page">
 
-      <li [class.valid]="status()?.frais_payes" [class.invalid]="!status()?.frais_payes">
-        <span class="icon"></span>
-        <div class="content">
-          <p class="label">Situation Financiere (Comptabilite)</p>
-          <p class="desc">{{ status()?.frais_payes ? 'Scolarite a jour.' : 'Reliquat de scolarite a regler.' }}</p>
-        </div>
-      </li>
+  <!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire" routerLinkActive="active">
+      <span class="ico">📁</span> Déposer un document
+    </a>
+    <a class="nav-item" routerLink="/etudiant/theme/nouveau" routerLinkActive="active">
+      <span class="ico">💡</span> Mes thèmes
+    </a>
 
-      <li [class.valid]="status()?.memoire_valide" [class.invalid]="!status()?.memoire_valide">
-        <span class="icon"></span>
-        <div class="content">
-          <p class="label">Depot du Memoire</p>
-          <p class="desc">{{ status()?.memoire_valide ? 'Document valide par le directeur.' : 'Memoire non depose ou en correction.' }}</p>
-        </div>
-      </li>
-    </ul>
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item" routerLink="/etudiant/chat" routerLinkActive="active">
+      <span class="ico">💬</span> Chat directeur
+    </a>
+    <a class="nav-item active" routerLink="/etudiant/eligibilite">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+    <a class="nav-item" routerLink="/etudiant/paiement" routerLinkActive="active">
+      <span class="ico">💳</span> Paiement des frais
+    </a>
+  </aside>
 
-    <div class="status-summary" [class.all-clear]="status()?.ue_validees && status()?.frais_payes && status()?.memoire_valide">
-      @if (status()?.ue_validees && status()?.frais_payes && status()?.memoire_valide) {
-        <p class="success-msg">Felicitations ! Vous etes eligible pour la soutenance.</p>
-        <button class="btn-gold">Prendre rendez-vous</button>
-      } @else {
-        <p class="error-msg">Veuillez regulariser les elements en rouge pour continuer.</p>
-      }
+  <!-- ═══ CONTENU PRINCIPAL ══════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">☑ Vérification de l'éligibilité</div>
+        <div class="page-subtitle">Tous les voyants doivent être au vert pour valider votre dossier de soutenance.</div>
+      </div>
+      <a class="btn btn-secondary btn-sm" routerLink="/etudiant">← Retour</a>
     </div>
-  }
+
+    @if (isLoading()) {
+      <div class="card">
+        <div class="loading-row">Analyse de votre dossier en cours…</div>
+      </div>
+    } @else {
+      <div class="card elig-card">
+        <ul class="elig-check-list">
+
+          <li class="elig-check-item" [class.ok]="status()?.ue_validees" [class.nok]="!status()?.ue_validees">
+            <span class="elig-check-ico">{{ status()?.ue_validees ? '✓' : '✗' }}</span>
+            <div>
+              <div class="elig-check-label">Unités d'Enseignement (UE)</div>
+              <div class="elig-check-desc">
+                {{ status()?.ue_validees ? 'Toutes les UE obligatoires sont validées.' : 'Des UE manquantes ont été détectées.' }}
+              </div>
+            </div>
+          </li>
+
+          <li class="elig-check-item" [class.ok]="status()?.frais_payes" [class.nok]="!status()?.frais_payes">
+            <span class="elig-check-ico">{{ status()?.frais_payes ? '✓' : '✗' }}</span>
+            <div>
+              <div class="elig-check-label">Frais de soutenance</div>
+              <div class="elig-check-desc">
+                {{ status()?.frais_payes ? 'Scolarité à jour — frais réglés.' : 'Reliquat de scolarité à régler avant soutenance.' }}
+              </div>
+            </div>
+          </li>
+
+          <li class="elig-check-item" [class.ok]="status()?.theme_valide" [class.nok]="!status()?.theme_valide">
+            <span class="elig-check-ico">{{ status()?.theme_valide ? '✓' : '···' }}</span>
+            <div>
+              <div class="elig-check-label">Thème de mémoire</div>
+              <div class="elig-check-desc">
+                {{ status()?.theme_valide ? 'Thème validé par la Direction Académique.' : 'Thème en attente de validation.' }}
+              </div>
+            </div>
+          </li>
+
+          <li class="elig-check-item" [class.ok]="status()?.memoire_valide" [class.nok]="!status()?.memoire_valide">
+            <span class="elig-check-ico">{{ status()?.memoire_valide ? '✓' : '···' }}</span>
+            <div>
+              <div class="elig-check-label">Mémoire validé par le directeur</div>
+              <div class="elig-check-desc">
+                {{ status()?.memoire_valide ? 'Document validé par votre directeur de mémoire.' : 'Mémoire non déposé ou en cours de correction.' }}
+              </div>
+            </div>
+          </li>
+
+        </ul>
+
+        <!-- Résumé global -->
+        @if (status()?.eligible) {
+          <div class="elig-result ok">
+            <span class="elig-result-ico">🎉</span>
+            <div>
+              <div class="elig-result-title">Félicitations ! Vous êtes éligible à la soutenance.</div>
+              <div class="elig-result-sub">Votre dossier est complet. Le Service Organisation va planifier votre soutenance.</div>
+            </div>
+          </div>
+        } @else {
+          <div class="elig-result nok">
+            <span class="elig-result-ico">⚠</span>
+            <div>
+              <div class="elig-result-title">Dossier incomplet</div>
+              <div class="elig-result-sub">
+                {{ status()?.message_bloquant || 'Veuillez régulariser les éléments en rouge pour continuer.' }}
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="elig-actions">
+          @if (!status()?.frais_payes) {
+            <a class="btn btn-gold btn-sm" routerLink="/etudiant/paiement">💳 Régler les frais</a>
+          }
+          @if (!status()?.theme_valide) {
+            <a class="btn btn-secondary btn-sm" routerLink="/etudiant/theme/nouveau">💡 Voir mes thèmes</a>
+          }
+          @if (!status()?.memoire_valide) {
+            <a class="btn btn-primary btn-sm" routerLink="/etudiant/memoire">📄 Déposer mon mémoire</a>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
 </div>

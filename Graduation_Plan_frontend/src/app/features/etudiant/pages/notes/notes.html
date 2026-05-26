@@ -1,0 +1,161 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">{{ initiales }}</div>
+      <div>
+        <div class="avatar-name">{{ prenom() }} {{ nom() }}</div>
+        <div class="avatar-role">Étudiant</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" [routerLinkActiveOptions]="{exact:true}" routerLinkActive="active">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item active" routerLink="/etudiant/notes" routerLinkActive="active">
+      <span class="ico">📊</span> Relevé de notes
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire" routerLinkActive="active">
+      <span class="ico">📁</span> Déposer un document
+    </a>
+    <a class="nav-item" routerLink="/etudiant/theme/nouveau" routerLinkActive="active">
+      <span class="ico">💡</span> Mes thèmes
+    </a>
+
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item" routerLink="/etudiant/chat" routerLinkActive="active">
+      <span class="ico">💬</span> Chat directeur
+    </a>
+    <a class="nav-item" routerLink="/etudiant/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/eligibilite" routerLinkActive="active">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+    <a class="nav-item" routerLink="/etudiant/paiement" routerLinkActive="active">
+      <span class="ico">💳</span> Paiement des frais
+    </a>
+    <a class="nav-item" routerLink="/etudiant/rattrapages" routerLinkActive="active">
+      <span class="ico">🔄</span> Rattrapages
+    </a>
+
+    <div class="sidebar-section">Ressources</div>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">📊 Relevé de notes</div>
+        <div class="page-subtitle">Vos résultats académiques par année — Service des Examens</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" (click)="charger()" [disabled]="isLoading()">
+          ↺ Actualiser
+        </button>
+        @if (releve() && !isLoading()) {
+          <button class="btn btn-download" (click)="telechargerPDF()">
+            📄 Télécharger PDF
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-20">{{ errorMsg() }}</div>
+    }
+
+    @if (isLoading()) {
+      <div class="loading-card">Chargement du relevé de notes…</div>
+    }
+
+    @if (!isLoading() && releve(); as r) {
+
+      <!-- Fiche étudiant -->
+      <div class="student-card mb-24">
+        <div class="student-avatar">{{ r.etudiant.prenom[0] }}{{ r.etudiant.nom[0] }}</div>
+        <div class="student-info">
+          <div class="student-name">{{ r.etudiant.prenom }} {{ r.etudiant.nom | uppercase }}</div>
+          <div class="student-meta">{{ r.etudiant.matricule }} · {{ r.etudiant.filiere }}</div>
+        </div>
+        <div class="student-stats">
+          @for (a of r.annees; track a.annee) {
+            <div class="stat-pill">
+              <span class="stat-annee">{{ a.annee }}</span>
+              <span class="stat-val">{{ a.nb_validees }}/{{ a.nb_total }} UE</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (r.annees.length === 0) {
+        <div class="empty-card">
+          <div class="empty-icon">📊</div>
+          <div class="empty-title">Aucune note enregistrée</div>
+          <div class="empty-sub">Le Service des Examens n'a pas encore saisi vos notes.</div>
+        </div>
+      }
+
+      <!-- Notes par année -->
+      @for (annee of r.annees; track annee.annee) {
+        <div class="annee-block mb-24">
+
+          <div class="annee-header">
+            <div class="annee-title">Année académique {{ annee.annee }}</div>
+            <div class="annee-summary">
+              <span class="summary-ok">{{ annee.nb_validees }} validée(s)</span>
+              <span class="summary-sep">/</span>
+              <span class="summary-total">{{ annee.nb_total }} UE au total</span>
+              @if (annee.nb_validees === annee.nb_total && annee.nb_total > 0) {
+                <span class="badge-all-ok">✅ Tout validé</span>
+              } @else if (annee.nb_total - annee.nb_validees > 0) {
+                <span class="badge-pending">{{ annee.nb_total - annee.nb_validees }} à rattraper</span>
+              }
+            </div>
+          </div>
+
+          <div class="notes-table-wrap">
+            <table class="notes-table">
+              <thead>
+                <tr>
+                  <th>Code UE</th>
+                  <th>Unité d'enseignement</th>
+                  <th class="col-note">Note</th>
+                  <th class="col-statut">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (note of annee.notes; track note.id) {
+                  <tr [class]="'row-' + note.statut.toLowerCase()">
+                    <td class="ue-code">{{ note.ue_code }}</td>
+                    <td class="ue-libelle">{{ note.ue_libelle }}</td>
+                    <td class="note-val">{{ noteLabel(note.note) }}</td>
+                    <td class="note-statut">
+                      <span class="badge" [class]="statutClass(note.statut)">
+                        {{ statutLabel(note.statut) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      }
+
+    }
+
+  </div>
+</div>

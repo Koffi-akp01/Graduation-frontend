@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
+import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { EligibiliteStatus } from '../../../../core/models/etudiant.model';
 import { EtudiantService } from '../../../../core/services/etudiant/etudiant';
 
 @Component({
   selector: 'app-eligibilite',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TopNav],
   templateUrl: './eligibilite.html',
   styleUrl: './eligibilite.scss',
 })

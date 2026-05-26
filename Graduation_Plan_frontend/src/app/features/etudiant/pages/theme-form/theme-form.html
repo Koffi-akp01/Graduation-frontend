@@ -1,33 +1,83 @@
-<div class="form-container card-white">
-  <h2 class="font-playfair color-navy">Soumettre mon Theme</h2>
-  <p class="text-ink3">Decrivez precisement votre sujet pour validation par la Direction.</p>
+<app-top-nav></app-top-nav>
 
-  <form [formGroup]="themeForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="titre">Titre du Memoire</label>
-      <input id="titre" formControlName="titre" type="text" placeholder="Ex: IA et diagnostic cardiaque..." />
-      @if (themeForm.get('titre')?.invalid && themeForm.get('titre')?.touched) {
-        <small class="error">Le titre doit comporter au moins 10 caracteres.</small>
-      }
+<div class="app-page">
+
+  <!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item active" routerLink="/etudiant/theme/nouveau">
+      <span class="ico">💡</span> Mes thèmes
+    </a>
+
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item" routerLink="/etudiant">
+      <span class="ico">📅</span> Ma soutenance
+    </a>
+    <a class="nav-item" routerLink="/etudiant/eligibilite">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+    <a class="nav-item" routerLink="/recouvrement">
+      <span class="ico">💳</span> Paiement des frais
+    </a>
+  </aside>
+
+  <!-- ═══ CONTENU ══════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">💡 Mes thèmes</div>
+        <div class="page-subtitle">Les thèmes proposés par votre directeur ou la Direction Académique</div>
+      </div>
+      <a class="btn btn-secondary btn-sm" routerLink="/etudiant">← Retour</a>
     </div>
 
-    <div class="form-group">
-      <label for="domaine">Domaine technologique</label>
-      <select id="domaine" formControlName="domaine">
-        <option value="">Selectionner un domaine</option>
-        <option value="GL">Genie Logiciel</option>
-        <option value="ASSR">Reseaux & Securite</option>
-        <option value="DATA">Data Science</option>
-      </select>
-    </div>
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-16">{{ errorMsg() }}</div>
+    }
 
-    <div class="form-group">
-      <label for="description">Description detaillee</label>
-      <textarea id="description" formControlName="description" rows="5"></textarea>
-    </div>
+    @if (isLoading()) {
+      <div class="loading-row">Chargement…</div>
+    } @else if (themes().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">💡</div>
+        <div class="empty-title">Aucun thème pour l'instant</div>
+        <div class="empty-sub">
+          Votre directeur de mémoire ou la Direction Académique vous proposera un thème prochainement.
+        </div>
+      </div>
+    } @else {
+      <div class="themes-list">
+        @for (t of themes(); track t.id) {
+          <div class="theme-card">
+            <div class="theme-card-header">
+              <div class="theme-titre">{{ t.titre }}</div>
+              <span class="badge" [class]="statutBadge(t.statut || '')">
+                {{ statutLabel(t.statut || '') }}
+              </span>
+            </div>
+            <div class="theme-meta">
+              <span class="theme-domaine">{{ domaineLabel(t.domaine) }}</span>
+              @if (t.date_soumission) {
+                <span class="theme-date">Proposé le {{ t.date_soumission | date:'dd/MM/yyyy' }}</span>
+              }
+            </div>
+            <div class="theme-description">{{ t.description }}</div>
+            @if (t.remarques_examinateur) {
+              <div class="theme-remarques">
+                <strong>Remarques :</strong> {{ t.remarques_examinateur }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
 
-    <button type="submit" [disabled]="themeForm.invalid || isSubmitting" class="btn-gold">
-      {{ isSubmitting ? 'Envoi en cours...' : 'Soumettre le sujet' }}
-    </button>
-  </form>
+  </div>
 </div>

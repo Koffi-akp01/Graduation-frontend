@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { AuditLog, GlobalStats } from '../../models/admin.model';
+import { AuditLog, GlobalStats, UserListItem } from '../../models/admin.model';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +19,10 @@ export class AdminService {
 
   getAuditLogs(): Observable<AuditLog[]> {
     return this.http.get<AuditLog[]>(`${this.apiUrl}/audit-logs/`);
+  }
+
+  getUsersList(): Observable<UserListItem[]> {
+    return this.http.get<UserListItem[]>(`${this.apiUrl}/users/`);
   }
 
   downloadReporting(): Observable<Blob> {

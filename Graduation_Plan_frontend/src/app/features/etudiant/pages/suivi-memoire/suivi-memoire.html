@@ -1,0 +1,187 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">{{ initiales }}</div>
+      <div>
+        <div class="avatar-name">{{ prenom() }} {{ nom() }}</div>
+        <div class="avatar-role">Étudiant</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" [routerLinkActiveOptions]="{exact:true}" routerLinkActive="active">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/notes" routerLinkActive="active">
+      <span class="ico">📊</span> Relevé de notes
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire" routerLinkActive="active">
+      <span class="ico">📁</span> Déposer un document
+    </a>
+    <a class="nav-item" routerLink="/etudiant/theme/nouveau" routerLinkActive="active">
+      <span class="ico">💡</span> Mes thèmes
+    </a>
+
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item" routerLink="/etudiant/chat" routerLinkActive="active">
+      <span class="ico">💬</span> Chat directeur
+    </a>
+    <a class="nav-item active" routerLink="/etudiant/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/eligibilite" routerLinkActive="active">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+    <a class="nav-item" routerLink="/etudiant/paiement" routerLinkActive="active">
+      <span class="ico">💳</span> Paiement des frais
+    </a>
+
+    <div class="sidebar-section">Ressources</div>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">📋 Suivi mémoire</div>
+        <div class="page-subtitle">Avancement chapitre par chapitre avec votre directeur</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" (click)="charger()" [disabled]="isLoading()">
+        ↺ Actualiser
+      </button>
+    </div>
+
+    @if (successMsg()) {
+      <div class="alert alert-success mb-16">{{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-16">{{ errorMsg() }}</div>
+    }
+
+    @if (isLoading()) {
+      <div class="loading-card">Chargement du suivi…</div>
+    }
+
+    @if (!isLoading() && suivi(); as s) {
+
+      <!-- En-tête directeur + progression globale -->
+      <div class="card mb-24">
+        <div class="progress-header">
+          <div class="progress-meta">
+            <div class="progress-title">Progression globale</div>
+            <div class="progress-sub">
+              Directeur : <strong>{{ s.directeur }}</strong>
+            </div>
+          </div>
+          <div class="progress-pct">{{ progressPercent }}%</div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="progressPercent"></div>
+          </div>
+        </div>
+        <div class="progress-steps-count">
+          {{ nbEtapesValidees }} / {{ s.etapes.length }} étapes validées
+        </div>
+      </div>
+
+      <!-- Liste des étapes -->
+      <div class="etapes-list">
+        @for (etape of s.etapes; track etape.id) {
+          <div class="etape-card" [class]="statutClass(etape.statut)">
+
+            <div class="etape-top">
+              <div class="etape-num-circle">{{ etape.ordre }}</div>
+              <div class="etape-content">
+                <div class="etape-titre">{{ etape.titre }}</div>
+                <div class="etape-desc">{{ etape.description }}</div>
+              </div>
+              <span class="etape-statut-badge">{{ statutLabel(etape.statut) }}</span>
+            </div>
+
+            <!-- Remarques du directeur -->
+            @if (etape.remarques) {
+              <div class="etape-remarques">
+                <span class="remarques-label">Remarques du directeur :</span>
+                {{ etape.remarques }}
+              </div>
+            }
+
+            <!-- Dates -->
+            <div class="etape-dates">
+              @if (etape.date_soumission) {
+                <span>Soumis le {{ etape.date_soumission | date:'dd/MM/yyyy à HH:mm' }}</span>
+              }
+              @if (etape.date_validation) {
+                <span>
+                  Validé le {{ etape.date_validation | date:'dd/MM/yyyy à HH:mm' }}
+                  @if (etape.valide_par_nom) { · <em>{{ etape.valide_par_nom }}</em> }
+                </span>
+              }
+            </div>
+
+            <!-- Document déjà soumis -->
+            @if (etape.fichier_url) {
+              <a [href]="etape.fichier_url" target="_blank" rel="noopener"
+                 class="btn-doc-link">
+                📄 {{ etape.fichier_nom || 'Mon document soumis' }}
+              </a>
+            }
+
+            <!-- Correction du directeur disponible -->
+            @if (etape.fichier_correction_url) {
+              <button class="btn-correction-pdf"
+                (click)="telechargerCorrection(etape.id, etape.fichier_correction_nom)">
+                ⬇ Télécharger la correction (PDF)
+              </button>
+            }
+
+            <!-- Soumettre un document Word (EN_COURS ou EN_REVISION) -->
+            @if (etape.statut === 'EN_COURS' || etape.statut === 'EN_REVISION') {
+              <div class="etape-actions">
+                @if (suiviInProgress() === etape.id) {
+                  <span class="action-hint">Envoi en cours…</span>
+                } @else if (etapeEnAttenteFichier() === etape.id) {
+                  <div class="upload-zone">
+                    <label class="upload-label">
+                      📎 Choisir le document Word (.docx)
+                      <input type="file" accept=".docx,.doc"
+                        (change)="onFichierChange($event, etape.id)" hidden />
+                    </label>
+                    <button class="btn btn-sm btn-secondary" (click)="annulerFichier()">
+                      Annuler
+                    </button>
+                  </div>
+                } @else {
+                  <button class="btn btn-primary btn-sm" (click)="demanderFichier(etape.id)">
+                    📤 Soumettre au directeur
+                  </button>
+                  <span class="action-hint">
+                    @if (etape.statut === 'EN_REVISION') {
+                      Apportez les corrections et soumettez le fichier Word (.docx) corrigé.
+                    } @else {
+                      Déposez votre document Word (.docx) pour relecture par le directeur.
+                    }
+                  </span>
+                }
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

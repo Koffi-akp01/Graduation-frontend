@@ -1,0 +1,36 @@
+.form-container {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+form {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.form-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+label {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  font: inherit;
+}
+
+.error {
+  color: var(--danger);
+}

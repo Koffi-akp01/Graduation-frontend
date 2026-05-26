@@ -1,0 +1,75 @@
+<app-top-nav></app-top-nav>
+
+<div class="page-container">
+  <div class="page-header">
+    <h1>Gestion des Rattrapages</h1>
+    @if (role() === 'CHEF_SERVICE_EXAM') {
+      <button class="btn-primary" (click)="showForm = !showForm">
+        {{ showForm ? 'Annuler' : '+ Nouveau rattrapage' }}
+      </button>
+    }
+  </div>
+
+  @if (successMsg()) { <div class="alert alert-success">{{ successMsg() }}</div> }
+  @if (errorMsg())   { <div class="alert alert-error">{{ errorMsg() }}</div> }
+
+  @if (showForm) {
+    <div class="form-card">
+      <h3>Programmer un rattrapage</h3>
+      <div class="form-row">
+        <label>ID Étudiant</label>
+        <input type="number" [(ngModel)]="form.etudiant" placeholder="ID étudiant" />
+      </div>
+      <div class="form-row">
+        <label>ID UE</label>
+        <input type="number" [(ngModel)]="form.ue" placeholder="ID de l'UE" />
+      </div>
+      <div class="form-row">
+        <label>Date et heure</label>
+        <input type="datetime-local" [(ngModel)]="form.date" />
+      </div>
+      <div class="form-row">
+        <label>Salle</label>
+        <input [(ngModel)]="form.salle" placeholder="Ex: Salle A1" />
+      </div>
+      <div class="form-row">
+        <label>Frais (FCFA)</label>
+        <input type="number" [(ngModel)]="form.frais" />
+      </div>
+      <button class="btn-submit" (click)="creer()">Enregistrer</button>
+    </div>
+  }
+
+  @if (isLoading()) { <div class="loading">Chargement...</div> }
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Étudiant</th><th>UE</th><th>Date</th><th>Salle</th>
+          <th>Statut</th><th>Frais</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of rattrapages(); track r.id) {
+          <tr>
+            <td>{{ r.etudiant_nom }}</td>
+            <td>{{ r.ue_code }}</td>
+            <td>{{ r.date | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ r.salle || '—' }}</td>
+            <td><span class="badge" [class]="'s-' + r.statut.toLowerCase()">{{ statutLabel(r.statut) }}</span></td>
+            <td>{{ r.frais | number }} FCFA</td>
+            <td>
+              @if (role() === 'CHEF_SERVICE_EXAM' && r.statut === 'PAIEMENT_SOUMIS' && r.valide_par_recouvrement) {
+                <button class="btn-action" (click)="autoriser(r.id)">Autoriser</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (rattrapages().length === 0 && !isLoading()) {
+      <p class="empty">Aucun rattrapage enregistré.</p>
+    }
+  </div>
+</div>

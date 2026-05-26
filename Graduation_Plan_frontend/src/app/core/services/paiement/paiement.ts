@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { Paiement, StatsPaiement } from '../../models/paiement.model';
+import { AlerteImpaye, Bordereau, StatsPaiement } from '../../models/paiement.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PaiementService {
-  private readonly apiUrl = `${environment.apiUrl}/paiements/`;
+  private readonly apiUrl = `${environment.apiUrl}/bordereaux/`;
 
   constructor(private http: HttpClient) {}
 
@@ -17,15 +17,28 @@ export class PaiementService {
     return this.http.get<StatsPaiement>(`${this.apiUrl}stats/`);
   }
 
-  getAllPaiements(params?: any): Observable<any> {
-    return this.http.get<any>(this.apiUrl, { params });
+  getAllBordereaux(params?: Record<string, string>): Observable<Bordereau[]> {
+    return this.http.get<Bordereau[]>(this.apiUrl, { params });
   }
 
-  validerPaiement(id: number): Observable<Paiement> {
-    return this.http.post<Paiement>(`${this.apiUrl}${id}/valider/`, {});
+  /** @deprecated Use getAllBordereaux */
+  getAllPaiements(params?: Record<string, string>): Observable<Bordereau[]> {
+    return this.getAllBordereaux(params);
   }
 
-  getRecu(id: number): Observable<{ url: string }> {
-    return this.http.get<{ url: string }>(`${this.apiUrl}${id}/recu/`);
+  validerPaiement(id: number): Observable<Bordereau> {
+    return this.http.patch<Bordereau>(`${this.apiUrl}${id}/`, { est_valide: true });
+  }
+
+  soumettreBordereau(formData: FormData): Observable<Bordereau> {
+    return this.http.post<Bordereau>(this.apiUrl, formData);
+  }
+
+  getAlertes(): Observable<AlerteImpaye[]> {
+    return this.http.get<AlerteImpaye[]>(`${this.apiUrl}alertes/`);
+  }
+
+  validerBordereau(id: number): Observable<Bordereau> {
+    return this.http.patch<Bordereau>(`${this.apiUrl}${id}/valider/`, {});
   }
 }

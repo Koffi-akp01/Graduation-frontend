@@ -1,0 +1,45 @@
+<div class="admin-container">
+  <div class="admin-header">
+    <h2 class="font-playfair color-navy">Administration Systeme</h2>
+    <button class="btn-gold" (click)="exporterDonnees()">Exporter Rapport Annuel</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="label">Etudiants Inscrits</span>
+      <span class="value color-navy">{{ stats()?.total_etudiants }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Soutenances Validees</span>
+      <span class="value color-success">{{ stats()?.soutenances_terminees }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Revenus Totaux</span>
+      <span class="value color-gold">{{ stats()?.total_paiements }} FCFA</span>
+    </div>
+  </div>
+
+  <div class="audit-section card-white">
+    <h3 class="color-navy">Journal d'Audit & Securite</h3>
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Utilisateur</th>
+          <th>Action effectuee</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (log of logs(); track log.id) {
+          <tr>
+            <td>{{ log.date | date:'short' }}</td>
+            <td><strong>{{ log.utilisateur }}</strong></td>
+            <td>{{ log.action }}</td>
+            <td class="text-mono">{{ log.ip_address }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

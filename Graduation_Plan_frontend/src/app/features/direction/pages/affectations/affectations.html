@@ -1,0 +1,64 @@
+<app-top-nav></app-top-nav>
+
+<div class="page-container">
+  <div class="page-header">
+    <h1>Affectations Directeurs de Mémoire</h1>
+    <p>Validez ou refusez les demandes d'encadrement soumises par les étudiants.</p>
+  </div>
+
+  @if (successMsg()) { <div class="alert alert-success">{{ successMsg() }}</div> }
+  @if (errorMsg())   { <div class="alert alert-error">{{ errorMsg() }}</div> }
+  @if (isLoading())  { <div class="loading">Chargement...</div> }
+
+  <section>
+    <h2>En attente ({{ enAttente().length }})</h2>
+    @if (enAttente().length === 0) {
+      <p class="empty">Aucune demande en attente.</p>
+    }
+    @for (a of enAttente(); track a.id) {
+      <div class="card">
+        <div class="card-info">
+          <span class="label">Étudiant</span>
+          <span class="value">{{ a.etudiant_nom }}</span>
+          <span class="label">Directeur demandé</span>
+          <span class="value">{{ a.directeur_nom }}</span>
+          <span class="label">Date</span>
+          <span class="value">{{ a.date_demande | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-accept" [disabled]="actionInProgress() === a.id" (click)="accepter(a.id)">
+            ✓ Accepter
+          </button>
+          <div class="refus-group">
+            <input placeholder="Motif de refus…" [(ngModel)]="motifRefus" class="input-motif" />
+            <button class="btn-refuse" [disabled]="actionInProgress() === a.id" (click)="refuser(a.id)">
+              ✕ Refuser
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section style="margin-top:2rem">
+    <h2>Historique</h2>
+    @if (traitees().length === 0) {
+      <p class="empty">Aucune demande traitée.</p>
+    }
+    @for (a of traitees(); track a.id) {
+      <div class="card card-history">
+        <div class="card-info">
+          <span class="label">Étudiant</span>   <span class="value">{{ a.etudiant_nom }}</span>
+          <span class="label">Directeur</span>  <span class="value">{{ a.directeur_nom }}</span>
+          <span class="label">Décision</span>
+          <span class="value statut" [class.accepte]="a.statut==='ACCEPTE'" [class.refuse]="a.statut==='REFUSE'">
+            {{ a.statut }}
+          </span>
+          @if (a.motif_refus) {
+            <span class="label">Motif</span> <span class="value">{{ a.motif_refus }}</span>
+          }
+        </div>
+      </div>
+    }
+  </section>
+</div>

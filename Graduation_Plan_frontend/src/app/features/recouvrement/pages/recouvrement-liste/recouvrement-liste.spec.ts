@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { RecouvrementListeComponent } from './recouvrement-liste';
 
@@ -8,13 +11,17 @@ describe('RecouvrementListeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RecouvrementListeComponent]
-    })
-    .compileComponents();
+      imports: [RecouvrementListeComponent],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RecouvrementListeComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

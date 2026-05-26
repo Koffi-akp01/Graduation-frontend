@@ -1,41 +1,483 @@
-<div class="examen-container">
-  <h2 class="font-playfair color-navy">Verification de Conformite & Anti-Plagiat</h2>
+<app-top-nav></app-top-nav>
 
-  <div class="table-container card-white">
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th>Etudiant</th>
-          <th>Score Plagiat</th>
-          <th>Detection IA</th>
-          <th>Document</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (m of memoiresAverifier(); track m.id) {
-          <tr>
-            <td><strong>{{ m.etudiant_nom }}</strong></td>
-            <td>
-              <span class="score-pill" [class.danger]="m.score_plagiat > 25">
-                {{ m.score_plagiat }}%
-              </span>
-            </td>
-            <td>
-              <span class="badge" [class.badge-danger]="m.detecte_IA">
-                {{ m.detecte_IA ? 'Suspecte' : 'Propre' }}
-              </span>
-            </td>
-            <td>
-              <button class="btn-outline">Ouvrir le Viewer</button>
-            </td>
-            <td>
-              <button class="btn-success" (click)="validerTechnique(m.id, 'VALIDE')">Approuver</button>
-              <button class="btn-danger" (click)="validerTechnique(m.id, 'REJETE')">Rejeter</button>
-            </td>
-          </tr>
+<div class="app-page">
+
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#DC2626">SE</div>
+      <div>
+        <div class="avatar-name">Service Examen</div>
+        <div class="avatar-role">Vérification &amp; Contrôle</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Vérifications</div>
+    <a class="nav-item" [class.active]="activeTab() === 'dossiers'" (click)="activeTab.set('dossiers')">
+      <span class="ico">🔍</span> Dossiers mémoires
+    </a>
+    <a class="nav-item" [class.active]="activeTab() === 'notes'" (click)="activeTab.set('notes')">
+      <span class="ico">📝</span> Saisie des notes
+    </a>
+    <a class="nav-item" [class.active]="activeTab() === 'etudiants'" (click)="activeTab.set('etudiants')">
+      <span class="ico">👥</span> Liste des étudiants
+    </a>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/examen/rattrapages" routerLinkActive="active">
+      <span class="ico">🔄</span> Rattrapages
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+    <a class="nav-item" routerLink="/calendrier" routerLinkActive="active">
+      <span class="ico">📅</span> Calendrier
+    </a>
+  </aside>
+
+  <!-- ═══ CONTENU PRINCIPAL ══════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- En-tête page -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Service Examen</div>
+        <div class="page-subtitle">
+          @if (activeTab() === 'dossiers') { Vérification des dossiers — Session 2025-2026 }
+          @else { Saisie des notes UE — filière RSS }
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm"
+          [class.btn-primary]="activeTab() === 'dossiers'"
+          (click)="activeTab.set('dossiers')">
+          🔍 Dossiers
+        </button>
+        <button class="btn btn-secondary btn-sm"
+          [class.btn-primary]="activeTab() === 'notes'"
+          (click)="activeTab.set('notes')">
+          📝 Notes UE
+        </button>
+        <button class="btn btn-secondary btn-sm"
+          [class.btn-primary]="activeTab() === 'etudiants'"
+          (click)="activeTab.set('etudiants')">
+          👥 Étudiants
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         TAB : DOSSIERS
+    ══════════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'dossiers') {
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Total dossiers</div>
+          <div class="stat-value">{{ stats().total }}</div>
+          <div class="stat-sub">Session 2025-2026</div>
+          <div class="stat-icon">📁</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">En attente</div>
+          <div class="stat-value">{{ stats().enAttente }}</div>
+          <div class="stat-sub">À vérifier</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Validés</div>
+          <div class="stat-value">{{ stats().valides }}</div>
+          <div class="stat-sub">Éligibles à soutenir</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Rejetés</div>
+          <div class="stat-value">{{ stats().rejetes }}</div>
+          <div class="stat-sub">Non conformes</div>
+          <div class="stat-icon">✗</div>
+        </div>
+      </div>
+
+      <!-- Table des dossiers -->
+      @if (!selectedDossier()) {
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📄 Dossiers en attente de vérification</span>
+            <div class="ex-filters">
+              <input class="ex-search" type="text" placeholder="Rechercher un étudiant..."
+                [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
+              <select class="ex-select" (change)="niveauFilter.set($any($event.target).value)">
+                <option value="">Tous niveaux</option>
+                <option value="Master 2">Master 2</option>
+                <option value="Master 1">Master 1</option>
+                <option value="Licence">Licence 3</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Niveau</th>
+                <th>Titre du mémoire</th>
+                <th>UE</th>
+                <th>Paiement</th>
+                <th>Anti-IA</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of filteredDossiers(); track d.id) {
+                <tr>
+                  <td>
+                    <strong>{{ d.etudiant_nom }}</strong>
+                    <div class="td-sub">{{ d.matricule }}</div>
+                  </td>
+                  <td>{{ d.niveau }}</td>
+                  <td class="td-titre">{{ d.titre_memoire }}</td>
+                  <td><span class="ex-badge ue">● {{ d.ue }}</span></td>
+                  <td>
+                    <span class="ex-badge"
+                      [class.paye]="d.paiement === 'PAYE'"
+                      [class.nonpaye]="d.paiement === 'NON_PAYE'">
+                      ● {{ d.paiement === 'PAYE' ? 'Payé' : 'Non payé' }}
+                    </span>
+                  </td>
+                  <td>
+                    @switch (d.anti_ia) {
+                      @case ('EN_COURS')  { <span class="ex-badge cours">● En cours</span> }
+                      @case ('VALIDE')    { <span class="ex-badge valid">● Validé</span> }
+                      @case ('SUSPICION') { <span class="ex-badge susp">● Suspicion IA</span> }
+                      @default            { <span class="ex-badge neut">• —</span> }
+                    }
+                  </td>
+                  <td>
+                    <button class="btn btn-sm"
+                      [class.btn-primary]="actionLabel(d) === 'Vérifier'"
+                      [class.btn-gold]="actionLabel(d) === 'Valider'"
+                      [class.btn-danger]="actionLabel(d) === 'Bloquer' || actionLabel(d) === 'Rejeter'"
+                      (click)="doAction(d)">
+                      {{ actionLabel(d) }}
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" style="text-align:center;padding:48px;color:var(--ink3)">
+                    Aucun dossier en attente de vérification.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- Panneau de vérification anti-plagiat -->
+      @if (selectedDossier(); as d) {
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔬 Vérification — {{ d.etudiant_nom }}</span>
+            <button class="btn btn-secondary btn-sm" (click)="retourListe()">← Retour à la liste</button>
+          </div>
+          <div style="padding:24px;display:flex;flex-direction:column;gap:20px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
+                <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase">Étudiant</div>
+                <div style="font-size:15px;font-weight:700;margin-top:4px">{{ d.etudiant_nom }}</div>
+                <div style="font-size:12px;color:var(--ink3)">{{ d.matricule }} — {{ d.niveau }}</div>
+              </div>
+              <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
+                <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase">Titre du mémoire</div>
+                <div style="font-size:13px;font-weight:600;margin-top:4px">{{ d.titre_memoire }}</div>
+              </div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-card" [class.red]="d.score_plagiat > 25" [class.green]="d.score_plagiat <= 25">
+                <div class="stat-label">Score similarité</div>
+                <div class="stat-value">{{ d.score_plagiat }}%</div>
+                <div class="stat-sub">Seuil acceptable : 25%</div>
+                <div class="stat-icon">📊</div>
+              </div>
+              <div class="stat-card" [class.red]="d.anti_ia === 'SUSPICION'" [class.green]="d.anti_ia !== 'SUSPICION'">
+                <div class="stat-label">Détection IA</div>
+                <div class="stat-value">{{ d.anti_ia === 'SUSPICION' ? 'Suspecté' : 'Propre' }}</div>
+                <div class="stat-sub">Analyse automatique</div>
+                <div class="stat-icon">🤖</div>
+              </div>
+              <div class="stat-card blue">
+                <div class="stat-label">UE validées</div>
+                <div class="stat-value">{{ d.ue }}</div>
+                <div class="stat-sub">Unités d'enseignement</div>
+                <div class="stat-icon">📚</div>
+              </div>
+              <div class="stat-card" [class.green]="d.paiement === 'PAYE'" [class.red]="d.paiement === 'NON_PAYE'">
+                <div class="stat-label">Paiement</div>
+                <div class="stat-value">{{ d.paiement === 'PAYE' ? 'Réglé' : 'Impayé' }}</div>
+                <div class="stat-sub">Frais de soutenance</div>
+                <div class="stat-icon">💳</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-gold" (click)="approuverDossier(d.id)" [disabled]="d.paiement === 'NON_PAYE'">
+                ✅ Approuver le dossier
+              </button>
+              <button class="btn btn-danger" (click)="rejeterDossier(d.id)">❌ Rejeter</button>
+              <button class="btn btn-secondary" (click)="retourListe()">← Retour</button>
+            </div>
+            @if (errorMsg()) {
+              <div class="alert alert-error" style="margin-top:12px">{{ errorMsg() }}</div>
+            }
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         TAB : NOTES UE
+    ══════════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'notes') {
+
+      <!-- ── Vue liste : choisir un étudiant ──────────────────────────── -->
+      @if (!selectedEtudiantId()) {
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📝 Sélectionner un étudiant pour saisir ses notes</span>
+            <input class="ex-search" type="text" placeholder="Rechercher…"
+              [value]="notesEtudiantSearch()"
+              (input)="notesEtudiantSearch.set($any($event.target).value)" />
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Matricule</th>
+                <th>Filière</th>
+                <th>UE validées</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of filteredDossiersNotes(); track d.id) {
+                <tr>
+                  <td><strong>{{ d.etudiant_nom }}</strong></td>
+                  <td>{{ d.matricule }}</td>
+                  <td>{{ d.filiere }}</td>
+                  <td><span class="ex-badge ue">{{ d.ue }}</span></td>
+                  <td>
+                    <button class="btn btn-primary btn-sm" (click)="selectionnerEtudiant(d)">
+                      📝 Saisir les notes
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" style="text-align:center;padding:40px;color:var(--ink3)">
+                    Aucun étudiant trouvé.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- ── Vue saisie des notes ──────────────────────────────────────── -->
+      @if (selectedEtudiantId() && !notesLoading()) {
+        @if (notesData(); as nd) {
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <span class="card-title">📝 Notes — {{ nd.etudiant_nom }}</span>
+                <div style="font-size:12px;color:var(--ink3);margin-top:2px">
+                  {{ nd.matricule }} · {{ nd.filiere }}
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <label style="font-size:12px;font-weight:600;color:var(--ink3)">Année</label>
+                <input class="ex-search" style="width:120px" type="text"
+                  [value]="anneeAcademique()"
+                  (input)="anneeAcademique.set($any($event.target).value)" />
+                <button class="btn btn-secondary btn-sm" (click)="retourListeNotes()">← Retour</button>
+              </div>
+            </div>
+
+            <div style="padding:20px;display:flex;flex-direction:column;gap:24px">
+
+              <!-- Légende -->
+              <div style="display:flex;gap:16px;align-items:center;font-size:12px">
+                <span style="display:flex;align-items:center;gap:4px">
+                  <span class="notes-dot ok"></span> Validé (≥ 10)
+                </span>
+                <span style="display:flex;align-items:center;gap:4px">
+                  <span class="notes-dot fail"></span> Échoué (&lt; 10) → rattrapage
+                </span>
+                <span style="display:flex;align-items:center;gap:4px">
+                  <span class="notes-dot empty"></span> Non saisi
+                </span>
+              </div>
+
+              <!-- Grille par semestre -->
+              @for (entry of notesBySemestre(); track entry[0]) {
+                <div>
+                  <div class="notes-sem-title">Semestre {{ entry[0] }}</div>
+                  <table class="notes-table">
+                    <thead>
+                      <tr>
+                        <th style="width:100px">Code</th>
+                        <th>Matière</th>
+                        <th style="width:60px;text-align:center">Cr.</th>
+                        <th style="width:110px;text-align:center">Note /20</th>
+                        <th style="width:100px;text-align:center">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (ue of entry[1]; track ue.ue_id; let i = $index) {
+                        <tr [class.notes-row-ok]="statutNote(ue.ue_id) === 'ok'"
+                            [class.notes-row-fail]="statutNote(ue.ue_id) === 'fail'">
+                          <td><code>{{ ue.code_ue }}</code></td>
+                          <td>{{ ue.libelle }}</td>
+                          <td style="text-align:center">{{ ue.credits }}</td>
+                          <td style="text-align:center">
+                            <input
+                              class="notes-input"
+                              [class.ok]="statutNote(ue.ue_id) === 'ok'"
+                              [class.fail]="statutNote(ue.ue_id) === 'fail'"
+                              type="number" min="0" max="20" step="0.5"
+                              placeholder="—"
+                              [value]="noteValue(ue.ue_id)"
+                              (input)="setNote(ue.ue_id, $any($event.target).value)"
+                            />
+                          </td>
+                          <td style="text-align:center">
+                            @switch (statutNote(ue.ue_id)) {
+                              @case ('ok')   { <span class="badge badge-success">Validé</span> }
+                              @case ('fail') { <span class="badge badge-warn">À rattraper</span> }
+                              @default       { <span class="badge badge-neutral">—</span> }
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
+              <!-- Alertes -->
+              @if (notesSuccess()) {
+                <div class="alert alert-success">✅ {{ notesSuccess() }}</div>
+              }
+              @if (notesError()) {
+                <div class="alert alert-error">{{ notesError() }}</div>
+              }
+
+              <!-- Bouton principal -->
+              <div style="display:flex;gap:10px">
+                <button class="btn btn-primary" (click)="enregistrerEtNotifier()" [disabled]="notesLoading()">
+                  📨 Enregistrer et notifier
+                </button>
+                <button class="btn btn-secondary" (click)="retourListeNotes()">← Retour</button>
+              </div>
+            </div>
+          </div>
         }
-      </tbody>
-    </table>
-  </div>
-</div>
+      }
+
+      @if (notesLoading()) {
+        <div class="card"><div class="loading-row">Chargement des matières…</div></div>
+      }
+      @if (notesError() && !notesData()) {
+        <div class="card"><div class="loading-row" style="color:var(--danger)">{{ notesError() }}</div></div>
+      }
+    }
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         TAB : LISTE ÉTUDIANTS
+    ══════════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'etudiants') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">👥 Liste des étudiants ({{ filteredEtudiants().length }})</span>
+          <div class="ex-filters">
+            <input class="ex-search" type="text" placeholder="Nom, prénom, matricule…"
+              [value]="etudiantsSearch()"
+              (input)="etudiantsSearch.set($any($event.target).value)" />
+            <select class="ex-select"
+              (change)="etudiantsFiliereFilter.set($any($event.target).value)">
+              <option value="">Toutes filières</option>
+              <option value="GL">Génie Logiciel</option>
+              <option value="RSS">Réseaux Systèmes Sécurité</option>
+              <option value="DWM">Développement Web &amp; Mobile</option>
+              <option value="CS">Cybersécurité</option>
+              <option value="WDIG">Web Design Infographie</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" (click)="chargerEtudiants()">🔄</button>
+          </div>
+        </div>
+
+        @if (etudiantsLoading()) {
+          <div class="loading-row">Chargement des étudiants…</div>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Matricule</th>
+                <th>Filière</th>
+                <th style="text-align:center">UE validées</th>
+                <th>Avancement</th>
+                <th style="text-align:center">Frais</th>
+                <th style="text-align:center">Éligible</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of filteredEtudiants(); track e.id) {
+                <tr>
+                  <td>
+                    <strong>{{ e.nom }} {{ e.prenom }}</strong>
+                  </td>
+                  <td><code style="font-size:12px">{{ e.matricule }}</code></td>
+                  <td>
+                    <span class="ex-badge neut">{{ e.filiere_code }}</span>
+                  </td>
+                  <td style="text-align:center">
+                    <span [class]="e.ue_validees === e.total_ue && e.total_ue > 0 ? 'ex-badge valid' : 'ex-badge cours'">
+                      {{ e.ue_validees }}/{{ e.total_ue }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="phaseBadge(e.phase)">{{ phaseLabel(e.phase) }}</span>
+                  </td>
+                  <td style="text-align:center">
+                    @if (e.has_paid_fees) {
+                      <span class="ex-badge valid">✓ Payé</span>
+                    } @else {
+                      <span class="ex-badge nonpaye">✗ Non payé</span>
+                    }
+                  </td>
+                  <td style="text-align:center">
+                    @if (e.eligible) {
+                      <span class="ex-badge valid">✓</span>
+                    } @else {
+                      <span class="ex-badge neut">—</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" style="text-align:center;padding:48px;color:var(--ink3)">
+                    Aucun étudiant trouvé.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+
+  </div><!-- /main -->
+</div><!-- /app-page -->

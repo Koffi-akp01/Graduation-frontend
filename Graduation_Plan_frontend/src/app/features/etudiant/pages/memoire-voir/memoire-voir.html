@@ -1,0 +1,130 @@
+<app-top-nav></app-top-nav>
+
+<div class="memoire-layout">
+
+  <!-- ══ PANNEAU GAUCHE — PDF ═══════════════════════════════════════════════ -->
+  <div class="pdf-panel">
+
+    <!-- En-tête -->
+    <div class="pdf-header">
+      <a routerLink="/etudiant" class="btn-back">← Retour</a>
+      <div class="pdf-meta">
+        <div class="pdf-titre">{{ titre() }}</div>
+        <div class="pdf-sub">
+          Directeur : <strong>{{ directeur() }}</strong>
+          &nbsp;·&nbsp; {{ version() }}
+          &nbsp;·&nbsp;
+          <span class="badge" [class]="statutClass(statut())">{{ statutLabel(statut()) }}</span>
+        </div>
+      </div>
+      @if (fichierUrl()) {
+        <a [href]="fichierUrl()" target="_blank" rel="noopener" class="btn-open">↗ Ouvrir</a>
+      }
+    </div>
+
+    <!-- Chargement -->
+    @if (isLoading() || isPdfLoading()) {
+      <div class="pdf-placeholder">
+        <div class="pdf-spinner"></div>
+        <div class="pdf-ph-text">Chargement du document…</div>
+      </div>
+    }
+
+    <!-- Erreur globale -->
+    @if (!isLoading() && errorMsg()) {
+      <div class="pdf-placeholder">
+        <div class="pdf-ph-icon">📄</div>
+        <div class="pdf-ph-text">{{ errorMsg() }}</div>
+        <a class="btn-upload" routerLink="/etudiant/memoire">📤 Déposer mon mémoire</a>
+      </div>
+    }
+
+    <!-- PDF -->
+    @if (blobSafeUrl() && !isPdfLoading()) {
+      <iframe class="pdf-frame" [src]="blobSafeUrl()!" type="application/pdf" title="Mon mémoire"></iframe>
+    }
+
+    <!-- Pas de fichier -->
+    @if (!isLoading() && !errorMsg() && !isPdfLoading() && !blobSafeUrl()) {
+      <div class="pdf-placeholder">
+        <div class="pdf-ph-icon">📄</div>
+        @if (pdfError()) {
+          <div class="pdf-ph-text">Impossible de charger le fichier</div>
+          <button class="btn-retry" (click)="recharger()">↺ Réessayer</button>
+        } @else {
+          <div class="pdf-ph-text">Fichier non disponible</div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- ══ PANNEAU DROIT — CORRECTIONS ════════════════════════════════════════ -->
+  <aside class="ann-panel">
+
+    <div class="ann-header">
+      <span class="ann-title">📝 Corrections du directeur</span>
+      @if (nbOuvertes() > 0) {
+        <span class="ann-badge">{{ nbOuvertes() }} à traiter</span>
+      }
+    </div>
+
+    <!-- Commentaire directeur -->
+    @if (commentaire()) {
+      <div class="directeur-comment">
+        <div class="dc-label">💬 Commentaire général</div>
+        <div class="dc-body">{{ commentaire() }}</div>
+      </div>
+    }
+
+    <!-- Filtre par page -->
+    @if (pagesDisponibles().length > 0) {
+      <div class="page-filter">
+        <button class="page-chip" [class.active]="pageActive() === null" (click)="filtrerPage(null)">
+          Toutes ({{ annotations().length }})
+        </button>
+        @for (p of pagesDisponibles(); track p) {
+          <button class="page-chip" [class.active]="pageActive() === p" (click)="filtrerPage(p)">
+            p. {{ p }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Liste annotations -->
+    <div class="ann-list">
+      @if (isLoadingAnn()) {
+        <div class="ann-loading">Chargement des corrections…</div>
+      } @else if (annotationsFiltrees().length === 0) {
+        <div class="ann-empty">
+          <div class="ann-empty-icon">✏️</div>
+          <div>Aucune correction pour l'instant.</div>
+          <div class="ann-empty-sub">Votre directeur n'a pas encore ajouté de remarques.</div>
+        </div>
+      } @else {
+        @for (ann of annotationsFiltrees(); track ann.id) {
+          <div class="ann-item" [class.resolved]="ann.est_resolu" [style.border-left-color]="ann.couleur">
+            <div class="ann-item-top">
+              <span class="ann-page-tag" [style.background]="ann.couleur + '22'" [style.color]="ann.couleur">
+                p. {{ ann.page }}
+              </span>
+              @if (ann.est_resolu) {
+                <span class="ann-resolved-tag">✓ Pris en compte</span>
+              }
+            </div>
+            <div class="ann-item-text">{{ ann.texte }}</div>
+            <div class="ann-item-meta">
+              <span>{{ ann.annotateur }}</span>
+              <span>{{ ann.date_creation | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Lien upload -->
+    <div class="ann-footer">
+      <a class="btn-upload" routerLink="/etudiant/memoire">📤 Déposer une nouvelle version</a>
+    </div>
+
+  </aside>
+</div>

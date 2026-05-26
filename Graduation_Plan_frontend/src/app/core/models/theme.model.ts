@@ -5,6 +5,7 @@ export interface Theme {
   domaine: string;
   etudiant_nom?: string;
   directeur_souhaite_id?: number;
-  statut?: 'EN_ATTENTE' | 'ACCEPTE' | 'REFUSE' | 'CORRECTION_DEMANDEE';
-  message_feedback?: string;
+  statut?: 'PENDING' | 'VALIDATED' | 'REJECTED';
+  remarques_examinateur?: string;
+  date_soumission?: string;
 }

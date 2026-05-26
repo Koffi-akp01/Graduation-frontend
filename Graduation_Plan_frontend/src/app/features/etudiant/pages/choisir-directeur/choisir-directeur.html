@@ -1,0 +1,74 @@
+<app-top-nav></app-top-nav>
+
+<div class="page-container">
+  <div class="page-header">
+    <h1>Choisir un directeur de mémoire</h1>
+    <p>Sélectionnez un formateur interne ou externe pour encadrer votre mémoire.</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Chargement...</div>
+  }
+
+  @if (successMsg()) {
+    <div class="alert alert-success">{{ successMsg() }}</div>
+  }
+
+  @if (errorMsg()) {
+    <div class="alert alert-error">{{ errorMsg() }}</div>
+  }
+
+  @if (affectationAcceptee()) {
+    <div class="alert alert-success">
+      ✅ Votre directeur de mémoire est <strong>{{ affectationAcceptee()!.directeur_nom }}</strong>.
+      <a [routerLink]="['/chat', affectationAcceptee()!.id]" class="btn-chat-link">💬 Ouvrir le chat</a>
+    </div>
+  }
+
+  @if (demandeEnAttente()) {
+    <div class="alert alert-info">
+      ⏳ Demande en attente auprès de <strong>{{ demandeEnAttente()!.directeur_nom }}</strong>.
+    </div>
+  }
+
+  <div class="directeurs-grid">
+    @for (d of directeurs(); track d.id) {
+      <div class="card">
+        <div class="card-header">
+          <div class="avatar">{{ d.prenom[0] }}{{ d.nom[0] }}</div>
+          <div>
+            <div class="name">{{ d.prenom }} {{ d.nom }}</div>
+            <div class="badge" [class.internal]="d.is_internal">
+              {{ d.is_internal ? 'Interne' : 'Externe' }}
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span>Filière :</span>
+            <span class="filiere-badge">{{ d.filiere_principale || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span>Email :</span> <span>{{ d.email }}</span>
+          </div>
+          <div class="info-row">
+            <span>Niveau :</span> <span>{{ d.niveau_pro || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span>Étudiants encadrés :</span> <span>{{ d.charge_travail }}</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          @if (!affectationAcceptee() && !demandeEnAttente()) {
+            <button
+              class="btn-primary"
+              [disabled]="isSubmitting()"
+              (click)="demanderAffectation(d.id)">
+              Choisir ce directeur
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
