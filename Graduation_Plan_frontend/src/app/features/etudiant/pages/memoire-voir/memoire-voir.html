@@ -19,6 +19,11 @@
       </div>
       @if (fichierUrl()) {
         <a [href]="fichierUrl()" target="_blank" rel="noopener" class="btn-open">↗ Ouvrir</a>
+        <button class="btn-open" style="background:var(--success);color:#fff;border:none;cursor:pointer"
+          [disabled]="!blobSafeUrl()"
+          (click)="telechargerMemoire()">
+          ⬇ Télécharger
+        </button>
       }
     </div>
 

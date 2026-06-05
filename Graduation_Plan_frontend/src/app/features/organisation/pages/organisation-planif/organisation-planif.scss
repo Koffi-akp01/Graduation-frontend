@@ -57,3 +57,62 @@ button.nav-item {
   &.error   { background:#fdecea; color:#c62828; border:1px solid #f5c2c7; }
   &.success { background:#e8f5e9; color:#1b5e20; border:1px solid #a5d6a7; }
 }
+
+// ── Checklist matériel ────────────────────────────────────────────────────────
+.materiel-card {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-left: 4px solid #C8963E;
+  border-radius: var(--radius, 8px);
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.materiel-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #92400E;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.materiel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.materiel-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #E2E0D8;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all .15s;
+
+  input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #276749; }
+  &.checked { background: #F0FDF4; border-color: #86EFAC; }
+  &:hover    { border-color: #C8963E; }
+}
+
+.materiel-ico { font-size: 16px; }
+.materiel-lbl { color: var(--ink2, #3A3935); }
+
+.materiel-note {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #E2E0D8;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  resize: vertical;
+  min-height: 56px;
+  box-sizing: border-box;
+  &:focus { outline: none; border-color: #C8963E; }
+}

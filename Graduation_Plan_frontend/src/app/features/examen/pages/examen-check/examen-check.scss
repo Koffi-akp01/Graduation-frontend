@@ -59,7 +59,6 @@
   text-transform: uppercase;
   letter-spacing: .6px;
   margin-bottom: 8px;
-  padding-left: 4px;
   border-left: 3px solid var(--accent2);
   padding-left: 10px;
 }
@@ -145,4 +144,106 @@
   &.valid { background: #D1FAE5; color: #065F46; }
   &.susp  { background: #FEE2E2; color: #991B1B; }
   &.neut  { background: #F3F4F6; color: #6B7280; }
+  &.ok    { background: #D1FAE5; color: #065F46; }
+  &.pend  { background: #EFF6FF; color: #1E40AF; }
 }
+
+// ══ CALENDRIER SOUTENANCES ════════════════════════════════════════════════════
+
+.sout-stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+}
+.sout-stat-card {
+  border-radius: var(--radius, 8px); padding: 16px 20px; text-align: center;
+  border: 1px solid var(--border, #E2DDD4);
+  &.blue    { background: #EFF6FF; border-color: #BFDBFE; }
+  &.green   { background: #F0FDF4; border-color: #BBF7D0; }
+  &.gold    { background: #FFFBEB; border-color: #FDE68A; }
+  &.neutral { background: #F9FAFB; border-color: #E5E7EB; }
+}
+.sout-stat-val { font-size: 28px; font-weight: 800; color: #0F2237; }
+.sout-stat-lbl { font-size: 11px; color: #718096; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+
+.sout-filters {
+  display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;
+}
+.sout-search {
+  flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #E2DDD4;
+  border-radius: 6px; font-size: 13px;
+  &:focus { outline: none; border-color: #C8963E; }
+}
+.sout-date-filter {
+  padding: 8px 10px; border: 1px solid #E2DDD4; border-radius: 6px; font-size: 13px; color: #2D3748;
+  &:focus { outline: none; border-color: #C8963E; }
+}
+
+.sout-table-wrap { overflow-x: auto; }
+.sout-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  background: #fff; border-radius: 8px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+
+  thead tr { background: #0F2237; }
+  th { padding: 10px 14px; text-align: left; color: #fff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; white-space: nowrap; }
+  tbody tr {
+    border-bottom: 1px solid #F3F4F6; transition: background .12s;
+    &:hover { background: #FAFAF9; }
+    &.row-cloture { opacity: .65; }
+  }
+  td { padding: 10px 14px; vertical-align: middle; }
+}
+
+.sout-date-cell { min-width: 100px; }
+.sout-date  { font-weight: 700; color: #0F2237; font-size: 13px; }
+.sout-heure { font-size: 11px; color: #C8963E; font-weight: 700; }
+.sout-etudiant { font-weight: 700; color: #1A202C; min-width: 140px; }
+.sout-filiere  { background: #EFF6FF; color: #1E40AF; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+
+// ══ BADGE COMPTEUR SIDEBAR ════════════════════════════════════════════════════
+.badge-pill {
+  margin-left: auto;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 99px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+// ══ LOADING / VIDE ════════════════════════════════════════════════════════════
+.loading-row {
+  text-align: center;
+  padding: 40px;
+  color: var(--ink3);
+  font-size: 13px;
+}
+
+.empty-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 48px;
+  text-align: center;
+
+  .empty-icon  { font-size: 40px; margin-bottom: 12px; opacity: .4; }
+  .empty-title { font-size: 15px; font-weight: 700; color: var(--ink2); margin-bottom: 6px; }
+  .empty-sub   { font-size: 13px; color: var(--ink3); }
+}
+
+.loading-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 48px;
+  text-align: center;
+  color: var(--ink3);
+  font-size: 13px;
+}
+
+// ══ ALERTE ERREUR ══════════════════════════════════════════════════════════════
+.alert-error {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+

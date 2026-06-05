@@ -9,13 +9,100 @@
 
 /* Sidebar buttons styled like nav-items */
 button.nav-item {
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font: inherit;
-  padding: 0;
+  width: 100%; text-align: left; background: none;
+  border: none; cursor: pointer; font: inherit; padding: 0;
+}
+
+/* Flux info banner */
+.info-flux {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px;
+  padding: 10px 14px; font-size: 12.5px; color: #1E40AF; margin-bottom: 16px;
+  .ico-flux { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+}
+
+/* Table helpers */
+.mono  { font-family: 'DM Mono', monospace; }
+.small { font-size: 12px; }
+.neant { color: var(--ink3, #718096); }
+.empty-cell { text-align: center; padding: 48px; color: var(--ink3, #718096); }
+.loading-cell { padding: 32px; text-align: center; color: var(--ink3, #718096); font-style: italic; }
+
+/* Row colorings */
+.row-valide   { background: #F0FDF4; }
+.row-warning  { background: #FFF7ED; }
+
+/* UE display */
+.ue-code { font-family: monospace; font-weight: 700; font-size: 12px; background: #F3F4F6; padding: 1px 6px; border-radius: 4px; margin-right: 6px; }
+.ue-lib  { color: #374151; font-size: 13px; }
+
+/* Section subtitle */
+.section-sub { font-size: 13px; font-weight: 700; color: #374151; margin: 16px 0 10px; }
+.mt-24 { margin-top: 24px; }
+
+/* Badge SE */
+.badge-se { background: #EDE9FE; color: #5B21B6; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.ml-4 { margin-left: 4px; }
+
+/* Alerts */
+.alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+.alert-success { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+.alert-danger  { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+
+.empty-state { text-align: center; padding: 40px; color: var(--ink3, #718096); }
+.empty-icon  { font-size: 36px; margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+
+// ══ SCOLARITÉ ════════════════════════════════════════════════════════════════
+
+.tarifs-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; padding: 16px 0 4px;
+}
+.tarif-card {
+  background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px;
+}
+.tarif-annee { font-size: 13px; font-weight: 800; color: #0F2237; margin-bottom: 8px; }
+.tarif-row   { display: flex; justify-content: space-between; font-size: 12px; color: #4A5568; padding: 2px 0; }
+.tarif-total { margin-top: 8px; font-size: 13px; font-weight: 800; color: #1B5E20; border-top: 1px solid #E2E8F0; padding-top: 6px; }
+
+.scol-detail-panel {
+  background: #FAFAFA; border-top: 2px solid #C8963E; padding: 16px 20px;
+}
+.scol-actions { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.scol-form-card {
+  background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px;
+  padding: 14px 16px; margin-bottom: 16px;
+}
+.scol-form-title { font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 10px; }
+.scol-form-grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.scol-sub-title  { font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: .5px; margin: 12px 0 6px; }
+
+.eng-card  {
+  background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 7px; padding: 10px 14px; margin-bottom: 8px;
+}
+.eng-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.eng-meta   { font-size: 11px; color: #4A5568; margin-bottom: 4px; }
+.eng-notes  { font-size: 11px; color: #6B7280; font-style: italic; margin-bottom: 6px; }
+.eng-btns   { display: flex; gap: 6px; flex-wrap: wrap; }
+
+// Form helpers (partagés avec affectations)
+.form-group   { display: flex; flex-direction: column; gap: 3px; }
+.form-label   { font-size: 12px; font-weight: 600; color: #374151; }
+.form-select, .form-textarea {
+  padding: .45rem .65rem; border: 1px solid #D1D5DB; border-radius: 6px;
+  font-size: 12px; color: #1e293b; background: #fff;
+  &:focus { outline: none; border-color: #C8963E; }
+}
+.form-textarea { resize: vertical; min-height: 60px; }
+.reattrib-btns { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 8px; }
+.btn-submit-reattrib {
+  padding: .45rem 1rem; background: #C8963E; color: #fff; border: none;
+  border-radius: 7px; font-weight: 700; cursor: pointer; font-size: 12px;
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+.btn-cancel {
+  padding: .45rem .9rem; background: #fff; color: #64748b;
+  border: 1px solid #e2e8f0; border-radius: 7px; font-weight: 600; cursor: pointer; font-size: 12px;
 }
 
 /* Alerte row highlight for students who haven't submitted anything */
@@ -38,4 +125,69 @@ tfoot .total-row td {
   border-top: 2px solid #1B5E20;
   padding: 10px 16px;
   font-size: 14px;
+}
+
+// ══ BADGE COMPTEUR SIDEBAR ════════════════════════════════════════════════════
+.badge-pill {
+  margin-left: auto;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 99px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+// ══ FILTRES SCOLARITÉ (et tables partagées) ═══════════════════════════════════
+.sout-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sout-search {
+  flex: 1;
+  min-width: 220px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+
+  &::placeholder { color: var(--ink3); }
+  &:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 3px #2B6CB018; }
+}
+
+.sout-date-filter {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+  cursor: pointer;
+
+  &:focus { outline: none; border-color: var(--accent2); }
+}
+
+.sout-table { width: 100%; border-collapse: collapse; }
+
+.input-annee {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+  margin-left: 6px;
+
+  &:focus { outline: none; border-color: var(--accent2); }
 }

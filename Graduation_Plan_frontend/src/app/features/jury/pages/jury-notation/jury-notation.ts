@@ -56,8 +56,12 @@ export class JuryNotationComponent implements OnInit {
   // ── Computed helpers ────────────────────────────────────────────────────
 
   get noteFinale(): string {
-    const s = +this.notePresentation + +this.noteMaitrise + +this.noteMemoire + +this.noteReponses;
-    return (s / 4).toFixed(2);
+    const weighted =
+      +this.noteMemoire      * 3 +
+      +this.noteMaitrise     * 4 +
+      +this.notePresentation * 3 +
+      +this.noteReponses     * 3;
+    return (weighted / 13).toFixed(2);
   }
 
   getEval(soutenanceId: number): Evaluation | undefined {

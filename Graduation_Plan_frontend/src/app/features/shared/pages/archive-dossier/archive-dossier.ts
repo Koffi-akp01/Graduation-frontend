@@ -254,6 +254,12 @@ export class ArchiveDossierComponent implements OnInit {
     }
   }
 
+  // ── Téléchargement authentifié ────────────────────────────────────────
+  telechargerDoc(url: string | null | undefined, nomFichier: string): void {
+    if (!url) return;
+    this.svc.telechargerFichier(url, nomFichier);
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────
   statutClass(statut: string): string {
     if (statut === 'ARCHIVE')    return 'badge-archive';

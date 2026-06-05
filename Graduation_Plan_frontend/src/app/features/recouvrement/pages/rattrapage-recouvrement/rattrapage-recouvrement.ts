@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import {
   RattrapageService, Rattrapage, FacturationPending,
@@ -10,7 +11,7 @@ type Tab = 'facturation' | 'validation' | 'historique';
 @Component({
   selector: 'app-rattrapage-recouvrement',
   standalone: true,
-  imports: [CommonModule, TopNav],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TopNav],
   templateUrl: './rattrapage-recouvrement.html',
   styleUrls: ['./rattrapage-recouvrement.scss'],
 })

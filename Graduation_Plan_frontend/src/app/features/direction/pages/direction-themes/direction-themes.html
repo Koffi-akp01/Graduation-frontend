@@ -30,6 +30,9 @@
     <button class="nav-item" [class.active]="vue() === 'etudiants'" (click)="afficherVue('etudiants')">
       <span class="ico">👥</span> Liste des étudiants
     </button>
+    <a class="nav-item" routerLink="/direction/affectations" routerLinkActive="active">
+      <span class="ico">🔗</span> Affectations
+    </a>
 
     <div class="sidebar-section">Outils</div>
     <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
@@ -37,9 +40,6 @@
     </a>
     <a class="nav-item" routerLink="/archive" routerLinkActive="active">
       <span class="ico">🗄</span> Archives
-    </a>
-    <a class="nav-item" routerLink="/calendrier" routerLinkActive="active">
-      <span class="ico">📅</span> Calendrier
     </a>
   </aside>
 

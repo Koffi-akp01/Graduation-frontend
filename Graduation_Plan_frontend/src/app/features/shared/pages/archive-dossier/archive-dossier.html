@@ -23,10 +23,6 @@
       <span class="ico">✅</span> Archivé
     </button>
 
-    <div class="sidebar-section">Actions</div>
-    <a class="nav-item" routerLink="/analyse">
-      <span class="ico">🔬</span> Analyse Plagiat/IA
-    </a>
   </aside>
 
   <!-- ═══ CONTENU ════════════════════════════════════════════════════════════ -->
@@ -291,8 +287,15 @@
 
             <div class="pv-btns">
               <button class="btn-secondary" (click)="activeArch.set(null)">Fermer</button>
-              <button class="btn-download-pv" (click)="telechargerPV(arch)">
-                📄 Télécharger PDF
+              @if (arch.pv.url) {
+                <button class="btn-download-pv"
+                  (click)="telechargerDoc(arch.pv.url, 'PV-' + arch.code_archive + '.pdf')">
+                  📄 Télécharger PV signé
+                </button>
+              }
+              <button class="btn-download-pv" style="background:var(--accent2)"
+                (click)="telechargerPV(arch)">
+                🖨 Imprimer / Exporter PDF
               </button>
             </div>
 
@@ -365,10 +368,16 @@
               <span class="arch-date">{{ formatDate(arch.date_archivage) }}</span>
               <div class="arch-actions">
                 @if (arch.pv.url) {
-                  <a [href]="arch.pv.url" target="_blank" class="btn-icon" title="Télécharger PV">📄</a>
+                  <button class="btn-icon" title="Télécharger PV signé"
+                    (click)="telechargerDoc(arch.pv.url, 'PV-' + arch.code_archive + '.pdf')">
+                    📄
+                  </button>
                 }
                 @if (arch.memoire?.url) {
-                  <a [href]="arch.memoire!.url!" target="_blank" class="btn-icon" title="Télécharger mémoire">📘</a>
+                  <button class="btn-icon" title="Télécharger mémoire"
+                    (click)="telechargerDoc(arch.memoire!.url, 'memoire-' + arch.etudiant.matricule + '.pdf')">
+                    📘
+                  </button>
                 }
                 @if (arch.statut !== 'ARCHIVE' && canManage()) {
                   <button class="btn-sign" (click)="ouvrirSig(arch)">✍ Signer PV</button>

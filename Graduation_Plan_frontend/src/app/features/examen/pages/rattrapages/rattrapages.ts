@@ -1,6 +1,7 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { RattrapageService, Rattrapage } from '../../../../core/services/rattrapage/rattrapage';
 import { AuthService } from '../../../../core/services/auth/auth';
@@ -8,7 +9,7 @@ import { AuthService } from '../../../../core/services/auth/auth';
 @Component({
   selector: 'app-rattrapages',
   standalone: true,
-  imports: [CommonModule, FormsModule, TopNav],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TopNav],
   templateUrl: './rattrapages.html',
   styleUrls: ['./rattrapages.scss'],
 })
@@ -19,7 +20,20 @@ export class RattrapagesComponent implements OnInit {
   errorMsg      = signal('');
   role          = signal('');
 
-  showForm = false;
+  showForm = signal(false);
+  searchTerm = signal('');
+
+  filteredRattrapages = computed(() => {
+    const q = this.searchTerm().toLowerCase();
+    return this.rattrapages().filter(r =>
+      !q || r.etudiant_nom.toLowerCase().includes(q) || r.ue_code.toLowerCase().includes(q)
+    );
+  });
+
+  aAutoriser = computed(() =>
+    this.rattrapages().filter(r => r.statut === 'PAIEMENT_SOUMIS' && r.valide_par_recouvrement)
+  );
+
   form = { etudiant: 0, ue: 0, date: '', salle: '', frais: 5000 };
 
   constructor(
@@ -42,11 +56,15 @@ export class RattrapagesComponent implements OnInit {
   }
 
   creer(): void {
+    if (!this.form.etudiant || !this.form.ue || !this.form.date) {
+      this.errorMsg.set('Étudiant, UE et date sont obligatoires.');
+      return;
+    }
     this.rattrapageService.creer(this.form).subscribe({
       next: (r) => {
         this.rattrapages.update(list => [r, ...list]);
-        this.successMsg.set('Rattrapage créé.');
-        this.showForm = false;
+        this.successMsg.set('Rattrapage créé et étudiant notifié.');
+        this.showForm.set(false);
         this.form = { etudiant: 0, ue: 0, date: '', salle: '', frais: 5000 };
       },
       error: (err) => this.errorMsg.set(err?.error?.detail || 'Erreur création.'),
@@ -62,10 +80,25 @@ export class RattrapagesComponent implements OnInit {
 
   statutLabel(statut: string): string {
     const map: Record<string, string> = {
-      PROGRAMME: 'Programmé', EN_ATTENTE_PAIEMENT: 'Attente paiement',
-      PAIEMENT_SOUMIS: 'Paiement soumis', AUTORISE: 'Autorisé',
-      PASSE: 'Passé', ANNULE: 'Annulé',
+      PROGRAMME:            '📅 Programmé',
+      EN_ATTENTE_PAIEMENT:  '⏳ Attente paiement',
+      PAIEMENT_SOUMIS:      '📤 Paiement soumis',
+      AUTORISE:             '✅ Autorisé',
+      PASSE:                '🗓 Passé',
+      ANNULE:               '❌ Annulé',
     };
     return map[statut] || statut;
+  }
+
+  statutClass(statut: string): string {
+    const map: Record<string, string> = {
+      PROGRAMME:            'badge-info',
+      EN_ATTENTE_PAIEMENT:  'badge-warn',
+      PAIEMENT_SOUMIS:      'badge-pending',
+      AUTORISE:             'badge-success',
+      PASSE:                'badge-neutral',
+      ANNULE:               'badge-danger',
+    };
+    return map[statut] || 'badge-neutral';
   }
 }

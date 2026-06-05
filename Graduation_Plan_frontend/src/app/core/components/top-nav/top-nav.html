@@ -34,7 +34,6 @@
     <a routerLink="/etudiant/eligibilite"     routerLinkActive="active" class="tab-btn">☑ Éligibilité</a>
     <a routerLink="/etudiant/paiement"        routerLinkActive="active" class="tab-btn">💳 Mes paiements</a>
     <a routerLink="/archive"                  routerLinkActive="active" class="tab-btn tab-btn--archive">🗄 Archives</a>
-    <a routerLink="/calendrier"               routerLinkActive="active" class="tab-btn">📅 Calendrier</a>
   }
 
   <!-- ── DIRECTION ACADÉMIQUE ── (Plagiat + Archives en gestion) ────────── -->
@@ -43,7 +42,6 @@
     <a routerLink="/direction/affectations" routerLinkActive="active" class="tab-btn">👥 Affectations</a>
     <a routerLink="/analyse"                routerLinkActive="active" class="tab-btn tab-btn--highlight">🔬 Plagiat / IA</a>
     <a routerLink="/archive"                routerLinkActive="active" class="tab-btn tab-btn--archive">🗄 Archives</a>
-    <a routerLink="/calendrier"             routerLinkActive="active" class="tab-btn">📅 Calendrier</a>
   }
 
   <!-- ── SERVICE EXAMEN ── (Plagiat + Archives en gestion) ─────────────── -->
@@ -52,7 +50,6 @@
     <a routerLink="/examen/rattrapages" routerLinkActive="active" class="tab-btn">📝 Rattrapages</a>
     <a routerLink="/analyse"            routerLinkActive="active" class="tab-btn tab-btn--highlight">🔬 Plagiat / IA</a>
     <a routerLink="/archive"            routerLinkActive="active" class="tab-btn tab-btn--archive">🗄 Archives</a>
-    <a routerLink="/calendrier"         routerLinkActive="active" class="tab-btn">📅 Calendrier</a>
   }
 
   <!-- ── DIRECTEUR DE MÉMOIRE ── (Plagiat + Archives en lecture) ────────── -->
@@ -60,7 +57,6 @@
     <a routerLink="/directeur/suivi" routerLinkActive="active" class="tab-btn">📘 Directeur Mémoire</a>
     <a routerLink="/analyse"         routerLinkActive="active" class="tab-btn tab-btn--highlight">🔬 Plagiat / IA</a>
     <a routerLink="/archive"         routerLinkActive="active" class="tab-btn tab-btn--archive">🗄 Archives</a>
-    <a routerLink="/calendrier"      routerLinkActive="active" class="tab-btn">📅 Calendrier</a>
   }
 
   <!-- ── JURY / EXAMINATEUR ── (Plagiat + Archives en lecture) ─────────── -->
@@ -68,21 +64,18 @@
     <a routerLink="/jury/notation" routerLinkActive="active" class="tab-btn">⚖ Jury / Examinateur</a>
     <a routerLink="/analyse"       routerLinkActive="active" class="tab-btn tab-btn--highlight">🔬 Plagiat / IA</a>
     <a routerLink="/archive"       routerLinkActive="active" class="tab-btn tab-btn--archive">🗄 Archives</a>
-    <a routerLink="/calendrier"    routerLinkActive="active" class="tab-btn">📅 Calendrier</a>
   }
 
   <!-- ── ORGANISATION ── (Archives en lecture, pas de Plagiat) ─────────── -->
   @if (isOrganisation()) {
     <a routerLink="/organisation/planification" routerLinkActive="active" class="tab-btn">🗓 Organisation</a>
     <a routerLink="/archive"                    routerLinkActive="active" class="tab-btn tab-btn--archive">🗄 Archives</a>
-    <a routerLink="/calendrier"                 routerLinkActive="active" class="tab-btn">📅 Calendrier</a>
   }
 
   <!-- ── RECOUVREMENT ── (pas d'Archives, pas de Plagiat) ──────────────── -->
   @if (isRecouvrement()) {
     <a routerLink="/recouvrement"                    routerLinkActive="active" class="tab-btn">💰 Recouvrement</a>
     <a routerLink="/recouvrement/rattrapages"         routerLinkActive="active" class="tab-btn">📝 Paiements rattrapages</a>
-    <a routerLink="/calendrier"                      routerLinkActive="active" class="tab-btn">📅 Calendrier</a>
   }
 
   <!-- ── ADMINISTRATEUR ─────────────────────────────────────────────────── -->
@@ -97,7 +90,6 @@
     <a routerLink="/analyse"                     routerLinkActive="active" class="tab-btn tab-btn--highlight">🔬 Analyse</a>
     <a routerLink="/archive"                     routerLinkActive="active" class="tab-btn tab-btn--archive">🗄 Archives</a>
     <a routerLink="/admin"                       routerLinkActive="active" class="tab-btn">⚙ Admin</a>
-    <a routerLink="/calendrier"                  routerLinkActive="active" class="tab-btn">📅 Calendrier</a>
   }
 
   <span class="spacer"></span>

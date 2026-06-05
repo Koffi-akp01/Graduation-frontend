@@ -157,6 +157,82 @@ button.nav-item {
   color: var(--ink2, #374151);
 }
 
+// Alert danger (non fournie par le global)
+.alert-danger {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+// ── Vue liste des étudiants ──────────────────────────────────────────────────
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent, #1A3C5E);
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 16px;
+}
+
+.filters-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+
+  select {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border, #E2E0D8);
+    border-radius: var(--radius, 8px);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink, #0F0E0C);
+    background: #fff;
+    cursor: pointer;
+    &:focus { outline: none; border-color: var(--accent2, #2B6CB0); }
+  }
+}
+
+.search-input {
+  flex: 1;
+  min-width: 220px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border, #E2E0D8);
+  border-radius: var(--radius, 8px);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink, #0F0E0C);
+  background: #fff;
+
+  &::placeholder { color: var(--ink3, #7A7870); }
+  &:focus { outline: none; border-color: var(--accent2, #2B6CB0); box-shadow: 0 0 0 3px #2B6CB018; }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--ink3, #7A7870);
+  font-size: 13px;
+}
+
+.table-wrap { overflow-x: auto; }
+
+.empty-row td {
+  text-align: center;
+  padding: 48px;
+  color: var(--ink3, #7A7870);
+}
+
+.table-footer {
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--ink3, #7A7870);
+  border-top: 1px solid var(--border, #E2E0D8);
+  text-align: right;
+}
+
 // Alert messages
 .alert-msg {
   border-radius: 6px;

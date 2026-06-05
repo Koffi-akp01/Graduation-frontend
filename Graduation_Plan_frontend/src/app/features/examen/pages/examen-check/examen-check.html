@@ -22,18 +22,25 @@
     <a class="nav-item" [class.active]="activeTab() === 'etudiants'" (click)="activeTab.set('etudiants')">
       <span class="ico">👥</span> Liste des étudiants
     </a>
+    <a class="nav-item" [class.active]="activeTab() === 'soutenances'" (click)="activeTab.set('soutenances'); chargerSoutenances()">
+      <span class="ico">📅</span> Calendrier soutenances
+      @if (statsSoutenances().aVenir > 0) {
+        <span class="badge-pill">{{ statsSoutenances().aVenir }}</span>
+      }
+    </a>
     <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
       <span class="ico">🔬</span> Plagiat / IA
     </a>
+    <a class="nav-item" routerLink="/examen/planification" routerLinkActive="active">
+      <span class="ico">📅</span> Programmer soutenance
+    </a>
+
     <div class="sidebar-section">Outils</div>
     <a class="nav-item" routerLink="/examen/rattrapages" routerLinkActive="active">
       <span class="ico">🔄</span> Rattrapages
     </a>
     <a class="nav-item" routerLink="/archive" routerLinkActive="active">
       <span class="ico">🗄</span> Archives
-    </a>
-    <a class="nav-item" routerLink="/calendrier" routerLinkActive="active">
-      <span class="ico">📅</span> Calendrier
     </a>
   </aside>
 
@@ -45,26 +52,30 @@
       <div>
         <div class="page-title">Service Examen</div>
         <div class="page-subtitle">
-          @if (activeTab() === 'dossiers') { Vérification des dossiers — Session 2025-2026 }
-          @else { Saisie des notes UE — filière RSS }
+          @switch (activeTab()) {
+            @case ('dossiers')    { Vérification des dossiers — Session 2025-2026 }
+            @case ('notes')       { Saisie des notes par UE }
+            @case ('etudiants')   { Liste et suivi des étudiants }
+            @case ('soutenances') { Calendrier des soutenances planifiées }
+          }
         </div>
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-secondary btn-sm"
-          [class.btn-primary]="activeTab() === 'dossiers'"
-          (click)="activeTab.set('dossiers')">
-          🔍 Dossiers
-        </button>
-        <button class="btn btn-secondary btn-sm"
-          [class.btn-primary]="activeTab() === 'notes'"
-          (click)="activeTab.set('notes')">
-          📝 Notes UE
-        </button>
-        <button class="btn btn-secondary btn-sm"
-          [class.btn-primary]="activeTab() === 'etudiants'"
-          (click)="activeTab.set('etudiants')">
-          👥 Étudiants
-        </button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <div style="display:flex;align-items:center;gap:6px;margin-right:6px">
+          <span style="font-size:12px;font-weight:600;color:var(--ink3)">📆 Année</span>
+          <input class="ex-search" style="width:110px" type="text"
+            [value]="anneeAcademique()"
+            (input)="anneeAcademique.set($any($event.target).value)" />
+        </div>
+        <button class="btn btn-sm" [class.btn-primary]="activeTab()==='dossiers'" [class.btn-secondary]="activeTab()!=='dossiers'"
+          (click)="activeTab.set('dossiers')">🔍 Dossiers</button>
+        <button class="btn btn-sm" [class.btn-primary]="activeTab()==='notes'" [class.btn-secondary]="activeTab()!=='notes'"
+          (click)="activeTab.set('notes')">📝 Notes UE</button>
+        <button class="btn btn-sm" [class.btn-primary]="activeTab()==='etudiants'" [class.btn-secondary]="activeTab()!=='etudiants'"
+          (click)="activeTab.set('etudiants')">👥 Étudiants</button>
+        <button class="btn btn-sm" [class.btn-primary]="activeTab()==='soutenances'" [class.btn-secondary]="activeTab()!=='soutenances'"
+          (click)="activeTab.set('soutenances'); chargerSoutenances()">📅 Soutenances</button>
+        <button class="btn btn-secondary btn-sm" (click)="chargerDossiers(); chargerEtudiants(); chargerSoutenances()">↺</button>
       </div>
     </div>
 
@@ -245,10 +256,18 @@
       @if (!selectedEtudiantId()) {
         <div class="card">
           <div class="card-header">
-            <span class="card-title">📝 Sélectionner un étudiant pour saisir ses notes</span>
-            <input class="ex-search" type="text" placeholder="Rechercher…"
-              [value]="notesEtudiantSearch()"
-              (input)="notesEtudiantSearch.set($any($event.target).value)" />
+            <span class="card-title">📝 Saisie des notes — {{ anneeAcademique() }}</span>
+            <div class="ex-filters">
+              <input class="ex-search" type="text" placeholder="Rechercher…"
+                [value]="notesEtudiantSearch()"
+                (input)="notesEtudiantSearch.set($any($event.target).value)" />
+              <select class="ex-select" (change)="notesFiliereFilter.set($any($event.target).value)">
+                <option value="">Toutes filières</option>
+                @for (f of filieres; track f.code) {
+                  <option [value]="f.code">{{ f.label }}</option>
+                }
+              </select>
+            </div>
           </div>
           <table>
             <thead>
@@ -400,7 +419,12 @@
     @if (activeTab() === 'etudiants') {
       <div class="card">
         <div class="card-header">
-          <span class="card-title">👥 Liste des étudiants ({{ filteredEtudiants().length }})</span>
+          <div>
+            <span class="card-title">👥 Liste des étudiants — {{ anneeAcademique() }}</span>
+            <div style="font-size:12px;color:var(--ink3);margin-top:2px">
+              {{ etudiantsEligibles().length }} éligible(s) · {{ etudiantsRattrapage().length }} en rattrapage
+            </div>
+          </div>
           <div class="ex-filters">
             <input class="ex-search" type="text" placeholder="Nom, prénom, matricule…"
               [value]="etudiantsSearch()"
@@ -408,13 +432,17 @@
             <select class="ex-select"
               (change)="etudiantsFiliereFilter.set($any($event.target).value)">
               <option value="">Toutes filières</option>
-              <option value="GL">Génie Logiciel</option>
-              <option value="RSS">Réseaux Systèmes Sécurité</option>
-              <option value="DWM">Développement Web &amp; Mobile</option>
-              <option value="CS">Cybersécurité</option>
-              <option value="WDIG">Web Design Infographie</option>
+              @for (f of filieres; track f.code) {
+                <option [value]="f.code">{{ f.label }}</option>
+              }
             </select>
             <button class="btn btn-secondary btn-sm" (click)="chargerEtudiants()">🔄</button>
+            <button class="btn btn-gold btn-sm"
+              [disabled]="!etudiantsEligibles().length"
+              (click)="telechargerListeEligibles()"
+              title="Télécharger la liste CSV des étudiants éligibles à soutenir">
+              ⬇ Éligibles ({{ etudiantsEligibles().length }})
+            </button>
           </div>
         </div>
 
@@ -477,7 +505,183 @@
           </table>
         }
       </div>
+
+      <!-- ── Section rattrapages par filière ──────────────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">🔄 Étudiants en rattrapage — {{ anneeAcademique() }}</span>
+            <div style="font-size:12px;color:var(--ink3);margin-top:2px">
+              UE non validées (note &lt; 10 ou non saisie)
+            </div>
+          </div>
+          <div class="ex-filters">
+            <select class="ex-select"
+              (change)="rattrapageFiliereFilter.set($any($event.target).value)">
+              <option value="">Toutes filières</option>
+              @for (f of filieres; track f.code) {
+                <option [value]="f.code">{{ f.label }}</option>
+              }
+            </select>
+            <button class="btn btn-danger btn-sm"
+              [disabled]="!etudiantsRattrapage().length"
+              (click)="telechargerListeRattrapages()"
+              title="Télécharger la liste CSV des étudiants en rattrapage">
+              ⬇ Rattrapages ({{ etudiantsRattrapage().length }})
+            </button>
+          </div>
+        </div>
+
+        @if (etudiantsRattrapage().length === 0) {
+          <div style="text-align:center;padding:40px;color:var(--ink3)">
+            Aucun étudiant en situation de rattrapage
+            @if (rattrapageFiliereFilter()) { pour cette filière }.
+          </div>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Matricule</th>
+                <th>Filière</th>
+                <th style="text-align:center">UE validées</th>
+                <th style="text-align:center">UE manquantes</th>
+                <th>Avancement</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of etudiantsRattrapage(); track e.id) {
+                <tr>
+                  <td><strong>{{ e.nom }} {{ e.prenom }}</strong></td>
+                  <td><code style="font-size:12px">{{ e.matricule }}</code></td>
+                  <td><span class="ex-badge neut">{{ e.filiere_code }}</span></td>
+                  <td style="text-align:center">
+                    <span class="ex-badge cours">{{ e.ue_validees }}/{{ e.total_ue }}</span>
+                  </td>
+                  <td style="text-align:center">
+                    <span class="ex-badge susp">{{ e.total_ue - e.ue_validees }} manquante(s)</span>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="phaseBadge(e.phase)">{{ phaseLabel(e.phase) }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- TAB : CALENDRIER SOUTENANCES                                      -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'soutenances') {
+      <div class="tab-panel">
+
+        <!-- En-tête -->
+        <div class="page-header">
+          <div>
+            <div class="page-title">📅 Calendrier des soutenances</div>
+            <div class="page-subtitle">
+              {{ statsSoutenances().total }} soutenance(s) — {{ statsSoutenances().aVenir }} à venir
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" (click)="chargerSoutenances()" [disabled]="soutenancesLoading()">
+            ↺ Actualiser
+          </button>
+        </div>
+
+        <!-- Stats rapides -->
+        <div class="sout-stats-row">
+          <div class="sout-stat-card blue">
+            <div class="sout-stat-val">{{ statsSoutenances().total }}</div>
+            <div class="sout-stat-lbl">Total planifiées</div>
+          </div>
+          <div class="sout-stat-card green">
+            <div class="sout-stat-val">{{ statsSoutenances().aVenir }}</div>
+            <div class="sout-stat-lbl">À venir</div>
+          </div>
+          <div class="sout-stat-card gold">
+            <div class="sout-stat-val">{{ statsSoutenances().cetteS }}</div>
+            <div class="sout-stat-lbl">Cette semaine</div>
+          </div>
+          <div class="sout-stat-card neutral">
+            <div class="sout-stat-val">{{ statsSoutenances().cloturees }}</div>
+            <div class="sout-stat-lbl">Clôturées</div>
+          </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="sout-filters">
+          <input class="sout-search" type="text" placeholder="🔍 Rechercher un étudiant, filière, jury…"
+            [value]="soutenancesSearch()" (input)="soutenancesSearch.set($any($event.target).value)" />
+          <input class="sout-date-filter" type="date"
+            [value]="soutenancesDate()" (change)="soutenancesDate.set($any($event.target).value)"
+            title="Filtrer par date" />
+          @if (soutenancesDate()) {
+            <button class="btn btn-secondary btn-sm" (click)="soutenancesDate.set('')">✕ Date</button>
+          }
+        </div>
+
+        <!-- Chargement -->
+        @if (soutenancesLoading()) {
+          <div class="loading-card">Chargement des soutenances…</div>
+        }
+
+        <!-- Table -->
+        @if (!soutenancesLoading()) {
+          @if (filteredSoutenances().length === 0) {
+            <div class="empty-card">
+              <div class="empty-icon">🗓</div>
+              <div class="empty-title">Aucune soutenance trouvée</div>
+              <div class="empty-sub">Aucune soutenance ne correspond à votre recherche.</div>
+            </div>
+          } @else {
+            <div class="sout-table-wrap">
+              <table class="sout-table">
+                <thead>
+                  <tr>
+                    <th>Date &amp; Heure</th>
+                    <th>Étudiant</th>
+                    <th>Filière</th>
+                    <th>Salle</th>
+                    <th>Président du jury</th>
+                    <th>Examinateur</th>
+                    <th>Directeur</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (s of filteredSoutenances(); track s.id) {
+                    <tr [class.row-cloture]="s.est_cloturee">
+                      <td class="sout-date-cell">
+                        <div class="sout-date">{{ s.date_soutenance | date:'dd/MM/yyyy' }}</div>
+                        <div class="sout-heure">{{ s.date_soutenance | date:'HH:mm' }}</div>
+                      </td>
+                      <td class="sout-etudiant">{{ s.etudiant_details ?? '—' }}</td>
+                      <td><span class="sout-filiere">{{ s.filiere ?? '—' }}</span></td>
+                      <td>{{ s.salle_nom ?? '—' }}</td>
+                      <td>{{ s.president_nom ?? '—' }}</td>
+                      <td>{{ s.examinateur_nom ?? '—' }}</td>
+                      <td>{{ s.directeur_nom ?? '—' }}</td>
+                      <td>
+                        @if (s.est_cloturee) {
+                          <span class="ex-badge ok">Clôturée</span>
+                        } @else {
+                          <span class="ex-badge pend">Planifiée</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+
+      </div>
     }
 
   </div><!-- /main -->
 </div><!-- /app-page -->
+

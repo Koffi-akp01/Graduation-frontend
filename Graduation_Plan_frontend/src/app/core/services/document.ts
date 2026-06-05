@@ -69,8 +69,26 @@ export class DocumentService {
     return this.http.get<MemoireVersion[]>(`${this.apiUrl}/etudiant/memoire/versions/`);
   }
 
-  getMemoireUrl(_id: number): string {
-    return `${this.apiUrl}/etudiant/memoire/versions/`;
+  getMemoireUrl(id: number): string {
+    return `${this.apiUrl}/etudiant/memoire/versions/${id}/fichier/`;
+  }
+
+  telechargerFichier(url: string, nomFichier: string): void {
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const objUrl = URL.createObjectURL(blob);
+        const a      = document.createElement('a');
+        a.href        = objUrl;
+        a.download    = nomFichier;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(objUrl);
+      },
+      error: () => {
+        window.open(url, '_blank');
+      },
+    });
   }
 
   getDocumentsAnalysables(): Observable<DocumentAnalysable[]> {

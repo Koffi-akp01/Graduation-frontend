@@ -29,6 +29,7 @@ import { EtudiantRattrapagesComponent }   from './features/etudiant/pages/rattra
 import { EtudiantNotesComponent }         from './features/etudiant/pages/notes/notes';
 import { ExamenCheckComponent }           from './features/examen/pages/examen-check/examen-check';
 import { RattrapagesComponent }           from './features/examen/pages/rattrapages/rattrapages';
+import { ExamenPlanificationComponent }  from './features/examen/pages/examen-planification/examen-planification';
 import { JuryNotationComponent }          from './features/jury/pages/jury-notation/jury-notation';
 import { OrganisationPlanifComponent }    from './features/organisation/pages/organisation-planif/organisation-planif';
 import { RecouvrementListeComponent }     from './features/recouvrement/pages/recouvrement-liste/recouvrement-liste';
@@ -43,7 +44,7 @@ const EXAMEN_ROLES    = ['CHEF_SERVICE_EXAM'];
 const RECOUV_ROLES    = ['SERVICE_RECOUVREMENT'];
 const ORGA_ROLES      = ['CHARGE_ORGANISATION'];
 const JURY_ROLES      = ['EXAMINER', 'PRESIDENT_JURY'];
-const ADMIN_ROLES     = ['ADMIN_ACADEMIC'];
+const ADMIN_ROLES     = ['ADMIN', 'ADMIN_ACADEMIC'];
 
 function guard(roles: string[]) {
   return { canActivate: [roleGuard], data: { roles } };
@@ -86,8 +87,9 @@ export const routes: Routes = [
   { path: 'chat/:id', component: ChatComponent, canActivate: [roleGuard] },
 
   // ── Service Examen ────────────────────────────────────────────────────
-  { path: 'examen/conformite',  component: ExamenCheckComponent, ...guard(EXAMEN_ROLES) },
-  { path: 'examen/rattrapages', component: RattrapagesComponent, ...guard(EXAMEN_ROLES) },
+  { path: 'examen/conformite',     component: ExamenCheckComponent,       ...guard(EXAMEN_ROLES) },
+  { path: 'examen/rattrapages',    component: RattrapagesComponent,       ...guard(EXAMEN_ROLES) },
+  { path: 'examen/planification',  component: ExamenPlanificationComponent, ...guard(EXAMEN_ROLES) },
 
   // ── Recouvrement ──────────────────────────────────────────────────────
   { path: 'recouvrement',             component: RecouvrementListeComponent,     ...guard(RECOUV_ROLES) },

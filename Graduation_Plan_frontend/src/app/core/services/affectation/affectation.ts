@@ -24,6 +24,7 @@ export interface Affectation {
   date_decision: string | null;
   decide_par: number | null;
   motif_refus: string | null;
+  motif_reattribution: string;
   etudiant_nom: string;
   directeur_nom: string;
   decide_par_nom: string | null;
@@ -45,6 +46,18 @@ export class AffectationService {
 
   demanderAffectation(directeurId: number): Observable<Affectation> {
     return this.http.post<Affectation>(`${this.base}/affectations/`, { directeur: directeurId });
+  }
+
+  accepter(id: number): Observable<Affectation> {
+    return this.http.patch<Affectation>(`${this.base}/affectations/${id}/`, { statut: 'ACCEPTE' });
+  }
+
+  reattribuer(id: number, nouveauDirecteurId: number, motif: string): Observable<Affectation> {
+    return this.http.patch<Affectation>(`${this.base}/affectations/${id}/`, {
+      statut: 'REATTRIBUER',
+      nouveau_directeur: nouveauDirecteurId,
+      motif_reattribution: motif,
+    });
   }
 
   decider(id: number, statut: 'ACCEPTE' | 'REFUSE', motif?: string): Observable<Affectation> {

@@ -4,9 +4,20 @@
 
   <!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
   <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#276749">EC</div>
+      <div>
+        <div class="avatar-name">Éligibilité</div>
+        <div class="avatar-role">Étudiant</div>
+      </div>
+    </div>
+
     <div class="sidebar-section">Mon espace</div>
     <a class="nav-item" routerLink="/etudiant" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
       <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/notes" routerLinkActive="active">
+      <span class="ico">📊</span> Relevé de notes
     </a>
     <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
       <span class="ico">📄</span> Mon mémoire
@@ -22,11 +33,19 @@
     <a class="nav-item" routerLink="/etudiant/chat" routerLinkActive="active">
       <span class="ico">💬</span> Chat directeur
     </a>
+    <a class="nav-item" routerLink="/etudiant/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+    </a>
     <a class="nav-item active" routerLink="/etudiant/eligibilite">
       <span class="ico">☑</span> Éligibilité
     </a>
     <a class="nav-item" routerLink="/etudiant/paiement" routerLinkActive="active">
       <span class="ico">💳</span> Paiement des frais
+    </a>
+
+    <div class="sidebar-section">Ressources</div>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
     </a>
   </aside>
 

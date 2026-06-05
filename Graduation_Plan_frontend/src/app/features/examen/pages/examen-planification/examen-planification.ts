@@ -6,29 +6,26 @@ import { forkJoin } from 'rxjs';
 
 import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import {
-  EtudiantSansSoutenance,
-  MembreJury,
-  Salle,
-  Soutenance,
-  SoutenanceForm,
-  StatsSession,
+  EtudiantSansSoutenance, MembreJury, Salle,
+  SoutenanceForm, StatsSession,
 } from '../../../../core/models/soutenance.model';
 import { SoutenanceService } from '../../../../core/services/soutenance/soutenance';
 
-export type OrgaVue = 'dashboard' | 'planifier' | 'soutenances';
+type Vue = 'dashboard' | 'planifier' | 'auto';
 
 @Component({
-  selector: 'app-organisation-planif',
+  selector: 'app-examen-planification',
+  standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TopNav],
-  templateUrl: './organisation-planif.html',
-  styleUrl: './organisation-planif.scss',
+  templateUrl: './examen-planification.html',
+  styleUrl: './examen-planification.scss',
 })
-export class OrganisationPlanifComponent implements OnInit {
-  vue = signal<OrgaVue>('dashboard');
+export class ExamenPlanificationComponent implements OnInit {
+
+  vue = signal<Vue>('dashboard');
 
   // ── Données ───────────────────────────────────────────────────────────────
   etudiantsSans = signal<EtudiantSansSoutenance[]>([]);
-  soutenances   = signal<Soutenance[]>([]);
   directeurs    = signal<MembreJury[]>([]);
   presidents    = signal<MembreJury[]>([]);
   examinateurs  = signal<MembreJury[]>([]);
@@ -40,76 +37,53 @@ export class OrganisationPlanifComponent implements OnInit {
   selectedEtudiant: EtudiantSansSoutenance | null = null;
 
   readonly SESSION_CHOICES = Array.from({ length: 12 }, (_, i) => ({
-    value: String(i + 1),
-    label: `Session ${i + 1}`,
+    value: String(i + 1), label: `Session ${i + 1}`,
   }));
 
-  isLoading         = false;
-  isProcessing      = signal(false);
-  generationSuccess = signal(false);
-  errorMsg          = '';
-  successMsg        = '';
-
-  readonly MATERIEL = [
-    { key: 'projecteur',  label: 'Vidéoprojecteur',       ico: '📽' },
-    { key: 'hdmi',        label: 'Câble HDMI',             ico: '🔌' },
-    { key: 'tableau',     label: 'Tableau blanc / Marqueurs', ico: '🖊' },
-    { key: 'micro',       label: 'Microphone / Sonorisation', ico: '🎤' },
-    { key: 'pc',          label: 'PC / Ordinateur de salle',  ico: '💻' },
-    { key: 'clim',        label: 'Climatisation',          ico: '❄' },
-    { key: 'internet',    label: 'Accès internet',         ico: '🌐' },
-    { key: 'chaises',     label: 'Chaises / Tables suffisantes', ico: '🪑' },
-  ];
-
-  materielCheck: Record<string, boolean> = {};
-  materielNote = '';
-
-  get materielPret(): boolean {
-    return this.MATERIEL.every(m => this.materielCheck[m.key]);
-  }
-
-  resetMateriel(): void {
-    this.materielCheck = {};
-    this.materielNote  = '';
-  }
+  isLoading       = false;
+  isProcessing    = signal(false);
+  autoSuccess     = signal(false);
+  errorMsg        = '';
+  successMsg      = '';
 
   constructor(private soutenanceService: SoutenanceService) {}
 
   ngOnInit(): void {
     this.chargerStats();
-    this.chargerSoutenances();
   }
 
   // ── Navigation ────────────────────────────────────────────────────────────
 
-  afficherVue(v: OrgaVue): void {
+  afficherVue(v: Vue): void {
     this.vue.set(v);
-    if (v === 'dashboard')    { this.chargerStats(); this.chargerSoutenances(); }
-    if (v === 'planifier')    this.chargerPlanifier();
-    if (v === 'soutenances')  this.chargerSoutenances();
+    this.errorMsg   = '';
+    this.successMsg = '';
+    if (v === 'planifier') this.chargerPlanifier();
+    if (v === 'dashboard') this.chargerStats();
   }
 
   // ── Chargements ───────────────────────────────────────────────────────────
 
   chargerStats(): void {
     this.soutenanceService.getStats().subscribe({
-      next: (s) => this.stats.set(s),
+      next:  s  => this.stats.set(s),
       error: () => this.stats.set(null),
     });
-  }
-
-  chargerSoutenances(): void {
-    this.soutenanceService.getSoutenances().subscribe((data) => this.soutenances.set(data));
+    this.soutenanceService.getEtudiantsSansSoutenance().subscribe(
+      d => this.etudiantsSans.set(d),
+    );
   }
 
   chargerPlanifier(): void {
-    this.soutenanceService.getEtudiantsSansSoutenance().subscribe((data) => this.etudiantsSans.set(data));
+    this.soutenanceService.getEtudiantsSansSoutenance().subscribe(
+      d => this.etudiantsSans.set(d),
+    );
     forkJoin({
-      internes:    this.soutenanceService.getDirecteurs(),
-      externes:    this.soutenanceService.getDirecteursExternes(),
-      presidents:  this.soutenanceService.getPresidents(),
+      internes:     this.soutenanceService.getDirecteurs(),
+      externes:     this.soutenanceService.getDirecteursExternes(),
+      presidents:   this.soutenanceService.getPresidents(),
       examinateurs: this.soutenanceService.getExaminateurs(),
-      salles:      this.soutenanceService.getSalles(),
+      salles:       this.soutenanceService.getSalles(),
     }).subscribe(({ internes, externes, presidents, examinateurs, salles }) => {
       this.directeurs.set([...internes, ...externes]);
       this.presidents.set(presidents);
@@ -118,21 +92,17 @@ export class OrganisationPlanifComponent implements OnInit {
     });
   }
 
-  // ── Sélection d'un étudiant ───────────────────────────────────────────────
+  // ── Sélection étudiant ────────────────────────────────────────────────────
 
   selectionnerEtudiant(e: EtudiantSansSoutenance): void {
-    if (!e.est_eligible) {
-      alert(`${e.prenom} ${e.nom} n'est pas encore éligible (UE ou frais non validés).`);
-      return;
-    }
+    if (!e.est_eligible) return;
     this.selectedEtudiant = e;
     this.form = { ...this.emptyForm(), etudiant: e.etudiant_id, theme: e.theme_id };
     this.errorMsg   = '';
     this.successMsg = '';
-    this.resetMateriel();
   }
 
-  // ── Soumission ────────────────────────────────────────────────────────────
+  // ── Soumission manuelle ───────────────────────────────────────────────────
 
   planifierSoutenance(): void {
     const f = this.form;
@@ -144,34 +114,31 @@ export class OrganisationPlanifComponent implements OnInit {
     this.errorMsg  = '';
     this.soutenanceService.creerSoutenance(f).subscribe({
       next: () => {
-        this.isLoading  = false;
-        this.successMsg = 'Soutenance planifiée avec succès !';
+        this.isLoading        = false;
+        this.successMsg       = '✅ Soutenance planifiée avec succès !';
         this.selectedEtudiant = null;
-        this.form = this.emptyForm();
-        setTimeout(() => {
-          this.successMsg = '';
-          this.afficherVue('planifier');
-        }, 1500);
+        this.form             = this.emptyForm();
+        setTimeout(() => { this.successMsg = ''; this.afficherVue('planifier'); }, 1500);
       },
       error: (err) => {
         this.isLoading = false;
         const e = err?.error;
-        if (e?.blocage)           this.errorMsg = (e.blocage as string[]).join(' — ');
+        if (e?.blocage)              this.errorMsg = (e.blocage as string[]).join(' — ');
         else if (e?.non_field_errors) this.errorMsg = e.non_field_errors[0];
-        else                      this.errorMsg = 'Erreur lors de la planification. Vérifiez les données.';
+        else                         this.errorMsg = 'Erreur lors de la planification.';
       },
     });
   }
 
-  // ── Algorithme auto ───────────────────────────────────────────────────────
+  // ── Planification automatique ─────────────────────────────────────────────
 
-  lancerAlgorithme(): void {
+  lancerAuto(): void {
     this.isProcessing.set(true);
-    this.generationSuccess.set(false);
+    this.autoSuccess.set(false);
     setTimeout(() => {
       this.isProcessing.set(false);
-      this.generationSuccess.set(true);
-      this.chargerSoutenances();
+      this.autoSuccess.set(true);
+      this.chargerStats();
     }, 2000);
   }
 

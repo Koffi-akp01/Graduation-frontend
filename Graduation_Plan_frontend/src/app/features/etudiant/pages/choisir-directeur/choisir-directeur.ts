@@ -1,13 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink }   from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TopNav } from '../../../../core/components/top-nav/top-nav';
 import { AffectationService, Affectation, Directeur } from '../../../../core/services/affectation/affectation';
 
 @Component({
   selector: 'app-choisir-directeur',
   standalone: true,
-  imports: [CommonModule, RouterLink, TopNav],
+  imports: [CommonModule, RouterLink, RouterLinkActive, TopNav],
   templateUrl: './choisir-directeur.html',
   styleUrls: ['./choisir-directeur.scss'],
 })

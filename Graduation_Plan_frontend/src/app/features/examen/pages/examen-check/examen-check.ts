@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -9,16 +9,28 @@ import {
   NotesEtudiant, SaisieNote, UeNote,
 } from '../../../../core/services/examen/examen';
 import { EtudiantListItem, StudentService } from '../../../../core/services/student.service';
+import { SoutenanceService } from '../../../../core/services/soutenance/soutenance';
+import { Soutenance } from '../../../../core/models/soutenance.model';
 
-type Tab = 'dossiers' | 'notes' | 'etudiants';
+type Tab = 'dossiers' | 'notes' | 'etudiants' | 'soutenances';
+
 
 @Component({
   selector: 'app-examen-check',
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TopNav],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TopNav, DatePipe],
   templateUrl: './examen-check.html',
   styleUrl: './examen-check.scss',
 })
 export class ExamenCheckComponent implements OnInit {
+
+  readonly filieres = [
+    { code: 'GL',   label: 'Génie Logiciel' },
+    { code: 'RSS',  label: 'Réseaux Systèmes Sécurité' },
+    { code: 'DWM',  label: 'Développement Web & Mobile' },
+    { code: 'CS',   label: 'Cybersécurité' },
+    { code: 'WDIG', label: 'Web Design Infographie' },
+  ];
+
   // ── Tab ──────────────────────────────────────────────────────────────
   activeTab = signal<Tab>('dossiers');
 
@@ -50,21 +62,27 @@ export class ExamenCheckComponent implements OnInit {
     rejetes:   this.dossiers().filter((d) => d.statut === 'REJECTED').length,
   }));
 
+  // ── Année académique globale ──────────────────────────────────────────
+  anneeAcademique = signal('2025-2026');
+
   // ── Notes tab ─────────────────────────────────────────────────────────
-  notesEtudiantSearch  = signal('');
-  selectedEtudiantId   = signal<number | null>(null);
-  notesData            = signal<NotesEtudiant | null>(null);
-  notesDraft           = signal<Record<number, string>>({});
-  anneeAcademique      = signal('2025-2026');
-  notesLoading         = signal(false);
-  notesSuccess         = signal('');
-  notesError           = signal('');
+  notesEtudiantSearch = signal('');
+  notesFiliereFilter  = signal('');
+  selectedEtudiantId  = signal<number | null>(null);
+  notesData           = signal<NotesEtudiant | null>(null);
+  notesDraft          = signal<Record<number, string>>({});
+  notesLoading        = signal(false);
+  notesSuccess        = signal('');
+  notesError          = signal('');
 
   filteredDossiersNotes = computed(() => {
     const q = this.notesEtudiantSearch().toLowerCase();
-    return this.dossiers().filter(
-      (d) => !q || d.etudiant_nom.toLowerCase().includes(q) || d.matricule.toLowerCase().includes(q),
-    );
+    const f = this.notesFiliereFilter();
+    return this.dossiers().filter((d) => {
+      const matchQ = !q || d.etudiant_nom.toLowerCase().includes(q) || d.matricule.toLowerCase().includes(q);
+      const matchF = !f || d.filiere === f;
+      return matchQ && matchF;
+    });
   });
 
   notesBySemestre = computed(() => {
@@ -79,10 +97,11 @@ export class ExamenCheckComponent implements OnInit {
   });
 
   // ── Liste étudiants tab ───────────────────────────────────────────────
-  etudiants          = signal<EtudiantListItem[]>([]);
-  etudiantsLoading   = signal(false);
-  etudiantsSearch    = signal('');
+  etudiants              = signal<EtudiantListItem[]>([]);
+  etudiantsLoading       = signal(false);
+  etudiantsSearch        = signal('');
   etudiantsFiliereFilter = signal('');
+  rattrapageFiliereFilter = signal('');
 
   filteredEtudiants = computed(() => {
     const q = this.etudiantsSearch().toLowerCase();
@@ -94,14 +113,72 @@ export class ExamenCheckComponent implements OnInit {
     });
   });
 
+  etudiantsEligibles = computed(() =>
+    this.filteredEtudiants().filter(e => e.eligible)
+  );
+
+  etudiantsRattrapage = computed(() => {
+    const f = this.rattrapageFiliereFilter();
+    return this.etudiants().filter(e => {
+      const hasEchec = e.ue_validees < e.total_ue;
+      const matchF   = !f || e.filiere_code === f;
+      return hasEchec && matchF;
+    });
+  });
+
+  // ── Soutenances tab ──────────────────────────────────────────────────
+  soutenances        = signal<Soutenance[]>([]);
+  soutenancesLoading = signal(false);
+  soutenancesSearch  = signal('');
+  soutenancesDate    = signal('');
+
+
+  filteredSoutenances = computed(() => {
+    const q = this.soutenancesSearch().toLowerCase();
+    const d = this.soutenancesDate();
+    return this.soutenances()
+      .filter(s => {
+        const matchQ = !q ||
+          (s.etudiant_details ?? '').toLowerCase().includes(q) ||
+          (s.filiere ?? '').toLowerCase().includes(q) ||
+          (s.president_nom ?? '').toLowerCase().includes(q) ||
+          (s.examinateur_nom ?? '').toLowerCase().includes(q);
+        const matchD = !d || s.date_soutenance.startsWith(d);
+        return matchQ && matchD;
+      })
+      .sort((a, b) => a.date_soutenance.localeCompare(b.date_soutenance));
+  });
+
+  statsSoutenances = computed(() => {
+    const all  = this.soutenances();
+    const today = new Date().toISOString().slice(0, 10);
+    const weekEnd = new Date(Date.now() + 7 * 86400_000).toISOString().slice(0, 10);
+    return {
+      total:      all.length,
+      cloturees:  all.filter(s => s.est_cloturee).length,
+      aVenir:     all.filter(s => !s.est_cloturee && s.date_soutenance >= today).length,
+      cetteS:     all.filter(s => s.date_soutenance >= today && s.date_soutenance <= weekEnd).length,
+    };
+  });
+
   constructor(
     private examenService: ExamenService,
     private studentService: StudentService,
+    private soutenanceService: SoutenanceService,
   ) {}
 
   ngOnInit(): void {
     this.chargerDossiers();
     this.chargerEtudiants();
+    this.chargerSoutenances();
+  }
+
+  chargerSoutenances(): void {
+    this.soutenancesLoading.set(true);
+    this.soutenanceService.getSoutenances().subscribe({
+      next:  data => { this.soutenances.set(data); this.soutenancesLoading.set(false); },
+      error: ()   => this.soutenancesLoading.set(false),
+    });
   }
 
   chargerEtudiants(): void {
@@ -273,4 +350,49 @@ export class ExamenCheckComponent implements OnInit {
   }
 
   trackUeId(_: number, ue: UeNote): number { return ue.ue_id; }
+
+  // ── Export CSV ───────────────────────────────────────────────────────
+
+  telechargerListeEligibles(): void {
+    const data = this.etudiantsEligibles();
+    if (!data.length) return;
+    const rows = data.map(e => ({
+      Nom: e.nom, Prénom: e.prenom, Matricule: e.matricule,
+      Filière: e.filiere_code,
+      'UE validées': `${e.ue_validees}/${e.total_ue}`,
+      Frais: e.has_paid_fees ? 'Payé' : 'Non payé',
+      Éligible: 'Oui',
+    }));
+    this._downloadCSV(rows, `eligibles-${this.anneeAcademique()}.csv`);
+  }
+
+  telechargerListeRattrapages(): void {
+    const data = this.etudiantsRattrapage();
+    if (!data.length) return;
+    const rows = data.map(e => ({
+      Nom: e.nom, Prénom: e.prenom, Matricule: e.matricule,
+      Filière: e.filiere_code,
+      'UE validées': e.ue_validees,
+      'Total UE': e.total_ue,
+      'UE manquantes': e.total_ue - e.ue_validees,
+    }));
+    const f = this.rattrapageFiliereFilter();
+    this._downloadCSV(rows, `rattrapages${f ? '-' + f : ''}-${this.anneeAcademique()}.csv`);
+  }
+
+  private _downloadCSV(rows: Record<string, unknown>[], filename: string): void {
+    const sep     = ';';
+    const headers = Object.keys(rows[0]).join(sep);
+    const lines   = rows.map(r => Object.values(r).map(v => `"${v}"`).join(sep));
+    const csv     = '﻿' + [headers, ...lines].join('\n');
+    const blob    = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url     = URL.createObjectURL(blob);
+    const a       = document.createElement('a');
+    a.href        = url;
+    a.download    = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 }

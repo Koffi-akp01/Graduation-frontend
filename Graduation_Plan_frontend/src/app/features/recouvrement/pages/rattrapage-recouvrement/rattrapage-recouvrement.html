@@ -1,163 +1,256 @@
 <app-top-nav></app-top-nav>
 
-<div class="page-container">
-  <div class="page-header">
-    <div>
-      <h1>Service de Recouvrement</h1>
-      <p>Gestion des factures de rattrapage et validation des paiements.</p>
-    </div>
-  </div>
+<div class="app-page">
 
-  @if (successMsg()) { <div class="alert alert-success">✅ {{ successMsg() }}</div> }
-  @if (errorMsg())   { <div class="alert alert-error">❌ {{ errorMsg() }}</div> }
-
-  <!-- Tabs -->
-  <div class="tabs-bar">
-    <button class="tab-btn" [class.active]="activeTab() === 'facturation'" (click)="setTab('facturation')">
-      💳 Facturation en attente
-      @if (pendingFactures().length > 0) {
-        <span class="badge-count">{{ pendingFactures().length }}</span>
-      }
-    </button>
-    <button class="tab-btn" [class.active]="activeTab() === 'validation'" (click)="setTab('validation')">
-      ✔ Validation paiements
-      @if (aValider().length > 0) {
-        <span class="badge-count">{{ aValider().length }}</span>
-      }
-    </button>
-    <button class="tab-btn" [class.active]="activeTab() === 'historique'" (click)="setTab('historique')">
-      🗂 Historique
-    </button>
-  </div>
-
-  <!-- ══ TAB : FACTURATION ══════════════════════════════════════════════ -->
-  @if (activeTab() === 'facturation') {
-    @if (facturesLoading()) {
-      <div class="loading">Chargement…</div>
-    } @else if (pendingFactures().length === 0) {
-      <div class="empty-state">
-        <div class="empty-icon">💳</div>
-        <p>Aucune facturation en attente.</p>
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#1B5E20">SR</div>
+      <div>
+        <div class="avatar-name">Service Recouvrement</div>
+        <div class="avatar-role">Gestion financière</div>
       </div>
-    } @else {
-      @for (item of pendingFactures(); track item.etudiant_id) {
-        <div class="facture-card">
-          <div class="facture-header">
-            <div>
-              <strong>{{ item.nom }}</strong>
-              <span class="matricule-tag">{{ item.matricule }}</span>
-              <span class="filiere-tag">{{ item.filiere }}</span>
+    </div>
+
+    <div class="sidebar-section">Paiements reçus</div>
+    <a class="nav-item" routerLink="/recouvrement/liste" routerLinkActive="active">
+      <span class="ico">💳</span> Frais de soutenance
+    </a>
+    <a class="nav-item active" routerLink="/recouvrement/rattrapages">
+      <span class="ico">🔄</span> Paiements rattrapages
+      @if (aValider().length > 0) {
+        <span class="badge-pill">{{ aValider().length }}</span>
+      }
+    </a>
+
+    <div class="sidebar-section">Rapports</div>
+    <a class="nav-item" routerLink="/recouvrement/liste" routerLinkActive="active">
+      <span class="ico">📊</span> Rapport financier
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- En-tête avec onglets intégrés -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Paiements rattrapages</div>
+        <div class="page-subtitle">Facturation, validation et historique des paiements de rattrapages</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm"
+          [class.btn-primary]="activeTab()==='facturation'"
+          [class.btn-secondary]="activeTab()!=='facturation'"
+          (click)="setTab('facturation')">
+          💳 Facturation
+          @if (pendingFactures().length > 0) {
+            <span class="badge-pill-sm">{{ pendingFactures().length }}</span>
+          }
+        </button>
+        <button class="btn btn-sm"
+          [class.btn-primary]="activeTab()==='validation'"
+          [class.btn-secondary]="activeTab()!=='validation'"
+          (click)="setTab('validation')">
+          ✔ Validation
+          @if (aValider().length > 0) {
+            <span class="badge-pill-sm">{{ aValider().length }}</span>
+          }
+        </button>
+        <button class="btn btn-sm"
+          [class.btn-primary]="activeTab()==='historique'"
+          [class.btn-secondary]="activeTab()!=='historique'"
+          (click)="setTab('historique')">
+          🗂 Historique
+        </button>
+        <button class="btn btn-secondary btn-sm" (click)="chargerFactures(); charger()">↺</button>
+      </div>
+    </div>
+
+    @if (successMsg()) { <div class="alert alert-success mb-16">✅ {{ successMsg() }}</div> }
+    @if (errorMsg())   { <div class="alert alert-danger mb-16">❌ {{ errorMsg() }}</div> }
+
+    <!-- ══ TAB : FACTURATION ══════════════════════════════════════════════ -->
+    @if (activeTab() === 'facturation') {
+
+      @if (facturesLoading()) {
+        <div class="loading-card">Chargement des factures…</div>
+
+      } @else if (pendingFactures().length === 0) {
+        <div class="empty-card">
+          <div class="empty-icon">💳</div>
+          <div class="empty-title">Aucune facturation en attente</div>
+          <div class="empty-sub">Tous les étudiants ont reçu leur facture de rattrapage.</div>
+        </div>
+
+      } @else {
+        @for (item of pendingFactures(); track item.etudiant_id) {
+          <div class="card mb-16">
+            <div class="card-header">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span class="card-title">{{ item.nom }}</span>
+                <span class="tag-matricule">{{ item.matricule }}</span>
+                <span class="tag-filiere">{{ item.filiere }}</span>
+              </div>
+              <span class="total-estime">
+                Total estimé : <strong>{{ item.total_estime | number:'1.0-0' }} FCFA</strong>
+              </span>
             </div>
-            <div class="total-estime">
-              Total estimé : <strong>{{ item.total_estime | number:'1.0-0' }} FCFA</strong>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Code UE</th>
+                  <th>Libellé</th>
+                  <th style="text-align:center">Crédits</th>
+                  <th>Type</th>
+                  <th style="text-align:right">Tarif/crédit</th>
+                  <th style="text-align:right">Montant (FCFA)</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of item.rattrapages; track r.id) {
+                  <tr>
+                    <td><code class="ue-code">{{ r.ue_code }}</code></td>
+                    <td>{{ r.ue_libelle }}</td>
+                    <td style="text-align:center">{{ r.credits }}</td>
+                    <td>
+                      @if (r.est_informatique) {
+                        <span class="badge badge-info">Informatique</span>
+                      } @else {
+                        <span class="badge badge-neutral">Non-info</span>
+                      }
+                    </td>
+                    <td class="mono" style="text-align:right">{{ r.tarif_credit | number:'1.0-0' }}</td>
+                    <td class="mono" style="text-align:right;font-weight:700">{{ r.montant | number:'1.0-0' }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td colspan="5" style="text-align:right;font-weight:700">TOTAL</td>
+                  <td class="mono" style="text-align:right;font-weight:800;color:#1B5E20">
+                    {{ item.total_estime | number:'1.0-0' }} FCFA
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div style="padding:12px 16px;display:flex;justify-content:flex-end">
+              <button class="btn btn-primary"
+                [disabled]="factureInProgress() === item.etudiant_id"
+                (click)="envoyerFacture(item.etudiant_id)">
+                @if (factureInProgress() === item.etudiant_id) { ⏳ Envoi en cours… }
+                @else { 📤 Envoyer la facture }
+              </button>
             </div>
           </div>
+        }
+      }
+    }
 
-          <table class="ue-table">
+    <!-- ══ TAB : VALIDATION ═══════════════════════════════════════════════ -->
+    @if (activeTab() === 'validation') {
+
+      @if (isLoading()) {
+        <div class="loading-card">Chargement…</div>
+
+      } @else if (aValider().length === 0) {
+        <div class="empty-card">
+          <div class="empty-icon">✔</div>
+          <div class="empty-title">Aucun paiement en attente</div>
+          <div class="empty-sub">Tous les paiements soumis ont été validés.</div>
+        </div>
+
+      } @else {
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">✔ Paiements à valider ({{ aValider().length }})</span>
+          </div>
+          <table>
             <thead>
               <tr>
-                <th>Code UE</th>
-                <th>Libellé</th>
-                <th>Crédits</th>
-                <th>Type</th>
-                <th>Tarif/crédit</th>
-                <th>Montant</th>
+                <th>Étudiant</th>
+                <th>UE</th>
+                <th>Date rattrapage</th>
+                <th style="text-align:right">Frais (FCFA)</th>
+                <th>Justificatif</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              @for (r of item.rattrapages; track r.id) {
+              @for (r of aValider(); track r.id) {
                 <tr>
-                  <td><code>{{ r.ue_code }}</code></td>
-                  <td>{{ r.ue_libelle }}</td>
-                  <td class="num">{{ r.credits }}</td>
+                  <td><strong>{{ r.etudiant_nom }}</strong></td>
                   <td>
-                    @if (r.est_informatique) {
-                      <span class="badge badge-info">Informatique</span>
+                    <code class="ue-code">{{ r.ue_code }}</code>
+                    <span class="small neant">{{ r.ue_libelle }}</span>
+                  </td>
+                  <td class="mono small">{{ r.date | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="mono" style="text-align:right">{{ r.frais | number:'1.0-0' }}</td>
+                  <td>
+                    @if (r.preuve_paiement) {
+                      <a [href]="r.preuve_paiement" target="_blank" class="btn btn-secondary btn-sm">👁 Voir</a>
                     } @else {
-                      <span class="badge badge-neutral">Non-informatique</span>
+                      <span class="neant">—</span>
                     }
                   </td>
-                  <td class="num">{{ r.tarif_credit | number:'1.0-0' }} FCFA</td>
-                  <td class="num montant">{{ r.montant | number:'1.0-0' }} FCFA</td>
+                  <td>
+                    <button class="btn btn-gold btn-sm"
+                      [disabled]="inProgress() === r.id"
+                      (click)="valider(r.id)">
+                      @if (inProgress() === r.id) { ⏳ } @else { ✅ Valider }
+                    </button>
+                  </td>
                 </tr>
               }
-              <tr class="total-row">
-                <td colspan="5"><strong>TOTAL</strong></td>
-                <td class="num montant"><strong>{{ item.total_estime | number:'1.0-0' }} FCFA</strong></td>
-              </tr>
             </tbody>
           </table>
-
-          <div class="facture-actions">
-            <button
-              class="btn-envoyer"
-              [disabled]="factureInProgress() === item.etudiant_id"
-              (click)="envoyerFacture(item.etudiant_id)"
-            >
-              @if (factureInProgress() === item.etudiant_id) {
-                Envoi en cours…
-              } @else {
-                📤 Envoyer la facture à l'étudiant
-              }
-            </button>
-          </div>
         </div>
       }
     }
-  }
 
-  <!-- ══ TAB : VALIDATION PAIEMENTS ════════════════════════════════════ -->
-  @if (activeTab() === 'validation') {
-    @if (isLoading()) {
-      <div class="loading">Chargement…</div>
-    } @else if (aValider().length === 0) {
-      <div class="empty-state">
-        <div class="empty-icon">✔</div>
-        <p>Aucun paiement en attente de validation.</p>
-      </div>
-    } @else {
-      @for (r of aValider(); track r.id) {
+    <!-- ══ TAB : HISTORIQUE ═══════════════════════════════════════════════ -->
+    @if (activeTab() === 'historique') {
+
+      @if (historique().length === 0) {
+        <div class="empty-card">
+          <div class="empty-icon">🗂</div>
+          <div class="empty-title">Aucun paiement validé</div>
+          <div class="empty-sub">L'historique des paiements validés apparaîtra ici.</div>
+        </div>
+
+      } @else {
         <div class="card">
-          <div class="card-info">
-            <div class="info-row"><span>Étudiant</span><strong>{{ r.etudiant_nom }}</strong></div>
-            <div class="info-row"><span>UE</span><strong>{{ r.ue_code }} — {{ r.ue_libelle }}</strong></div>
-            <div class="info-row"><span>Date rattrapage</span><strong>{{ r.date | date:'dd/MM/yyyy HH:mm' }}</strong></div>
-            <div class="info-row"><span>Frais à régler</span><strong>{{ r.frais | number:'1.0-0' }} FCFA</strong></div>
-            @if (r.preuve_paiement) {
-              <div class="info-row">
-                <span>Preuve</span>
-                <a [href]="r.preuve_paiement" target="_blank" class="link-preuve">Voir le justificatif</a>
-              </div>
-            }
+          <div class="card-header">
+            <span class="card-title">🗂 Historique validés ({{ historique().length }})</span>
           </div>
-          <div class="card-action">
-            <button class="btn-valider" [disabled]="inProgress() === r.id" (click)="valider(r.id)">
-              ✓ Valider le paiement
-            </button>
-          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>UE</th>
+                <th style="text-align:right">Frais (FCFA)</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of historique(); track r.id) {
+                <tr class="row-valide">
+                  <td><strong>{{ r.etudiant_nom }}</strong></td>
+                  <td>
+                    <code class="ue-code">{{ r.ue_code }}</code>
+                    <span class="small neant">{{ r.ue_libelle }}</span>
+                  </td>
+                  <td class="mono" style="text-align:right">{{ r.frais | number:'1.0-0' }}</td>
+                  <td><span class="badge badge-success">✅ Validé</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       }
     }
-  }
 
-  <!-- ══ TAB : HISTORIQUE ═══════════════════════════════════════════════ -->
-  @if (activeTab() === 'historique') {
-    @if (historique().length === 0) {
-      <div class="empty-state">
-        <div class="empty-icon">🗂</div>
-        <p>Aucun paiement validé pour le moment.</p>
-      </div>
-    } @else {
-      @for (r of historique(); track r.id) {
-        <div class="card card-done">
-          <div class="card-info">
-            <div class="info-row"><span>Étudiant</span><strong>{{ r.etudiant_nom }}</strong></div>
-            <div class="info-row"><span>UE</span><strong>{{ r.ue_code }}</strong></div>
-            <div class="info-row"><span>Frais réglés</span><strong>{{ r.frais | number:'1.0-0' }} FCFA</strong></div>
-            <div class="info-row"><span>Statut</span><span class="statut-ok">✅ Validé</span></div>
-          </div>
-        </div>
-      }
-    }
-  }
-</div>
+  </div><!-- /main -->
+</div><!-- /app-page -->

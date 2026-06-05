@@ -1,74 +1,145 @@
 <app-top-nav></app-top-nav>
 
-<div class="planning-page">
-  <header class="page-header">
-    <h1>Mon planning</h1>
-    <a routerLink="/directeur/suivi" class="btn-back">← Retour suivi</a>
-  </header>
+<div class="app-page">
 
-  @if (isLoading()) { <p class="loading">Chargement…</p> }
-  @if (errorMsg()) { <div class="alert error">{{ errorMsg() }}</div> }
-  @if (successMsg()) { <div class="alert success">{{ successMsg() }}</div> }
-
-  <!-- ── À confirmer ───────────────────────────────────────────────────── -->
-  @if (aValider().length) {
-    <section class="section">
-      <h2 class="section-title urgent">⚠ En attente de confirmation ({{ aValider().length }})</h2>
-      <div class="rdv-grid">
-        @for (rdv of aValider(); track rdv.id) {
-          <div class="rdv-card propose">
-            <div class="rdv-student">{{ rdv.etudiant_nom }}</div>
-            <div class="rdv-date">{{ rdv.date_heure | date:'EEEE dd MMM yyyy · HH:mm' }}</div>
-            @if (rdv.lieu) { <div class="rdv-lieu">📍 {{ rdv.lieu }}</div> }
-            @if (rdv.description) { <p class="rdv-desc">{{ rdv.description }}</p> }
-            <div class="rdv-actions">
-              <button class="btn-confirm" (click)="confirmer(rdv.id)">Confirmer</button>
-              <button class="btn-cancel"  (click)="annuler(rdv.id)">Refuser</button>
-              <a [routerLink]="['/chat', rdv.affectation]" class="btn-chat">💬 Discuter</a>
-            </div>
-          </div>
-        }
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">{{ initiales }}</div>
+      <div>
+        <div class="avatar-name">{{ prenom() }} {{ nom() }}</div>
+        <div class="avatar-role">Directeur de mémoire</div>
       </div>
-    </section>
-  }
+    </div>
 
-  <!-- ── Prochains rendez-vous ─────────────────────────────────────────── -->
-  <section class="section">
-    <h2 class="section-title">Prochains rendez-vous ({{ prochains().length }})</h2>
-    @if (prochains().length) {
-      <div class="rdv-grid">
-        @for (rdv of prochains(); track rdv.id) {
-          <div class="rdv-card confirme">
-            <div class="rdv-student">{{ rdv.etudiant_nom }}</div>
-            <div class="rdv-date">{{ rdv.date_heure | date:'EEEE dd MMM yyyy · HH:mm' }}</div>
-            @if (rdv.lieu) { <div class="rdv-lieu">📍 {{ rdv.lieu }}</div> }
-            @if (rdv.description) { <p class="rdv-desc">{{ rdv.description }}</p> }
-            <div class="rdv-actions">
-              <button class="btn-cancel sm" (click)="annuler(rdv.id)">Annuler</button>
-              <a [routerLink]="['/chat', rdv.affectation]" class="btn-chat">💬 Chat</a>
-            </div>
-          </div>
-        }
+    <div class="sidebar-section">Encadrement</div>
+    <a class="nav-item" routerLink="/directeur/suivi" routerLinkActive="active"
+       [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/directeur/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+    </a>
+    <a class="nav-item active" routerLink="/directeur/planning">
+      <span class="ico">📅</span> Planning
+      @if (aValider().length > 0) {
+        <span class="badge-pill">{{ aValider().length }}</span>
+      }
+    </a>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">📅 Mon planning</div>
+        <div class="page-subtitle">Rendez-vous avec mes étudiants</div>
       </div>
-    } @else {
-      <p class="empty">Aucun rendez-vous confirmé à venir.</p>
+      <button class="btn btn-secondary btn-sm" (click)="charger()" [disabled]="isLoading()">
+        ↺ Actualiser
+      </button>
+    </div>
+
+    @if (successMsg()) {
+      <div class="alert alert-success mb-16">{{ successMsg() }}</div>
     }
-  </section>
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-16">{{ errorMsg() }}</div>
+    }
+    @if (isLoading()) {
+      <div class="loading-card">Chargement du planning…</div>
+    }
 
-  <!-- ── Historique ────────────────────────────────────────────────────── -->
-  @if (historique().length) {
-    <section class="section">
-      <h2 class="section-title muted">Historique</h2>
-      <div class="rdv-grid">
-        @for (rdv of historique(); track rdv.id) {
-          <div class="rdv-card {{ rdv.statut.toLowerCase() }}">
-            <div class="rdv-student">{{ rdv.etudiant_nom }}</div>
-            <div class="rdv-date">{{ rdv.date_heure | date:'dd/MM/yyyy HH:mm' }}</div>
-            <span class="badge badge-{{ rdv.statut.toLowerCase() }}">{{ statutLabel(rdv.statut) }}</span>
-            <a [routerLink]="['/chat', rdv.affectation]" class="btn-chat sm">💬 Chat</a>
-          </div>
-        }
+    <!-- ── À confirmer (urgents) ──────────────────────────────────────── -->
+    @if (aValider().length > 0) {
+      <div class="card mb-20">
+        <div class="card-header">
+          <span class="card-title">⚠ En attente de confirmation ({{ aValider().length }})</span>
+        </div>
+        <div class="rdv-grid">
+          @for (rdv of aValider(); track rdv.id) {
+            <div class="rdv-card rdv-propose">
+              <div class="rdv-student">{{ rdv.etudiant_nom }}</div>
+              <div class="rdv-date">{{ rdv.date_heure | date:'EEEE dd MMM yyyy · HH:mm' }}</div>
+              @if (rdv.lieu) { <div class="rdv-lieu">📍 {{ rdv.lieu }}</div> }
+              @if (rdv.description) { <div class="rdv-desc">{{ rdv.description }}</div> }
+              <div class="rdv-actions">
+                <button class="btn btn-primary btn-sm" (click)="confirmer(rdv.id)">✅ Confirmer</button>
+                <button class="btn btn-danger  btn-sm" (click)="annuler(rdv.id)">❌ Refuser</button>
+                <a [routerLink]="['/chat', rdv.affectation]" class="btn btn-secondary btn-sm">💬 Chat</a>
+              </div>
+            </div>
+          }
+        </div>
       </div>
-    </section>
-  }
+    }
+
+    <!-- ── Prochains RDV confirmés ──────────────────────────────────────── -->
+    <div class="card mb-20">
+      <div class="card-header">
+        <span class="card-title">✅ Prochains rendez-vous ({{ prochains().length }})</span>
+      </div>
+      @if (prochains().length === 0) {
+        <div class="empty-cell">Aucun rendez-vous confirmé à venir.</div>
+      } @else {
+        <div class="rdv-grid">
+          @for (rdv of prochains(); track rdv.id) {
+            <div class="rdv-card rdv-confirme">
+              <div class="rdv-student">{{ rdv.etudiant_nom }}</div>
+              <div class="rdv-date">{{ rdv.date_heure | date:'EEEE dd MMM yyyy · HH:mm' }}</div>
+              @if (rdv.lieu) { <div class="rdv-lieu">📍 {{ rdv.lieu }}</div> }
+              @if (rdv.description) { <div class="rdv-desc">{{ rdv.description }}</div> }
+              <div class="rdv-actions">
+                <button class="btn btn-secondary btn-sm" (click)="annuler(rdv.id)">Annuler</button>
+                <a [routerLink]="['/chat', rdv.affectation]" class="btn btn-secondary btn-sm">💬 Chat</a>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ── Historique ──────────────────────────────────────────────────── -->
+    @if (historique().length > 0) {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🗓 Historique ({{ historique().length }})</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Date</th>
+              <th>Lieu</th>
+              <th>Statut</th>
+              <th>Chat</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rdv of historique(); track rdv.id) {
+              <tr>
+                <td><strong>{{ rdv.etudiant_nom }}</strong></td>
+                <td class="small mono">{{ rdv.date_heure | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="small">{{ rdv.lieu || '—' }}</td>
+                <td><span class="badge" [class]="statutClass(rdv.statut)">{{ statutLabel(rdv.statut) }}</span></td>
+                <td>
+                  <a [routerLink]="['/chat', rdv.affectation]" class="btn btn-secondary btn-sm">💬</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
 </div>

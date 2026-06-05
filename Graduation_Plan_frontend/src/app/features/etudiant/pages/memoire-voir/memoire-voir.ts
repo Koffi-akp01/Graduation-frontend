@@ -105,6 +105,18 @@ export class EtudiantMemoireVoirComponent implements OnInit, OnDestroy {
     });
   }
 
+  telechargerMemoire(): void {
+    const url = this.blobObjectUrl;
+    if (!url) return;
+    const nom = (this.titre() || 'memoire').replace(/\s+/g, '_');
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = `${nom}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   filtrerPage(page: number | null): void { this.pageActive.set(page); }
 
   recharger(): void {

@@ -1,24 +1,60 @@
 <app-top-nav></app-top-nav>
 
 <div class="app-page">
+
+  <!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
   <aside class="sidebar">
     <div class="sidebar-avatar">
       <div class="avatar-circle">💳</div>
       <div>
-        <div class="avatar-name">Frais de soutenance</div>
-        <div class="avatar-role">Gestion de mon paiement</div>
+        <div class="avatar-name">Paiement des frais</div>
+        <div class="avatar-role">Étudiant</div>
       </div>
     </div>
-    <div class="sidebar-section">Navigation</div>
-    <a class="nav-item" routerLink="/etudiant"><span class="ico">🏠</span> Tableau de bord</a>
-    <a class="nav-item active"><span class="ico">💳</span> Paiement des frais</a>
-    <a class="nav-item" routerLink="/etudiant/memoire"><span class="ico">📄</span> Mon mémoire</a>
+
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/notes" routerLinkActive="active">
+      <span class="ico">📊</span> Relevé de notes
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire" routerLinkActive="active">
+      <span class="ico">📁</span> Déposer un document
+    </a>
+    <a class="nav-item" routerLink="/etudiant/theme/nouveau" routerLinkActive="active">
+      <span class="ico">💡</span> Mes thèmes
+    </a>
+
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item" routerLink="/etudiant/chat" routerLinkActive="active">
+      <span class="ico">💬</span> Chat directeur
+    </a>
+    <a class="nav-item" routerLink="/etudiant/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/eligibilite" routerLinkActive="active">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+    <a class="nav-item active" routerLink="/etudiant/paiement">
+      <span class="ico">💳</span> Paiement des frais
+    </a>
+
+    <div class="sidebar-section">Ressources</div>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
   </aside>
 
+  <!-- ═══ CONTENU PRINCIPAL ══════════════════════════════════════════════ -->
   <div class="main">
+
     <div class="page-header">
       <div>
-        <div class="page-title">Paiement des frais de soutenance</div>
+        <div class="page-title">💳 Paiement des frais de soutenance</div>
         <div class="page-subtitle">Session 3 – 22 Août 2026</div>
       </div>
       <button class="btn btn-gold" (click)="ouvrirModal()">➕ Soumettre un bordereau</button>
@@ -28,6 +64,7 @@
     <div class="card">
       <div class="card-header">
         <span class="card-title">🧾 Mes bordereaux de paiement</span>
+        <button class="btn btn-secondary btn-sm" (click)="chargerBordereaux()">↺ Actualiser</button>
       </div>
 
       @if (bordereaux().length === 0) {
@@ -43,7 +80,7 @@
               <th>N° Bordereau</th>
               <th>Banque</th>
               <th>Montant</th>
-              <th>Date</th>
+              <th>Date de dépôt</th>
               <th>Statut</th>
               <th>Preuve</th>
             </tr>
@@ -51,7 +88,7 @@
           <tbody>
             @for (b of bordereaux(); track b.id) {
               <tr>
-                <td style="font-family:'DM Mono',monospace">{{ b.numero_bordereau }}</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700">{{ b.numero_bordereau }}</td>
                 <td>{{ b.banque }}</td>
                 <td style="font-family:'DM Mono',monospace">{{ montantLabel(b.montant) }}</td>
                 <td style="font-size:12px">{{ b.date_depot | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -65,6 +102,8 @@
                 <td>
                   @if (b.image_bordereau) {
                     <a [href]="b.image_bordereau" target="_blank" class="btn btn-secondary btn-sm">👁 Voir</a>
+                  } @else {
+                    <span style="color:#718096">—</span>
                   }
                 </td>
               </tr>
@@ -73,19 +112,21 @@
         </table>
       }
     </div>
+
   </div>
 </div>
 
-<!-- ═══ MODAL soumission bordereau ═══════════════════════════════════════ -->
-@if (showModal) {
+<!-- ═══ MODAL : soumettre un bordereau ══════════════════════════════════ -->
+@if (showModal()) {
   <div class="modal-overlay" (click)="fermerModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <span class="modal-title">Soumettre un bordereau de paiement</span>
+        <span class="modal-title">📤 Soumettre un bordereau de paiement</span>
         <button class="modal-close" (click)="fermerModal()">✕</button>
       </div>
 
       <div class="modal-body">
+
         <div class="field-group">
           <label>N° du bordereau <span class="req">*</span></label>
           <input type="text" [(ngModel)]="form.numero_bordereau" placeholder="Ex : BRD-2026-00142" />
@@ -111,18 +152,19 @@
           <span class="field-hint">Photo ou PDF du reçu bancaire</span>
         </div>
 
-        @if (errorMessage) {
-          <div class="alert-msg error">❌ {{ errorMessage }}</div>
+        @if (errorMessage()) {
+          <div class="alert-msg error">❌ {{ errorMessage() }}</div>
         }
-        @if (successMessage) {
-          <div class="alert-msg success">✅ {{ successMessage }}</div>
+        @if (successMessage()) {
+          <div class="alert-msg success">✅ {{ successMessage() }}</div>
         }
+
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="fermerModal()">Annuler</button>
-        <button class="btn btn-gold" (click)="soumettre()" [disabled]="isLoading">
-          @if (isLoading) { Envoi en cours… } @else { Soumettre }
+        <button class="btn btn-gold" (click)="soumettre()" [disabled]="isLoading()">
+          @if (isLoading()) { Envoi en cours… } @else { Soumettre }
         </button>
       </div>
     </div>

@@ -242,8 +242,14 @@ export class DashboardComponent implements OnInit {
   private buildStatCards(profile: EtudiantProfile, elig: EligibiliteStatus | null): DashboardStatCard[] {
     const phase = profile.current_phase ?? 1;
     const dossier = this.dossierStatFromPhase(phase);
-    const year = new Date().getFullYear();
     const fraisOk = elig?.frais_payes === true;
+
+    // Calcul dynamique du délai avant la clôture des dépôts (22 août 2026)
+    const cloture  = new Date('2026-08-22T00:00:00');
+    const aujourdHui = new Date(); aujourdHui.setHours(0, 0, 0, 0);
+    const daysLeft = Math.ceil((cloture.getTime() - aujourdHui.getTime()) / 86_400_000);
+    const delaiVal = daysLeft > 0 ? `${daysLeft}j` : 'Clôturé';
+    const delaiSub = daysLeft > 0 ? 'Avant clôture des dépôts (22 août)' : 'Session de dépôts terminée';
 
     return [
       { label: 'STATUT DOSSIER', value: dossier.value, sub: dossier.sub, icon: '📁' },
@@ -262,11 +268,11 @@ export class DashboardComponent implements OnInit {
       {
         label: 'FRAIS DE SOUTENANCE',
         value: fraisOk ? 'Payé' : 'À régler',
-        sub: fraisOk ? `Reçu N° REC-${year}-0418` : 'Paiement requis avant soutenance',
+        sub: fraisOk ? 'Paiement confirmé par le recouvrement' : 'Paiement requis avant soutenance',
         icon: '💳',
         showCheck: fraisOk,
       },
-      { label: 'DÉLAI RESTANT', value: '18j', sub: 'Avant clôture des dépôts', icon: '⏳' },
+      { label: 'DÉLAI RESTANT', value: delaiVal, sub: delaiSub, icon: '⏳' },
     ];
   }
 

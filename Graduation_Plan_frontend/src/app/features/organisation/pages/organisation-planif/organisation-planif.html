@@ -223,6 +223,32 @@
               </div>
             </div>
 
+            <!-- ── Checklist matériel ──────────────────────────────────── -->
+            <div class="materiel-card">
+              <div class="materiel-title">
+                🔧 Vérification du matériel
+                @if (materielPret) {
+                  <span class="badge badge-success" style="margin-left:10px">✓ Tout prêt</span>
+                } @else {
+                  <span class="badge badge-warn" style="margin-left:10px">À vérifier</span>
+                }
+              </div>
+              <div class="materiel-grid">
+                @for (m of MATERIEL; track m.key) {
+                  <label class="materiel-item" [class.checked]="materielCheck[m.key]">
+                    <input type="checkbox" [(ngModel)]="materielCheck[m.key]" />
+                    <span class="materiel-ico">{{ m.ico }}</span>
+                    <span class="materiel-lbl">{{ m.label }}</span>
+                  </label>
+                }
+              </div>
+              <div style="margin-top:10px">
+                <label style="font-size:12px;font-weight:600;color:var(--ink3)">Remarques logistiques</label>
+                <textarea class="materiel-note" rows="2" [(ngModel)]="materielNote"
+                  placeholder="Problèmes constatés, besoins spéciaux, contacts…"></textarea>
+              </div>
+            </div>
+
             @if (errorMsg) {
               <div class="alert-msg error" style="margin-top:12px">{{ errorMsg }}</div>
             }
@@ -231,7 +257,7 @@
             }
 
             <div class="form-actions" style="margin-top:16px">
-              <button class="btn btn-secondary" (click)="selectedEtudiant = null">Annuler</button>
+              <button class="btn btn-secondary" (click)="selectedEtudiant = null; resetMateriel()">Annuler</button>
               <button class="btn btn-primary" (click)="planifierSoutenance()" [disabled]="isLoading">
                 {{ isLoading ? 'Planification...' : '📅 Confirmer la planification' }}
               </button>

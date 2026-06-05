@@ -34,9 +34,6 @@
     <a class="nav-item" routerLink="/archive" routerLinkActive="active">
       <span class="ico">🗄</span> Archives
     </a>
-    <a class="nav-item" routerLink="/calendrier" routerLinkActive="active">
-      <span class="ico">🗓</span> Calendrier
-    </a>
   </aside>
 
   <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
@@ -173,8 +170,8 @@
           <textarea [(ngModel)]="propositionEnCours.description" rows="3"
             placeholder="Description détaillée du thème…"></textarea>
           <div class="correction-actions">
-            <button class="btn btn-sm btn-gold" [disabled]="isSavingTheme" (click)="envoyerProposition()">
-              @if (isSavingTheme) { Envoi… } @else { 📤 Envoyer le thème }
+            <button class="btn btn-sm btn-gold" [disabled]="isSavingTheme()" (click)="envoyerProposition()">
+              @if (isSavingTheme()) { Envoi… } @else { 📤 Envoyer le thème }
             </button>
             <button class="btn btn-sm btn-secondary" (click)="annulerProposition()">Annuler</button>
           </div>

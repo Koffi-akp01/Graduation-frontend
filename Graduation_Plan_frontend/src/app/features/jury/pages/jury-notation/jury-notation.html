@@ -127,15 +127,15 @@
         <div style="padding:24px">
 
           <!-- Infos soutenance -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-            <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
-              <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">Étudiant</div>
-              <div style="font-size:15px;font-weight:700;margin-top:4px">{{ s.etudiant_details }}</div>
-              <div style="font-size:12px;color:var(--ink3)">{{ s.filiere }}</div>
+          <div class="notation-info-grid">
+            <div class="info-panel">
+              <div class="info-panel-lbl">Étudiant</div>
+              <div class="info-panel-val">{{ s.etudiant_details }}</div>
+              <div class="info-panel-sub">{{ s.filiere }}</div>
             </div>
-            <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
-              <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">Titre du mémoire</div>
-              <div style="font-size:13px;font-weight:600;margin-top:4px">{{ s.theme_titre || '—' }}</div>
+            <div class="info-panel">
+              <div class="info-panel-lbl">Titre du mémoire</div>
+              <div class="info-panel-val info-panel-val--sm">{{ s.theme_titre || '—' }}</div>
             </div>
           </div>
 
@@ -151,49 +151,43 @@
             <tbody>
               <tr>
                 <td>Qualité rédactionnelle du mémoire</td>
-                <td style="text-align:center;font-weight:700">3</td>
+                <td class="coeff-cell">3</td>
                 <td>
-                  <input type="number" [(ngModel)]="noteMemoire" min="0" max="20"
-                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous"
-                    style="width:70px;text-align:center"/>
+                  <input type="number" class="note-input" [(ngModel)]="noteMemoire" min="0" max="20"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous" />
                 </td>
               </tr>
               <tr>
                 <td>Maîtrise du sujet (présentation orale)</td>
-                <td style="text-align:center;font-weight:700">4</td>
+                <td class="coeff-cell">4</td>
                 <td>
-                  <input type="number" [(ngModel)]="noteMaitrise" min="0" max="20"
-                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous"
-                    style="width:70px;text-align:center"/>
+                  <input type="number" class="note-input" [(ngModel)]="noteMaitrise" min="0" max="20"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous" />
                 </td>
               </tr>
               <tr>
                 <td>Présentation (support, clarté)</td>
-                <td style="text-align:center;font-weight:700">3</td>
+                <td class="coeff-cell">3</td>
                 <td>
-                  <input type="number" [(ngModel)]="notePresentation" min="0" max="20"
-                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous"
-                    style="width:70px;text-align:center"/>
+                  <input type="number" class="note-input" [(ngModel)]="notePresentation" min="0" max="20"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous" />
                 </td>
               </tr>
               <tr>
                 <td>Réponses aux questions du jury</td>
-                <td style="text-align:center;font-weight:700">3</td>
+                <td class="coeff-cell">3</td>
                 <td>
-                  <input type="number" [(ngModel)]="noteReponses" min="0" max="20"
-                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous"
-                    style="width:70px;text-align:center"/>
+                  <input type="number" class="note-input" [(ngModel)]="noteReponses" min="0" max="20"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous" />
                 </td>
               </tr>
-              <tr style="background:var(--gold-lt)">
-                <td colspan="2"><strong>MOYENNE FINALE (/20)</strong></td>
+              <tr class="tr-total">
+                <td colspan="2"><strong>MOYENNE PONDÉRÉE (/20) — coefficients 3 · 4 · 3 · 3</strong></td>
                 <td>
-                  <strong style="font-size:20px;font-family:'DM Mono',monospace;color:var(--accent)">
-                    {{ noteFinale }}
-                  </strong>
-                  <span style="margin-left:12px;font-size:12px;color:var(--ink3)">
-                    → {{ mentionFor(+noteFinale) }}
-                  </span>
+                  <div class="note-finale-display">
+                    <span class="note-finale-num">{{ noteFinale }}</span>
+                    <span class="note-finale-mention">→ {{ mentionFor(+noteFinale) }}</span>
+                  </div>
                 </td>
               </tr>
             </tbody>

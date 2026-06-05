@@ -1,0 +1,392 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#DC2626">SE</div>
+      <div>
+        <div class="avatar-name">Service Examen</div>
+        <div class="avatar-role">Planification</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Planification</div>
+    <button class="nav-item" [class.active]="vue() === 'dashboard'" (click)="afficherVue('dashboard')">
+      <span class="ico">🏠</span> Tableau de bord
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'planifier'" (click)="afficherVue('planifier')">
+      <span class="ico">📅</span> Planifier manuellement
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'auto'" (click)="afficherVue('auto')">
+      <span class="ico">🤖</span> Planification automatique
+    </button>
+
+    <div class="sidebar-section">Navigation</div>
+    <a class="nav-item" routerLink="/examen/conformite" routerLinkActive="active">
+      <span class="ico">🔍</span> Retour Service Examen
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- ── TABLEAU DE BORD ───────────────────────────────────────────────── -->
+    @if (vue() === 'dashboard') {
+      <div class="page-header">
+        <div>
+          <div class="page-title">Programmation des soutenances</div>
+          <div class="page-subtitle">Session en cours — planifiez et organisez les soutenances</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" (click)="chargerStats()">↺ Actualiser</button>
+          <button class="btn btn-primary" (click)="afficherVue('planifier')">
+            + Planifier une soutenance
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Soutenances planifiées</div>
+          <div class="stat-value">{{ stats()?.total_soutenances ?? '—' }}</div>
+          <div class="stat-sub">Session en cours</div>
+          <div class="stat-icon">📋</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">En attente</div>
+          <div class="stat-value">{{ etudiantsSans().length }}</div>
+          <div class="stat-sub">Étudiants sans soutenance</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Clôturées</div>
+          <div class="stat-value">{{ stats()?.soutenances_cloturees ?? '—' }}</div>
+          <div class="stat-sub">Résultats finalisés</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Moyenne générale</div>
+          <div class="stat-value">
+            {{ stats()?.moyenne_generale != null ? (stats()!.moyenne_generale | number:'1.1-1') : '—' }}
+          </div>
+          <div class="stat-sub">/20</div>
+          <div class="stat-icon">📊</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⏳ Étudiants en attente de soutenance ({{ etudiantsSans().length }})</span>
+          <button class="btn btn-primary btn-sm" (click)="afficherVue('planifier')">
+            📅 Planifier
+          </button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Thème</th>
+              <th>Éligible</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of etudiantsSans(); track e.etudiant_id) {
+              <tr>
+                <td>
+                  <strong>{{ e.prenom }} {{ e.nom }}</strong>
+                  <div style="font-size:11px;color:var(--ink3)">{{ e.matricule }}</div>
+                </td>
+                <td>{{ e.filiere }}</td>
+                <td style="font-size:12px;max-width:200px">{{ e.titre_theme }}</td>
+                <td>
+                  @if (e.est_eligible) {
+                    <span class="badge badge-success">✅ Éligible</span>
+                  } @else {
+                    <span class="badge badge-warn">⚠ Non éligible</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" style="text-align:center;padding:40px;color:var(--ink3)">
+                  ✅ Tous les étudiants éligibles ont une soutenance planifiée.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ── PLANIFICATION MANUELLE ────────────────────────────────────────── -->
+    @if (vue() === 'planifier') {
+      <div class="page-header">
+        <div>
+          <div class="page-title">Planifier une soutenance</div>
+          <div class="page-subtitle">{{ etudiantsSans().length }} étudiant(s) sans soutenance planifiée</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" (click)="afficherVue('dashboard')">← Retour</button>
+      </div>
+
+      <!-- Étape 1 : choisir un étudiant -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <span class="card-title">① Sélectionner un étudiant éligible</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Thème</th>
+              <th>Éligible</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of etudiantsSans(); track e.etudiant_id) {
+              <tr [style.background]="selectedEtudiant?.etudiant_id === e.etudiant_id ? '#f0fdf4' : ''">
+                <td>
+                  <strong>{{ e.prenom }} {{ e.nom }}</strong>
+                  <div style="font-size:11px;color:var(--ink3)">{{ e.matricule }}</div>
+                </td>
+                <td>{{ e.filiere }}</td>
+                <td style="font-size:12px;max-width:180px">{{ e.titre_theme }}</td>
+                <td>
+                  @if (e.est_eligible) {
+                    <span class="badge badge-success">Éligible</span>
+                  } @else {
+                    <span class="badge badge-danger">Non éligible</span>
+                  }
+                </td>
+                <td>
+                  <button class="btn btn-primary btn-sm"
+                    [disabled]="!e.est_eligible"
+                    (click)="selectionnerEtudiant(e)">
+                    Sélectionner
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" style="text-align:center;padding:40px;color:var(--ink3)">
+                  Tous les étudiants éligibles ont déjà une soutenance planifiée.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Étape 2 : remplir le formulaire -->
+      @if (selectedEtudiant) {
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">
+              ② Formulaire — {{ selectedEtudiant.prenom }} {{ selectedEtudiant.nom }}
+            </span>
+          </div>
+          <div style="padding:20px">
+
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:13px">
+              📋 <strong>Thème :</strong> {{ selectedEtudiant.titre_theme }}
+            </div>
+
+            <div class="form-grid">
+              <div class="field-group">
+                <label>Directeur de mémoire <span class="req">*</span></label>
+                <select [(ngModel)]="form.directeur_memoire">
+                  <option [value]="0">Sélectionner...</option>
+                  @for (d of directeurs(); track d.id) {
+                    <option [value]="d.id">{{ membreNom(d) }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Président du jury <span class="req">*</span></label>
+                <select [(ngModel)]="form.president">
+                  <option [value]="0">Sélectionner...</option>
+                  @for (p of presidents(); track p.id) {
+                    <option [value]="p.id">{{ membreNom(p) }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Examinateur <span class="req">*</span></label>
+                <select [(ngModel)]="form.examinateur">
+                  <option [value]="0">Sélectionner...</option>
+                  @for (ex of examinateurs(); track ex.id) {
+                    <option [value]="ex.id">{{ membreNom(ex) }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Salle <span class="req">*</span></label>
+                <select [(ngModel)]="form.salle">
+                  <option [value]="0">Sélectionner...</option>
+                  @for (s of salles(); track s.id) {
+                    <option [value]="s.id">{{ s.nom }} ({{ s.capacite }} places)</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Date et heure <span class="req">*</span></label>
+                <input type="datetime-local" [(ngModel)]="form.date_soutenance" />
+              </div>
+
+              <div class="field-group">
+                <label>Session</label>
+                <select [(ngModel)]="form.session">
+                  @for (sc of SESSION_CHOICES; track sc.value) {
+                    <option [value]="sc.value">{{ sc.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group" style="grid-column:1/-1">
+                <label>Lien Google Meet (optionnel)</label>
+                <input type="url" [(ngModel)]="form.lien_meet"
+                  placeholder="https://meet.google.com/..." />
+              </div>
+            </div>
+
+            @if (errorMsg) {
+              <div class="alert-msg error" style="margin-top:14px">❌ {{ errorMsg }}</div>
+            }
+            @if (successMsg) {
+              <div class="alert-msg success" style="margin-top:14px">{{ successMsg }}</div>
+            }
+
+            <div class="form-actions" style="margin-top:20px">
+              <button class="btn btn-secondary" (click)="selectedEtudiant = null">Annuler</button>
+              <button class="btn btn-primary" (click)="planifierSoutenance()" [disabled]="isLoading">
+                {{ isLoading ? '⏳ Planification...' : '📅 Confirmer la soutenance' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ── PLANIFICATION AUTOMATIQUE ────────────────────────────────────── -->
+    @if (vue() === 'auto') {
+      <div class="page-header">
+        <div>
+          <div class="page-title">🤖 Planification automatique</div>
+          <div class="page-subtitle">
+            L'algorithme répartit les étudiants éligibles selon la disponibilité des jurys et des salles.
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" (click)="afficherVue('dashboard')">← Retour</button>
+      </div>
+
+      <!-- Info -->
+      <div class="card mb-16">
+        <div class="card-header">
+          <span class="card-title">📋 Comment ça fonctionne</span>
+        </div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+          <div class="auto-step">
+            <span class="auto-step-num">1</span>
+            <div>
+              <div style="font-weight:600;font-size:13px">Étudiants éligibles</div>
+              <div style="font-size:12px;color:var(--ink3)">
+                L'algorithme sélectionne automatiquement les étudiants dont les UE sont validées et les frais payés.
+              </div>
+            </div>
+          </div>
+          <div class="auto-step">
+            <span class="auto-step-num">2</span>
+            <div>
+              <div style="font-weight:600;font-size:13px">Affectation jury &amp; salle</div>
+              <div style="font-size:12px;color:var(--ink3)">
+                Il vérifie les disponibilités du directeur, président et examinateur, puis assigne une salle libre.
+              </div>
+            </div>
+          </div>
+          <div class="auto-step">
+            <span class="auto-step-num">3</span>
+            <div>
+              <div style="font-weight:600;font-size:13px">Créneau horaire</div>
+              <div style="font-size:12px;color:var(--ink3)">
+                Il planifie les soutenances sur des créneaux disponibles en évitant les conflits.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compteur -->
+      <div class="card mb-16">
+        <div class="card-header">
+          <span class="card-title">📊 État actuel de la session</span>
+        </div>
+        <div style="padding:20px;display:flex;gap:24px;flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-size:32px;font-weight:800;color:var(--accent);font-family:'DM Mono',monospace">
+              {{ etudiantsSans().length }}
+            </div>
+            <div style="font-size:12px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">
+              À planifier
+            </div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:32px;font-weight:800;color:var(--success);font-family:'DM Mono',monospace">
+              {{ stats()?.total_soutenances ?? 0 }}
+            </div>
+            <div style="font-size:12px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">
+              Déjà planifiées
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🤖 Lancer la planification automatique</span>
+        </div>
+        <div style="padding:24px">
+          <p style="font-size:13px;color:var(--ink3);margin-bottom:20px;line-height:1.6">
+            Cliquez sur le bouton ci-dessous pour lancer l'algorithme.
+            Il traitera les <strong>{{ etudiantsSans().length }}</strong> étudiant(s) en attente
+            et créera automatiquement leurs soutenances.
+          </p>
+
+          @if (etudiantsSans().length === 0) {
+            <div class="alert alert-success">
+              ✅ Tous les étudiants éligibles ont déjà une soutenance planifiée.
+            </div>
+          } @else {
+            <button class="btn btn-gold" style="font-size:14px;padding:12px 24px"
+              [disabled]="isProcessing()"
+              (click)="lancerAuto()">
+              {{ isProcessing() ? '⏳ Calcul en cours…' : '🤖 Lancer la planification automatique' }}
+            </button>
+          }
+
+          @if (autoSuccess()) {
+            <div class="alert alert-success" style="margin-top:16px">
+              ✅ <strong>Planning généré !</strong>
+              Les soutenances ont été créées automatiquement.
+              <a routerLink="/examen/conformite" style="margin-left:8px;color:var(--success);font-weight:700">
+                → Voir le calendrier
+              </a>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+  </div><!-- /main -->
+</div><!-- /app-page -->

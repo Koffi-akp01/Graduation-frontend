@@ -17,7 +17,8 @@ export const roleGuard: CanActivateFn = (route, _state) => {
   // Supporte data.roles (tableau) ou data.role (string unique, rétrocompatibilité)
   const allowed: string[] = route.data['roles'] ?? (route.data['role'] ? [route.data['role']] : []);
 
-  if (allowed.length === 0 || allowed.includes(userRole)) {
+  // ADMIN est super-utilisateur — il passe tous les guards
+  if (allowed.length === 0 || allowed.includes(userRole) || userRole === 'ADMIN') {
     return true;
   }
 

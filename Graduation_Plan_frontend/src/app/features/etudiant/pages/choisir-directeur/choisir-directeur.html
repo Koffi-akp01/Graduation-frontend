@@ -1,74 +1,158 @@
 <app-top-nav></app-top-nav>
 
-<div class="page-container">
-  <div class="page-header">
-    <h1>Choisir un directeur de mémoire</h1>
-    <p>Sélectionnez un formateur interne ou externe pour encadrer votre mémoire.</p>
-  </div>
+<div class="app-page">
 
-  @if (isLoading()) {
-    <div class="loading">Chargement...</div>
-  }
-
-  @if (successMsg()) {
-    <div class="alert alert-success">{{ successMsg() }}</div>
-  }
-
-  @if (errorMsg()) {
-    <div class="alert alert-error">{{ errorMsg() }}</div>
-  }
-
-  @if (affectationAcceptee()) {
-    <div class="alert alert-success">
-      ✅ Votre directeur de mémoire est <strong>{{ affectationAcceptee()!.directeur_nom }}</strong>.
-      <a [routerLink]="['/chat', affectationAcceptee()!.id]" class="btn-chat-link">💬 Ouvrir le chat</a>
+  <!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">🔗</div>
+      <div>
+        <div class="avatar-name">Choisir un directeur</div>
+        <div class="avatar-role">Étudiant</div>
+      </div>
     </div>
-  }
 
-  @if (demandeEnAttente()) {
-    <div class="alert alert-info">
-      ⏳ Demande en attente auprès de <strong>{{ demandeEnAttente()!.directeur_nom }}</strong>.
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/notes" routerLinkActive="active">
+      <span class="ico">📊</span> Relevé de notes
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire" routerLinkActive="active">
+      <span class="ico">📁</span> Déposer un document
+    </a>
+    <a class="nav-item" routerLink="/etudiant/theme/nouveau" routerLinkActive="active">
+      <span class="ico">💡</span> Mes thèmes
+    </a>
+    <a class="nav-item active" routerLink="/etudiant/choisir-directeur">
+      <span class="ico">🔗</span> Choisir un directeur
+    </a>
+
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item" routerLink="/etudiant/chat" routerLinkActive="active">
+      <span class="ico">💬</span> Chat directeur
+    </a>
+    <a class="nav-item" routerLink="/etudiant/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/eligibilite" routerLinkActive="active">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+    <a class="nav-item" routerLink="/etudiant/paiement" routerLinkActive="active">
+      <span class="ico">💳</span> Paiement des frais
+    </a>
+
+    <div class="sidebar-section">Ressources</div>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+  </aside>
+
+  <!-- ═══ CONTENU PRINCIPAL ══════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">🔗 Choisir un directeur de mémoire</div>
+        <div class="page-subtitle">Sélectionnez un formateur interne ou externe pour encadrer votre mémoire.</div>
+      </div>
+      <a class="btn btn-secondary btn-sm" routerLink="/etudiant">← Retour</a>
     </div>
-  }
 
-  <div class="directeurs-grid">
-    @for (d of directeurs(); track d.id) {
-      <div class="card">
-        <div class="card-header">
-          <div class="avatar">{{ d.prenom[0] }}{{ d.nom[0] }}</div>
-          <div>
-            <div class="name">{{ d.prenom }} {{ d.nom }}</div>
-            <div class="badge" [class.internal]="d.is_internal">
-              {{ d.is_internal ? 'Interne' : 'Externe' }}
-            </div>
-          </div>
+    @if (isLoading()) {
+      <div class="loading-card">Chargement des directeurs disponibles…</div>
+    }
+
+    @if (successMsg()) {
+      <div class="alert alert-success mb-16">✅ {{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-16">{{ errorMsg() }}</div>
+    }
+
+    <!-- Statut affectation acceptée -->
+    @if (affectationAcceptee()) {
+      <div class="affectation-ok-card">
+        <div class="affectation-ok-ico">✅</div>
+        <div class="affectation-ok-info">
+          <div class="affectation-ok-title">Directeur affecté</div>
+          <div class="affectation-ok-name">{{ affectationAcceptee()!.directeur_nom }}</div>
+          <div class="affectation-ok-sub">Votre affectation a été acceptée par la direction académique.</div>
         </div>
-        <div class="card-body">
-          <div class="info-row">
-            <span>Filière :</span>
-            <span class="filiere-badge">{{ d.filiere_principale || '—' }}</span>
-          </div>
-          <div class="info-row">
-            <span>Email :</span> <span>{{ d.email }}</span>
-          </div>
-          <div class="info-row">
-            <span>Niveau :</span> <span>{{ d.niveau_pro || '—' }}</span>
-          </div>
-          <div class="info-row">
-            <span>Étudiants encadrés :</span> <span>{{ d.charge_travail }}</span>
-          </div>
-        </div>
-        <div class="card-footer">
-          @if (!affectationAcceptee() && !demandeEnAttente()) {
-            <button
-              class="btn-primary"
-              [disabled]="isSubmitting()"
-              (click)="demanderAffectation(d.id)">
-              Choisir ce directeur
-            </button>
-          }
-        </div>
+        <a [routerLink]="['/chat', affectationAcceptee()!.id]" class="btn btn-primary btn-sm">
+          💬 Ouvrir le chat
+        </a>
       </div>
     }
+
+    <!-- Demande en attente -->
+    @if (demandeEnAttente()) {
+      <div class="alert alert-info mb-16">
+        ⏳ Demande en attente de validation auprès de
+        <strong>{{ demandeEnAttente()!.directeur_nom }}</strong>.
+        La Direction Académique examinera votre demande prochainement.
+      </div>
+    }
+
+    <!-- Grille des directeurs -->
+    @if (!affectationAcceptee()) {
+      <div class="directeurs-grid">
+        @for (d of directeurs(); track d.id) {
+          <div class="dir-card">
+            <div class="dir-card-top">
+              <div class="dir-avatar">{{ d.prenom[0] }}{{ d.nom[0] }}</div>
+              <div class="dir-info">
+                <div class="dir-name">{{ d.prenom }} {{ d.nom }}</div>
+                <span class="dir-type-badge" [class.interne]="d.is_internal">
+                  {{ d.is_internal ? '🏫 Interne' : '🌐 Externe' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="dir-details">
+              <div class="dir-detail-row">
+                <span class="dir-detail-label">Filière</span>
+                <span class="dir-detail-val">{{ d.filiere_principale || '—' }}</span>
+              </div>
+              <div class="dir-detail-row">
+                <span class="dir-detail-label">Email</span>
+                <span class="dir-detail-val small">{{ d.email }}</span>
+              </div>
+              <div class="dir-detail-row">
+                <span class="dir-detail-label">Niveau</span>
+                <span class="dir-detail-val">{{ d.niveau_pro || '—' }}</span>
+              </div>
+              <div class="dir-detail-row">
+                <span class="dir-detail-label">Étudiants encadrés</span>
+                <span class="dir-detail-val">{{ d.charge_travail }}</span>
+              </div>
+            </div>
+
+            <div class="dir-card-footer">
+              @if (demandeEnAttente()) {
+                <span class="dir-btn-disabled">Demande déjà soumise</span>
+              } @else {
+                <button class="btn btn-primary btn-sm"
+                  [disabled]="isSubmitting()"
+                  (click)="demanderAffectation(d.id)">
+                  @if (isSubmitting()) { Envoi… } @else { Choisir ce directeur }
+                </button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-icon">🔗</div>
+            <div class="empty-title">Aucun directeur disponible</div>
+            <div class="empty-sub">Contactez la Direction Académique pour plus d'informations.</div>
+          </div>
+        }
+      </div>
+    }
+
   </div>
 </div>

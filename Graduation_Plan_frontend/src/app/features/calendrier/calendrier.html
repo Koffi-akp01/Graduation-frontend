@@ -24,6 +24,47 @@
     <div class="form-card">
       <h3>Nouvel événement</h3>
       <div class="form-grid">
+
+        <!-- Sélecteur étudiant (soutenance) -->
+        <div class="form-row full">
+          <label>Étudiant prêt à soutenir
+            <span style="font-size:11px;color:#718096;font-weight:400;margin-left:6px">
+              ({{ etudiantsEligibles().length }} éligible(s))
+            </span>
+          </label>
+          @if (etudiantsLoading()) {
+            <div style="font-size:13px;color:#718096;padding:6px 0">Chargement…</div>
+          } @else {
+            <select [(ngModel)]="etudiantSelId" (change)="onEtudiantChange()">
+              <option [value]="0">— Choisir un étudiant (optionnel) —</option>
+              @for (e of etudiantsEligibles(); track e.id) {
+                <option [value]="e.id">
+                  {{ e.nom }} {{ e.prenom }} — {{ e.matricule }} ({{ e.filiere_code }})
+                </option>
+              }
+            </select>
+          }
+          @if (etudiantSelId && etudiantSelId !== 0) {
+            <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+              @for (e of etudiantsEligibles(); track e.id) {
+                @if (e.id === +etudiantSelId) {
+                  <span style="font-size:12px;background:#D1FAE5;color:#065F46;border-radius:6px;padding:3px 10px">
+                    ✓ {{ e.ue_validees }}/{{ e.total_ue }} UE validées
+                  </span>
+                  <span style="font-size:12px;background:#EFF6FF;color:#1E40AF;border-radius:6px;padding:3px 10px">
+                    {{ e.filiere_code }}
+                  </span>
+                  @if (e.has_paid_fees) {
+                    <span style="font-size:12px;background:#D1FAE5;color:#065F46;border-radius:6px;padding:3px 10px">
+                      💳 Frais payés
+                    </span>
+                  }
+                }
+              }
+            </div>
+          }
+        </div>
+
         <div class="form-row">
           <label>Titre</label>
           <input [(ngModel)]="form.titre" placeholder="Titre de l'événement" />

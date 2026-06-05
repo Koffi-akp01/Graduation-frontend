@@ -46,7 +46,7 @@ export class DirecteurSuiviComponent implements OnInit {
 
   // Inline theme proposal form
   propositionEnCours: { etudiantId: number; titre: string; domaine: string; description: string } | null = null;
-  isSavingTheme = false;
+  isSavingTheme = signal(false);
 
   readonly domaines = [
     { value: 'GL',         label: 'Génie Logiciel' },
@@ -198,18 +198,18 @@ export class DirecteurSuiviComponent implements OnInit {
       this.errorMsg.set('Titre, domaine et description sont obligatoires.');
       return;
     }
-    this.isSavingTheme = true;
+    this.isSavingTheme.set(true);
     this.themeService.submitThemeForStudent(p.etudiantId, {
       titre: p.titre, domaine: p.domaine, description: p.description,
     }).subscribe({
       next: () => {
-        this.isSavingTheme = false;
+        this.isSavingTheme.set(false);
         this.propositionEnCours = null;
         this.toast.success('Thème proposé. L\'étudiant est notifié.');
         this.charger();
       },
       error: (err: { error?: { detail?: string } }) => {
-        this.isSavingTheme = false;
+        this.isSavingTheme.set(false);
         this.errorMsg.set(err?.error?.detail ?? 'Erreur lors de la proposition du thème.');
       },
     });
