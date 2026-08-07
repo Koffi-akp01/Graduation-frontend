@@ -19,6 +19,7 @@ export interface UserInfo {
   role: string;
   first_name: string;
   last_name: string;
+  genre?: string;
 }
 
 export interface StudentRegisterPayload {
@@ -28,6 +29,10 @@ export interface StudentRegisterPayload {
   first_name: string;
   last_name: string;
   matricule: string;
+  annee_formation?: string;
+  filiere_choisie?: string;
+  genre?: string;
+  niveau_professionnel?: string;
 }
 
 // Mapping rôle → route
@@ -38,6 +43,7 @@ const ROLE_ROUTES: Record<string, string> = {
   ADMIN_ACADEMIC:       '/direction/themes',
   DIRECTION:            '/direction/themes',
   direction:            '/direction/themes',
+  SYSADMIN:             '/admin',
   CHEF_SERVICE_EXAM:    '/examen/conformite',
   examen:               '/examen/conformite',
   SERVICE_RECOUVREMENT: '/recouvrement',
@@ -71,17 +77,23 @@ export class AuthService {
 
     return this.http.post<LoginResponse>(`${this.apiUrl}/token/`, credentials).pipe(
       tap((response) => {
-        localStorage.setItem('access_token', response.access);
+        localStorage.setItem('access_token',  response.access);
         localStorage.setItem('refresh_token', response.refresh);
 
-        // 1. Essayer d'extraire le rôle du token / de la réponse
-        const role = this.extractRole(response);
+        // Construct user from token response fields
+        const userInfo: UserInfo | null = response.user ?? null;
+        if (userInfo) {
+          this.currentUser.set(userInfo);
+          localStorage.setItem('user_first_name', userInfo.first_name ?? '');
+          localStorage.setItem('user_last_name',  userInfo.last_name  ?? '');
+          localStorage.setItem('user_genre',      userInfo.genre      ?? '');
+        }
 
+        const role = this.extractRole(response);
         if (role) {
           localStorage.setItem('user_role', role);
           this.redirectByRole(role);
         } else {
-          // 2. Fallback : appeler /me/ pour récupérer le profil
           this.loadCurrentUser();
         }
       }),
@@ -107,7 +119,10 @@ export class AuthService {
     this.http.get<UserInfo>(`${this.apiUrl}/me/`).subscribe({
       next: (user) => {
         this.currentUser.set(user);
-        localStorage.setItem('user_role', user.role);
+        localStorage.setItem('user_role',       user.role);
+        localStorage.setItem('user_first_name', user.first_name ?? '');
+        localStorage.setItem('user_last_name',  user.last_name  ?? '');
+        localStorage.setItem('user_genre',      user.genre      ?? '');
         this.redirectByRole(user.role);
       },
       error: () => {
@@ -123,6 +138,9 @@ export class AuthService {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_role');
+    localStorage.removeItem('user_first_name');
+    localStorage.removeItem('user_last_name');
+    localStorage.removeItem('user_genre');
     this.currentUser.set(null);
     this.router.navigate(['/login']);
   }

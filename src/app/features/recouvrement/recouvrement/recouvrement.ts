@@ -1,21 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../../../shared/shared-module';
 import { TopNav } from '../../../core/components/top-nav/top-nav';
 import { ToastService } from '../../../shared/services/toast';
 import { RecouvrementService } from '../../../core/services/recouvrement';
-
-interface Paiement {
-  etudiant: string;
-  matricule: string;
-  niveau: string;
-  montant: number;
-  mode: string;
-  date: string;
-  statut: 'Validé' | 'Impayé' | 'En vérification';
-  statutVariant: 'success' | 'danger' | 'warning';
-}
+import { Bordereau, StatsPaiement } from '../../../core/models/paiement.model';
 
 @Component({
   selector: 'app-recouvrement',
@@ -71,10 +61,10 @@ interface Paiement {
 
         <!-- Statistiques -->
         <div class="stats-grid">
-          <app-stat-card label="Total frais attendus" value="1 740 000" icon="💰" color="#0F2237" sub="FCFA — 87 étudiants"></app-stat-card>
-          <app-stat-card label="Frais encaissés" value="1 450 000" icon="✅" color="#276749" sub="FCFA — 72 réglés"></app-stat-card>
-          <app-stat-card label="Impayés" value="290 000" icon="⚠️" color="#9B2226" sub="FCFA — 15 étudiants"></app-stat-card>
-          <app-stat-card label="Reçus émis" value="72" icon="🧾" color="#C8963E" sub="Ce mois"></app-stat-card>
+          <app-stat-card label="Total frais attendus" [value]="(totalAttendus() | number:'1.0-0') ?? '0'" icon="💰" color="#0F2237" [sub]="'FCFA — ' + bordereaux().length + ' étudiants'"></app-stat-card>
+          <app-stat-card label="Frais encaissés" [value]="(totalEncaisse() | number:'1.0-0') ?? '0'" icon="✅" color="#276749" [sub]="'FCFA — ' + valides().length + ' réglés'"></app-stat-card>
+          <app-stat-card label="Impayés" [value]="(totalImpayes() | number:'1.0-0') ?? '0'" icon="⚠️" color="#9B2226" [sub]="'FCFA — ' + aValider().length + ' étudiants'"></app-stat-card>
+          <app-stat-card label="Reçus émis" [value]="nbRecus().toString()" icon="🧾" color="#C8963E" sub="Ce mois"></app-stat-card>
         </div>
 
         <!-- Tableau -->
@@ -87,30 +77,30 @@ interface Paiement {
               <thead>
                 <tr>
                   <th>Étudiant</th>
-                  <th>Niveau</th>
+                  <th>Banque</th>
                   <th>Montant (FCFA)</th>
                   <th>Mode</th>
-                  <th>Date</th>
+                  <th>Date dépôt</th>
                   <th>Statut</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                @for (p of paiements(); track p.etudiant) {
+                @for (p of bordereaux(); track p.id) {
                 <tr>
                   <td>
-                    <div class="etudiant-nom">{{ p.etudiant }}</div>
-                    <div class="etudiant-matricule">{{ p.matricule }}</div>
+                    <div class="etudiant-nom">{{ p.etudiant_nom }}</div>
+                    <div class="etudiant-matricule">{{ p.numero_bordereau }}</div>
                   </td>
-                  <td>{{ p.niveau }}</td>
+                  <td>{{ p.banque }}</td>
                   <td>{{ p.montant | number:'1.0-0' }}</td>
-                  <td>{{ p.mode }}</td>
-                  <td>{{ p.date }}</td>
+                  <td>{{ p.banque }}</td>
+                  <td>{{ p.date_depot }}</td>
                   <td>
-                    <app-badge [text]="p.statut" [variant]="p.statutVariant"></app-badge>
+                    <app-badge [text]="p.est_valide ? 'Validé' : 'En attente'" [variant]="p.est_valide ? 'success' : 'warning'"></app-badge>
                   </td>
                   <td class="actions-cell">
-                    @if (p.statut !== 'Validé') {
+                    @if (!p.est_valide) {
                       <button class="btn-valider" (click)="validerPaiement(p)">Valider</button>
                     }
                     <button class="btn-recu" (click)="telechargerRecu(p)">🧾 Reçu</button>
@@ -368,27 +358,53 @@ interface Paiement {
     }
   `]
 })
-export class RecouvrementComponent {
+export class RecouvrementComponent implements OnInit {
   private recouvrementService = inject(RecouvrementService);
   private toast = inject(ToastService);
 
-  paiements = signal<Paiement[]>([
-    { etudiant: 'Ama Koffi', matricule: 'M2-INFO-2025', niveau: 'Master 2', montant: 20000, mode: 'Mobile Money', date: '28/05/2025', statut: 'Validé', statutVariant: 'success' },
-    { etudiant: 'Abena Mensah', matricule: 'L3-MATH-2025', niveau: 'Licence 3', montant: 15000, mode: '—', date: '—', statut: 'Impayé', statutVariant: 'danger' },
-    { etudiant: 'Yaw Boateng', matricule: 'M1-GESTION-2025', niveau: 'Master 1', montant: 20000, mode: 'Virement', date: '02/06/2025', statut: 'En vérification', statutVariant: 'warning' }
-  ]);
+  bordereaux  = signal<Bordereau[]>([]);
+  stats       = signal<StatsPaiement | null>(null);
+  isLoading   = signal(false);
 
-  validerPaiement(p: Paiement) {
-    this.toast.success(`Paiement de ${p.etudiant} validé`);
-    p.statut = 'Validé';
-    p.statutVariant = 'success';
+  totalAttendus  = computed(() => this.bordereaux().length * 20000);
+  totalEncaisse  = computed(() => this.bordereaux().filter(b => b.est_valide).reduce((s, b) => s + b.montant, 0));
+  totalImpayes   = computed(() => this.bordereaux().filter(b => !b.est_valide).reduce((s, b) => s + b.montant, 0));
+  nbRecus        = computed(() => this.bordereaux().filter(b => b.est_valide).length);
+
+  aValider   = computed(() => this.bordereaux().filter(b => !b.est_valide));
+  valides    = computed(() => this.bordereaux().filter(b => b.est_valide));
+
+  ngOnInit(): void {
+    this.charger();
   }
 
-  telechargerRecu(p: Paiement) {
-    this.toast.info(`Téléchargement du reçu pour ${p.etudiant} (simulé)`);
+  charger(): void {
+    this.isLoading.set(true);
+    this.recouvrementService.getPaiements().subscribe({
+      next: (data) => { this.bordereaux.set(data); this.isLoading.set(false); },
+      error: () => { this.toast.error('Impossible de charger les paiements.'); this.isLoading.set(false); },
+    });
+    this.recouvrementService.getStats().subscribe({
+      next: (s) => this.stats.set(s),
+      error: () => {},
+    });
   }
 
-  genererRapport() {
-    this.toast.info('Génération du rapport financier (simulée)');
+  validerPaiement(b: Bordereau): void {
+    this.recouvrementService.validerPaiement(b.id).subscribe({
+      next: () => {
+        this.toast.success(`Paiement de ${b.etudiant_nom} validé.`);
+        this.charger();
+      },
+      error: () => this.toast.error('Erreur lors de la validation.'),
+    });
+  }
+
+  telechargerRecu(b: Bordereau): void {
+    this.toast.info(`Reçu pour ${b.etudiant_nom} — fonctionnalité à venir.`);
+  }
+
+  genererRapport(): void {
+    this.toast.info('Génération du rapport financier — fonctionnalité à venir.');
   }
 }

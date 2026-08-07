@@ -1,0 +1,582 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-ico">🗄</span>
+      <span class="logo-txt">Archives</span>
+    </div>
+
+    <div class="sidebar-section">Filtres</div>
+    <button class="nav-item" [class.active]="filtreStatut()===''" (click)="filtreStatut.set(''); reload()">
+      <span class="ico">📋</span> Tous
+    </button>
+    <button class="nav-item" [class.active]="filtreStatut()==='EN_ATTENTE'" (click)="filtreStatut.set('EN_ATTENTE'); reload()">
+      <span class="ico">⏳</span> En attente
+    </button>
+    <button class="nav-item" [class.active]="filtreStatut()==='PV_PARTIEL'" (click)="filtreStatut.set('PV_PARTIEL'); reload()">
+      <span class="ico">✍</span> PV partiel
+    </button>
+    <button class="nav-item" [class.active]="filtreStatut()==='EN_VALIDATION'" (click)="filtreStatut.set('EN_VALIDATION'); reload()">
+      <span class="ico">📖</span> À valider (Service Examen)
+    </button>
+    <button class="nav-item" [class.active]="filtreStatut()==='ARCHIVE'" (click)="filtreStatut.set('ARCHIVE'); reload()">
+      <span class="ico">✅</span> Archivé
+    </button>
+
+  </aside>
+
+  <!-- ═══ CONTENU ════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- En-tête -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Archives des dossiers de soutenance</div>
+        <div class="page-subtitle">
+          Gestion des PV, signatures et archivage final — {{ archives().length }} dossier(s)
+        </div>
+      </div>
+      @if (canManage()) {
+        <button class="btn-primary" (click)="showCreer.set(true)">
+          + Archiver un dossier
+        </button>
+      }
+    </div>
+
+    @if (error()) {
+      <div class="alert-danger">{{ error() }}</div>
+    }
+
+    <!-- ── Stats globales ──────────────────────────────────────────────── -->
+    <div class="stats-row">
+      <div class="stat-chip chip-blue">
+        <span class="chip-val">{{ statsArchives().total }}</span>
+        <span class="chip-lbl">Total dossiers</span>
+      </div>
+      <div class="stat-chip chip-orange">
+        <span class="chip-val">{{ statsArchives().enAttente }}</span>
+        <span class="chip-lbl">En attente</span>
+      </div>
+      <div class="stat-chip chip-yellow">
+        <span class="chip-val">{{ statsArchives().pvPartiel }}</span>
+        <span class="chip-lbl">PV partiels</span>
+      </div>
+      <div class="stat-chip chip-purple">
+        <span class="chip-val">{{ statsArchives().enValidation }}</span>
+        <span class="chip-lbl">À valider (SE)</span>
+      </div>
+      <div class="stat-chip chip-green">
+        <span class="chip-val">{{ statsArchives().archives }}</span>
+        <span class="chip-lbl">Archivés</span>
+      </div>
+      @if (statsArchives().moyFinale) {
+        <div class="stat-chip chip-purple">
+          <span class="chip-val">{{ statsArchives().moyFinale }}/20</span>
+          <span class="chip-lbl">Moyenne générale</span>
+        </div>
+      }
+    </div>
+
+    <!-- ── MODAL CRÉATION ───────────────────────────────────────────────── -->
+    @if (showCreer()) {
+      <div class="modal-backdrop" (click)="showCreer.set(false)">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <span class="modal-title">Créer un dossier d'archive</span>
+            <button class="modal-close" (click)="showCreer.set(false)">✕</button>
+          </div>
+
+          @if (creerError) {
+            <div class="alert-danger">{{ creerError }}</div>
+          }
+
+          <div class="field-group">
+            <label>Étudiant <span class="req">*</span></label>
+            <select [(ngModel)]="creerForm.etudiant_id">
+              <option value="">— Sélectionner un étudiant —</option>
+              @for (e of etudiants(); track e.id) {
+                <option [value]="e.id">
+                  {{ e.prenom }} {{ e.nom }} — {{ e.matricule }}
+                  {{ e.memoire_valide ? '✅' : e.memoire_depose ? '📄' : '⚠' }}
+                </option>
+              }
+            </select>
+            <span class="field-hint">✅ mémoire validé · 📄 déposé · ⚠ non déposé</span>
+          </div>
+
+          <div class="two-col">
+            <div class="field-group">
+              <label>Note finale (/20)</label>
+              <input type="number" min="0" max="20" step="0.25"
+                     [(ngModel)]="creerForm.note_finale" placeholder="ex: 14.5" />
+            </div>
+            <div class="field-group">
+              <label>Mention</label>
+              <select [(ngModel)]="creerForm.mention">
+                <option value="">— Mention —</option>
+                @for (m of MENTIONS; track m) {
+                  <option [value]="m">{{ m }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>PV signé (PDF, optionnel)</label>
+            <input type="file" accept=".pdf" (change)="onPvFile($event)" />
+          </div>
+
+          <div class="field-group">
+            <label>Commentaire</label>
+            <textarea rows="2" [(ngModel)]="creerForm.commentaire"
+                      placeholder="Observations, conditions particulières…"></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="showCreer.set(false)">Annuler</button>
+            <button class="btn-primary" (click)="submitCreer()" [disabled]="creerLoading">
+              @if (creerLoading) { <span class="spinner-sm"></span> } Créer l'archive
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── MODAL PV ───────────────────────────────────────────────────────── -->
+    @if (activeArch(); as arch) {
+      <div class="modal-backdrop" (click)="activeArch.set(null)">
+        <div class="modal-card modal-card--pv" (click)="$event.stopPropagation()">
+
+          <!-- En-tête modal -->
+          <div class="modal-header">
+            <span class="modal-title">
+              Procès-Verbal de Soutenance
+              <span class="modal-sub">{{ arch.code_archive }}</span>
+            </span>
+            <button class="modal-close" (click)="activeArch.set(null)">✕</button>
+          </div>
+
+          @if (sigError) {
+            <div class="alert-danger">{{ sigError }}</div>
+          }
+
+          <!-- ══ Document PV ══════════════════════════════════════════════ -->
+          <div class="pv-document">
+
+            <!-- En-tête officiel -->
+            <div class="pv-header">
+              <div class="pv-institution">IPNET — Institut de Formation en Technologies</div>
+              <div class="pv-title-main">PROCÈS-VERBAL DE SOUTENANCE</div>
+              <div class="pv-code-badge">{{ arch.code_archive }}</div>
+            </div>
+
+            <!-- Étudiant -->
+            <div class="pv-section">
+              <div class="pv-section-title">Étudiant</div>
+              <div class="pv-row">
+                <span class="pv-label">Nom & Prénom</span>
+                <span class="pv-value">{{ arch.etudiant.prenom }} {{ arch.etudiant.nom | uppercase }}</span>
+              </div>
+              <div class="pv-row">
+                <span class="pv-label">Matricule</span>
+                <span class="pv-value">{{ arch.etudiant.matricule }}</span>
+              </div>
+              <div class="pv-row">
+                <span class="pv-label">Filière</span>
+                <span class="pv-value">{{ arch.etudiant.filiere }}</span>
+              </div>
+            </div>
+
+            <!-- Mémoire -->
+            @if (arch.soutenance_info) {
+              <div class="pv-section">
+                <div class="pv-section-title">Mémoire</div>
+                <div class="pv-row">
+                  <span class="pv-label">Titre</span>
+                  <span class="pv-value pv-value--titre">{{ arch.soutenance_info.titre_theme }}</span>
+                </div>
+              </div>
+
+              <!-- Jury -->
+              <div class="pv-section">
+                <div class="pv-section-title">Composition du jury</div>
+                <div class="pv-row">
+                  <span class="pv-label">Président du jury</span>
+                  <span class="pv-value">{{ arch.soutenance_info.president }}</span>
+                </div>
+                <div class="pv-row">
+                  <span class="pv-label">Examinateur</span>
+                  <span class="pv-value">{{ arch.soutenance_info.examinateur }}</span>
+                </div>
+                <div class="pv-row">
+                  <span class="pv-label">Directeur de mémoire</span>
+                  <span class="pv-value">{{ arch.soutenance_info.directeur }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- Résultats -->
+            <div class="pv-section">
+              <div class="pv-section-title">Résultats</div>
+              @if (arch.soutenance_info) {
+                <div class="pv-row">
+                  <span class="pv-label">Date de soutenance</span>
+                  <span class="pv-value">{{ arch.soutenance_info.date }}</span>
+                </div>
+                @if (arch.soutenance_info.salle) {
+                  <div class="pv-row">
+                    <span class="pv-label">Salle</span>
+                    <span class="pv-value">{{ arch.soutenance_info.salle }}</span>
+                  </div>
+                }
+              }
+              @if (arch.note_finale !== null) {
+                <div class="pv-row">
+                  <span class="pv-label">Note finale</span>
+                  <span class="pv-value pv-value--note">{{ arch.note_finale }}/20</span>
+                </div>
+              }
+              @if (arch.mention) {
+                <div class="pv-row">
+                  <span class="pv-label">Mention</span>
+                  <span class="pv-value">{{ arch.mention }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Signatures -->
+            <div class="pv-section">
+              <div class="pv-section-title">Signatures</div>
+              <div class="pv-sig-grid">
+
+                @for (sig of arch.signatures; track sig.role) {
+                  <div class="pv-sig-block">
+                    <div class="pv-sig-role">{{ sig.role_label }}</div>
+                    <div class="pv-sig-name">{{ sig.signataire || '—' }}</div>
+                    <div class="pv-sig-status" [class.pv-sig-ok]="sig.signe">
+                      {{ sig.signe ? '✅ Signé' : '⬜ En attente' }}
+                    </div>
+                    @if (sig.signe) {
+                      <div class="pv-sig-code">Code : {{ sig.code_verification }}</div>
+                    } @else if (arch.peut_signer.includes(sig.role)) {
+                      <button class="btn-sign-role" (click)="ouvrirSignature(sig.role)">
+                        🔏 Signer maintenant
+                      </button>
+                    }
+                    <div class="pv-sig-line"></div>
+                  </div>
+                }
+
+                <div class="pv-sig-block">
+                  <div class="pv-sig-role">L'Étudiant(e)</div>
+                  <div class="pv-sig-name">{{ arch.etudiant.prenom }} {{ arch.etudiant.nom }}</div>
+                  <div class="pv-sig-status pv-sig-ok">✅ Présent(e) à la soutenance</div>
+                  <div class="pv-sig-line"></div>
+                </div>
+
+              </div>
+
+              <!-- Prompt mot de passe pour signature numérique -->
+              @if (signingRole(); as role) {
+                <div class="sign-password-box">
+                  <div class="sign-password-title">🔏 Confirmez votre identité pour signer — {{ ROLE_LABELS[role] }}</div>
+                  @if (signError()) { <div class="alert-danger">{{ signError() }}</div> }
+                  <div class="sign-password-row">
+                    <input type="password" placeholder="Votre mot de passe de compte"
+                      [(ngModel)]="signPassword" (keyup.enter)="confirmerSignature()" />
+                    <button class="btn-save-sig" [disabled]="signLoading()" (click)="confirmerSignature()">
+                      @if (signLoading()) { <span class="spinner-sm"></span> } Signer
+                    </button>
+                    <button class="btn-secondary" (click)="annulerSignature()">Annuler</button>
+                  </div>
+                  <div class="sign-password-hint">
+                    Un code de vérification horodaté sera généré et imprimé sur le PV, prouvant votre identité et la date de signature.
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Validation Service Examen + Registre -->
+            <div class="pv-section">
+              <div class="pv-section-title">Validation Service Examen &amp; Registre</div>
+
+              @if (arch.valide_service_examen) {
+                <div class="registre-info">
+                  <div class="registre-badge">📖 N° registre électronique : <strong>{{ arch.numero_registre }}</strong></div>
+                  <div class="registre-detail">
+                    Validé par {{ arch.valide_par_examen }} le {{ arch.date_validation_examen ? formatDate(arch.date_validation_examen) : '' }}
+                  </div>
+                  @if (arch.numero_registre_manuel) {
+                    <div class="registre-detail">Registre papier n° {{ arch.numero_registre_manuel }}</div>
+                  }
+                </div>
+              } @else if (arch.jury_signatures_completes) {
+                @if (arch.peut_valider_examen) {
+                  <div class="valider-examen-box">
+                    <div class="valider-examen-hint">
+                      ✅ Les 3 signatures du jury (président, examinateur, directeur) sont réunies. Vous pouvez valider ce PV et l'enregistrer au registre.
+                    </div>
+                    @if (validerError()) { <div class="alert-danger">{{ validerError() }}</div> }
+                    <div class="valider-examen-row">
+                      <input type="text" placeholder="N° registre papier (optionnel)" [(ngModel)]="numeroRegistreManuel" />
+                      <button class="btn-save-sig" [disabled]="validerLoading()" (click)="validerExamen(arch)">
+                        @if (validerLoading()) { <span class="spinner-sm"></span> } 📖 Valider &amp; enregistrer
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="registre-detail">En attente de validation par le Service Examen.</div>
+                }
+              } @else {
+                <div class="registre-detail">En attente des 3 signatures du jury avant validation.</div>
+              }
+            </div>
+
+          </div>
+          <!-- ══ Fin document PV ══════════════════════════════════════════ -->
+
+          <!-- Barre d'actions -->
+          <div class="pv-actions-bar">
+
+            <!-- Édition des informations du PV (seulement si gestionnaire et non clos) -->
+            @if (canManage() && arch.statut !== 'ARCHIVE') {
+              <details class="pv-edit-details">
+                <summary>✏️ Modifier les informations du rapport de soutenance</summary>
+
+                <div class="pv-edit-grid">
+                  <div class="field-group">
+                    <label>Note finale (/20)</label>
+                    <input type="number" min="0" max="20" step="0.25" [(ngModel)]="sigForm.note_finale" />
+                  </div>
+                  <div class="field-group">
+                    <label>Mention</label>
+                    <select [(ngModel)]="sigForm.mention">
+                      <option value="">— Mention —</option>
+                      @for (m of MENTIONS; track m) { <option [value]="m">{{ m }}</option> }
+                    </select>
+                  </div>
+                  <div class="field-group">
+                    <label>Spécialité</label>
+                    <input type="text" [(ngModel)]="sigForm.specialite" placeholder="ex: Génie Logiciel" />
+                  </div>
+                  <div class="field-group">
+                    <label>Promotion</label>
+                    <input type="text" [(ngModel)]="sigForm.promotion" placeholder="ex: 2025-2026" />
+                  </div>
+                  <div class="field-group">
+                    <label>Ville de soutenance</label>
+                    <input type="text" [(ngModel)]="sigForm.ville_soutenance" />
+                  </div>
+                  <div class="field-group">
+                    <label>Décision du jury</label>
+                    <select [(ngModel)]="sigForm.decision_jury">
+                      <option value="">— À déterminer —</option>
+                      <option value="ACCEPTE">Accepté</option>
+                      <option value="REJETE">Rejeté</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="pv-edit-grid">
+                  <div class="field-group">
+                    <label>Président — Grade</label>
+                    <input type="text" [(ngModel)]="sigForm.president_grade" placeholder="ex: Docteur" />
+                  </div>
+                  <div class="field-group">
+                    <label>Président — Établissement</label>
+                    <input type="text" [(ngModel)]="sigForm.president_etablissement" />
+                  </div>
+                  <div class="field-group">
+                    <label>Examinateur — Grade</label>
+                    <input type="text" [(ngModel)]="sigForm.examinateur_grade" />
+                  </div>
+                  <div class="field-group">
+                    <label>Examinateur — Établissement</label>
+                    <input type="text" [(ngModel)]="sigForm.examinateur_etablissement" />
+                  </div>
+                  <div class="field-group">
+                    <label>Directeur — Grade</label>
+                    <input type="text" [(ngModel)]="sigForm.directeur_grade" />
+                  </div>
+                  <div class="field-group">
+                    <label>Directeur — Établissement</label>
+                    <input type="text" [(ngModel)]="sigForm.directeur_etablissement" />
+                  </div>
+                </div>
+
+                <div class="pv-edit-grid">
+                  <div class="field-group">
+                    <label>2ᵉ membre du jury — Nom</label>
+                    <input type="text" [(ngModel)]="sigForm.membre2_nom" />
+                  </div>
+                  <div class="field-group">
+                    <label>2ᵉ membre — Grade</label>
+                    <input type="text" [(ngModel)]="sigForm.membre2_grade" />
+                  </div>
+                  <div class="field-group">
+                    <label>2ᵉ membre — Établissement</label>
+                    <input type="text" [(ngModel)]="sigForm.membre2_etablissement" />
+                  </div>
+                </div>
+
+                <div class="pv-edit-grid">
+                  <div class="field-group">
+                    <label>Digne d'un mémoire ?</label>
+                    <select [(ngModel)]="sigForm.digne_memoire">
+                      <option value="">— Non évalué —</option>
+                      <option value="true">Oui</option>
+                      <option value="false">Non</option>
+                    </select>
+                  </div>
+                  <div class="field-group">
+                    <label>Niveau scientifique</label>
+                    <select [(ngModel)]="sigForm.niveau_scientifique">
+                      <option value="">— Non évalué —</option>
+                      @for (n of NIVEAUX_SCIENTIFIQUES; track n.value) {
+                        <option [value]="n.value">{{ n.label }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label>Rapport scientifique du jury</label>
+                  <textarea rows="4" [(ngModel)]="sigForm.rapport_scientifique"
+                    placeholder="Appréciation détaillée du travail présenté…"></textarea>
+                </div>
+
+                <div class="field-group">
+                  <label>Commentaire interne</label>
+                  <textarea rows="2" [(ngModel)]="sigForm.commentaire"></textarea>
+                </div>
+
+                <div class="field-group">
+                  <label>Remplacer le PV signé (PDF)</label>
+                  <input type="file" accept=".pdf" (change)="onNewPvFile($event)" />
+                </div>
+
+                @if (sigError) { <div class="alert-danger">{{ sigError }}</div> }
+
+                <button class="btn-save-sig" (click)="submitSig()" [disabled]="sigLoading">
+                  @if (sigLoading) { <span class="spinner-sm"></span> } 💾 Enregistrer
+                </button>
+              </details>
+            }
+
+            <div class="pv-btns">
+              <button class="btn-secondary" (click)="activeArch.set(null)">Fermer</button>
+              @if (arch.pv.url) {
+                <button class="btn-download-pv"
+                  (click)="telechargerDoc(arch.pv.url, 'PV-' + arch.code_archive + '.pdf')">
+                  📄 Télécharger PV signé
+                </button>
+              }
+              <button class="btn-download-pv" style="background:var(--accent2)"
+                (click)="telechargerPV(arch)">
+                🖨 Générer le PV (rapport officiel)
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    }
+
+    <!-- ── LISTE DES ARCHIVES ───────────────────────────────────────────── -->
+    @if (loading()) {
+      <div class="loading-wrap">
+        <div class="spinner-lg"></div> Chargement…
+      </div>
+    } @else if (archives().length === 0) {
+      <div class="empty-state">
+        <div class="empty-ico">🗄</div>
+        <div class="empty-msg">Aucun dossier archivé pour ce filtre.</div>
+        <button class="btn-primary" (click)="showCreer.set(true)">Créer le premier dossier</button>
+      </div>
+    } @else {
+      <div class="archives-grid">
+        @for (arch of archives(); track arch.id) {
+          <div class="arch-card" [class]="'arch-card--' + arch.statut.toLowerCase()">
+
+            <!-- Header -->
+            <div class="arch-header">
+              <div class="arch-code">{{ arch.code_archive }}</div>
+              <span class="badge" [class]="statutClass(arch.statut)">{{ arch.statut_label }}</span>
+            </div>
+
+            <!-- Étudiant -->
+            <div class="arch-student">
+              <div class="arch-avatar">
+                {{ arch.etudiant.prenom[0] }}{{ arch.etudiant.nom[0] }}
+              </div>
+              <div>
+                <div class="arch-name">{{ arch.etudiant.prenom }} {{ arch.etudiant.nom }}</div>
+                <div class="arch-meta">{{ arch.etudiant.matricule }} · {{ arch.etudiant.filiere }}</div>
+              </div>
+            </div>
+
+            <!-- Note & Mention -->
+            @if (arch.note_finale !== null || arch.mention) {
+              <div class="arch-note">
+                @if (arch.note_finale !== null) {
+                  <span class="note-val">{{ arch.note_finale }}/20</span>
+                }
+                @if (arch.mention) {
+                  <span class="mention-badge">{{ arch.mention }}</span>
+                }
+              </div>
+            }
+
+            <!-- Signatures PV -->
+            <div class="sig-row">
+              <span class="sig-pill" [class.ok]="arch.pv.signe_president">
+                {{ arch.pv.signe_president ? '✅' : '⬜' }} Président
+              </span>
+              <span class="sig-pill" [class.ok]="arch.pv.signe_examinateur">
+                {{ arch.pv.signe_examinateur ? '✅' : '⬜' }} Examinateur
+              </span>
+              <span class="sig-pill" [class.ok]="arch.pv.signe_directeur">
+                {{ arch.pv.signe_directeur ? '✅' : '⬜' }} Directeur
+              </span>
+              <span class="sig-pill" [class.ok]="arch.pv.signe_directeur_academique">
+                {{ arch.pv.signe_directeur_academique ? '✅' : '⬜' }} Visa DA
+              </span>
+            </div>
+
+            <!-- Pied de carte -->
+            <div class="arch-footer">
+              <span class="arch-date">{{ formatDate(arch.date_archivage) }}</span>
+              <div class="arch-actions">
+                @if (arch.pv.url) {
+                  <button class="btn-icon" title="Télécharger PV signé"
+                    (click)="telechargerDoc(arch.pv.url, 'PV-' + arch.code_archive + '.pdf')">
+                    📄
+                  </button>
+                }
+                @if (arch.memoire?.url) {
+                  <button class="btn-icon" title="Télécharger mémoire"
+                    (click)="telechargerDoc(arch.memoire!.url, 'memoire-' + arch.etudiant.matricule + '.pdf')">
+                    📘
+                  </button>
+                }
+                @if (arch.statut !== 'ARCHIVE' && (canManage() || arch.peut_signer.length > 0)) {
+                  <button class="btn-sign" (click)="ouvrirSig(arch)">
+                    {{ arch.peut_signer.length > 0 && !canManage() ? '🔏 Signer' : '✍ Signer PV' }}
+                  </button>
+                } @else if (arch.statut === 'ARCHIVE') {
+                  <span class="cloture-badge">🔒 Clos {{ formatDate(arch.date_cloture!) }}</span>
+                }
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

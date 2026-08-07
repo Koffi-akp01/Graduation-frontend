@@ -1,0 +1,127 @@
+// ══ UTILITAIRES ══════════════════════════════════════════════════════════════
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.small { font-size: 12px; color: var(--ink3); }
+.mono  { font-family: 'DM Mono', monospace; }
+.empty-cell { text-align: center; padding: 40px; color: var(--ink3); }
+
+// ══ ALERTES ═══════════════════════════════════════════════════════════════════
+.alert-danger {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+// ══ BADGE COMPTEUR SIDEBAR ════════════════════════════════════════════════════
+.badge-pill {
+  margin-left: auto;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 99px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+// ══ BANDEAU PAIEMENTS À AUTORISER ════════════════════════════════════════════
+.alert-autoriser {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: #7B4F00;
+  margin-bottom: 20px;
+
+  .alert-ico { font-size: 22px; flex-shrink: 0; line-height: 1; }
+  strong { font-weight: 700; color: #92400E; }
+}
+
+// ══ FORMULAIRE NOUVEAU RATTRAPAGE ═════════════════════════════════════════════
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 20px 20px 0;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink2);
+  letter-spacing: .3px;
+}
+
+.req { color: var(--warn); margin-left: 2px; }
+
+.form-input {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+  transition: border .15s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px #2B6CB018;
+  }
+}
+
+// ══ BARRE DE FILTRES ══════════════════════════════════════════════════════════
+.rat-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.rat-search {
+  flex: 1;
+  min-width: 220px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+
+  &::placeholder { color: var(--ink3); }
+  &:focus {
+    outline: none;
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px #2B6CB018;
+  }
+}
+
+// ══ LOADING ═══════════════════════════════════════════════════════════════════
+.loading-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 48px;
+  text-align: center;
+  color: var(--ink3);
+  font-size: 13px;
+}
+
+// ══ LIGNE EN ATTENTE D'AUTORISATION ══════════════════════════════════════════
+.row-autoriser td { background: #FFFBEB !important; }

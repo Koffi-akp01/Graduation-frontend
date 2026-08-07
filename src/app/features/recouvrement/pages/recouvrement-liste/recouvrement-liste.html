@@ -1,7 +1,7 @@
 <app-top-nav></app-top-nav>
 
 <div class="app-page">
-  <!-- Sidebar -->
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
   <aside class="sidebar">
     <div class="sidebar-avatar">
       <div class="avatar-circle" style="background:#1B5E20">SR</div>
@@ -10,101 +10,589 @@
         <div class="avatar-role">Gestion financière</div>
       </div>
     </div>
-    <div class="sidebar-section">Paiements</div>
-    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
-    <a class="nav-item"><span class="ico">💳</span> Vérifier paiements</a>
-    <a class="nav-item"><span class="ico">🧾</span> Émettre un reçu</a>
-    <a class="nav-item"><span class="ico">⚠</span> Alertes impayés</a>
+
+    <div class="sidebar-section">Paiements reçus</div>
+    <button class="nav-item" [class.active]="vue() === 'bordereaux'" (click)="afficherVue('bordereaux')">
+      <span class="ico">💳</span> Frais de soutenance
+      @if ((stats()?.en_attente ?? 0) > 0) {
+        <span class="badge-pill">{{ stats()?.en_attente }}</span>
+      }
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'rattrapages'" (click)="afficherVue('rattrapages')">
+      <span class="ico">🔄</span> Paiements rattrapages
+      @if (aValiderRattrapage().length > 0) {
+        <span class="badge-pill">{{ aValiderRattrapage().length }}</span>
+      }
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'scolarite'" (click)="afficherVue('scolarite')">
+      <span class="ico">🎓</span> Scolarité annuelle
+      @if (etudiantsScol().length > 0 && etudiantsScol().filter(e => !e.en_regle).length > 0) {
+        <span class="badge-pill">{{ etudiantsScol().filter(e => !e.en_regle).length }}</span>
+      }
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'alertes'" (click)="afficherVue('alertes')">
+      <span class="ico">⚠</span> Alertes impayés
+    </button>
+
     <div class="sidebar-section">Rapports</div>
-    <a class="nav-item"><span class="ico">📊</span> Rapport financier</a>
+    <button class="nav-item" [class.active]="vue() === 'rapport'" (click)="afficherVue('rapport')">
+      <span class="ico">📊</span> Rapport financier
+    </button>
   </aside>
 
-  <!-- Contenu principal -->
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
   <div class="main">
     <div class="page-header">
       <div>
         <div class="page-title">Service Recouvrement</div>
-        <div class="page-subtitle">Gestion des frais de soutenance — Session Juillet 2026</div>
+        <div class="page-subtitle">Validation des paiements — transmission au Service Examen</div>
       </div>
-      <button class="btn btn-primary">📊 Rapport financier</button>
+      <button class="btn btn-secondary btn-sm" (click)="chargerDonnees()">↺ Actualiser</button>
     </div>
+
+    @if (successMsg()) {
+      <div class="alert alert-success">{{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert-danger">{{ errorMsg() }}</div>
+    }
 
     <!-- Stat cards -->
     <div class="stats-grid">
       <div class="stat-card blue">
-        <div class="stat-label">Total frais attendus</div>
-        <div class="stat-value" style="font-size:22px">
-          {{ stats()?.total_encaisse ? (stats()!.total_encaisse + stats()!.total_impayes | number:'1.0-0') : '1 740 000' }}
-        </div>
-        <div class="stat-sub">FCFA — 87 étudiants</div>
-        <div class="stat-icon">💰</div>
+        <div class="stat-label">Bordereaux reçus</div>
+        <div class="stat-value">{{ stats()?.total ?? '—' }}</div>
+        <div class="stat-sub">Frais soutenance</div>
+        <div class="stat-icon">📋</div>
       </div>
       <div class="stat-card green">
-        <div class="stat-label">Frais encaissés</div>
-        <div class="stat-value" style="font-size:22px">
-          {{ stats()?.total_encaisse ? (stats()!.total_encaisse | number:'1.0-0') : '1 450 000' }}
-        </div>
-        <div class="stat-sub">FCFA — 72 réglés</div>
+        <div class="stat-label">Paiements validés</div>
+        <div class="stat-value">{{ stats()?.valides ?? '—' }}</div>
+        <div class="stat-sub">Étudiants en règle</div>
         <div class="stat-icon">✅</div>
       </div>
       <div class="stat-card red">
-        <div class="stat-label">Impayés</div>
-        <div class="stat-value" style="font-size:22px">
-          {{ stats()?.total_impayes ? (stats()!.total_impayes | number:'1.0-0') : '290 000' }}
-        </div>
-        <div class="stat-sub">FCFA — 15 étudiants</div>
+        <div class="stat-label">Bordereaux en attente</div>
+        <div class="stat-value">{{ stats()?.en_attente ?? '—' }}</div>
+        <div class="stat-sub">À vérifier</div>
         <div class="stat-icon">⚠</div>
       </div>
       <div class="stat-card gold">
-        <div class="stat-label">Reçus émis</div>
-        <div class="stat-value">72</div>
-        <div class="stat-sub">Ce mois</div>
-        <div class="stat-icon">🧾</div>
+        <div class="stat-label">Rattrapages à valider</div>
+        <div class="stat-value">{{ aValiderRattrapage().length }}</div>
+        <div class="stat-sub">Paiements soumis</div>
+        <div class="stat-icon">🔄</div>
       </div>
     </div>
 
-    <!-- Tableau des paiements -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">💳 Suivi des paiements</span>
+    <!-- ══ VUE : FRAIS SOUTENANCE ══════════════════════════════════════════ -->
+    @if (vue() === 'bordereaux') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">💳 Bordereaux de paiement — frais de soutenance</span>
+        </div>
+
+        <div class="info-flux">
+          <span class="ico-flux">ℹ</span>
+          Après validation, le <strong>Service Examen</strong> est automatiquement notifié de vérifier l'éligibilité de l'étudiant pour la soutenance.
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>N° Bordereau</th>
+              <th>Banque</th>
+              <th>Montant (FCFA)</th>
+              <th>Date dépôt</th>
+              <th>Preuve</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of bordereaux(); track b.id) {
+              <tr [class.row-valide]="b.est_valide">
+                <td><strong>{{ b.etudiant_nom }}</strong></td>
+                <td class="mono">{{ b.numero_bordereau }}</td>
+                <td>{{ b.banque }}</td>
+                <td class="mono">{{ b.montant | number:'1.0-0' }}</td>
+                <td class="mono small">{{ b.date_depot | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  @if (b.image_bordereau) {
+                    <a [href]="b.image_bordereau" target="_blank" class="btn btn-secondary btn-sm">👁 Voir</a>
+                  } @else { <span class="neant">—</span> }
+                </td>
+                <td>
+                  @if (b.est_valide) {
+                    <span class="badge badge-success">✅ Validé</span>
+                  } @else {
+                    <span class="badge badge-pending">⏳ En attente</span>
+                  }
+                </td>
+                <td>
+                  @if (!b.est_valide) {
+                    <button class="btn btn-gold btn-sm" (click)="confirmerPaiement(b.id)">
+                      ✅ Valider &amp; Notifier SE
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="8" class="empty-cell">Aucun bordereau reçu.</td></tr>
+            }
+          </tbody>
+        </table>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Étudiant</th>
-            <th>Niveau</th>
-            <th>Montant (FCFA)</th>
-            <th>Mode</th>
-            <th>Date</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (p of paiements(); track p.id) {
-            <tr>
-              <td><strong>Matricule #{{ p.etudiant_id }}</strong></td>
-              <td>—</td>
-              <td style="font-family:'DM Mono',monospace">{{ p.montant | number:'1.0-0' }}</td>
-              <td>—</td>
-              <td style="font-family:'DM Mono',monospace;font-size:12px">{{ p.date_paiement | date:'dd/MM/yyyy' }}</td>
-              <td>
-                <span class="badge badge-pending">En vérification</span>
-              </td>
-              <td style="white-space:nowrap">
-                <button class="btn btn-gold btn-sm" (click)="confirmerPaiement(p.id)">✅ Valider</button>
-                <a [href]="p.recu_url" target="_blank" class="btn btn-secondary btn-sm" style="margin-left:6px">🧾 Reçu</a>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" style="text-align:center;padding:48px;color:var(--ink3)">
-                Aucune transaction en attente.
-              </td>
-            </tr>
+    }
+
+    <!-- ══ VUE : PAIEMENTS RATTRAPAGES ════════════════════════════════════ -->
+    @if (vue() === 'rattrapages') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🔄 Paiements de rattrapages</span>
+          <span class="badge badge-pending">{{ aValiderRattrapage().length }} à valider</span>
+        </div>
+
+        <div class="info-flux">
+          <span class="ico-flux">ℹ</span>
+          Après validation, le <strong>Service Examen</strong> est automatiquement notifié d'autoriser l'étudiant à passer le rattrapage de l'UE concernée.
+        </div>
+
+        @if (rattrapagesLoading()) {
+          <div class="loading-cell">Chargement…</div>
+        } @else {
+
+          @if (aValiderRattrapage().length > 0) {
+            <h3 class="section-sub">En attente de validation ({{ aValiderRattrapage().length }})</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Étudiant</th>
+                  <th>UE</th>
+                  <th>Date rattrapage</th>
+                  <th>Frais (FCFA)</th>
+                  <th>Preuve paiement</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of aValiderRattrapage(); track r.id) {
+                  <tr>
+                    <td><strong>{{ r.etudiant_nom }}</strong></td>
+                    <td>
+                      <span class="ue-code">{{ r.ue_code }}</span>
+                      <span class="ue-lib">{{ r.ue_libelle }}</span>
+                    </td>
+                    <td class="mono small">{{ r.date | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td class="mono">{{ r.frais | number:'1.0-0' }}</td>
+                    <td>
+                      @if (r.preuve_paiement) {
+                        <a [href]="r.preuve_paiement" target="_blank" class="btn btn-secondary btn-sm">👁 Justificatif</a>
+                      } @else { <span class="neant">—</span> }
+                    </td>
+                    <td>
+                      <button class="btn btn-gold btn-sm"
+                        [disabled]="rattrapageInProg() === r.id"
+                        (click)="validerPaiementRattrapage(r)">
+                        @if (rattrapageInProg() === r.id) { ⏳ } @else { ✅ Valider &amp; Notifier SE }
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="empty-state">
+              <div class="empty-icon">✔</div>
+              <p>Aucun paiement de rattrapage en attente de validation.</p>
+            </div>
           }
-        </tbody>
-      </table>
-    </div>
+
+          @if (historiqueRattrapage().length > 0) {
+            <h3 class="section-sub mt-24">Historique validés ({{ historiqueRattrapage().length }})</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Étudiant</th>
+                  <th>UE</th>
+                  <th>Frais (FCFA)</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of historiqueRattrapage(); track r.id) {
+                  <tr class="row-valide">
+                    <td><strong>{{ r.etudiant_nom }}</strong></td>
+                    <td><span class="ue-code">{{ r.ue_code }}</span> {{ r.ue_libelle }}</td>
+                    <td class="mono">{{ r.frais | number:'1.0-0' }}</td>
+                    <td>
+                      <span class="badge badge-success">✅ Validé</span>
+                      @if (r.statut === 'AUTORISE') {
+                        <span class="badge badge-se ml-4">SE autorisé</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+      </div>
+    }
+
+    <!-- ══ VUE : SCOLARITÉ ════════════════════════════════════════════════ -->
+    @if (vue() === 'scolarite') {
+
+      <!-- Grille tarifaire -->
+      <div class="card mb-16">
+        <div class="card-header">
+          <span class="card-title">🎓 Grille tarifaire — Frais de scolarité</span>
+          <span class="small neant">Année académique
+            <input class="input-annee" [(ngModel)]="anneeAcademique" style="width:90px;padding:3px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px" (change)="chargerScolarite()" />
+          </span>
+        </div>
+        <div class="tarifs-grid">
+          @for (t of tarifs(); track t.annee) {
+            <div class="tarif-card">
+              <div class="tarif-annee">{{ t.annee_label }}</div>
+              <div class="tarif-row"><span>Scolarité</span><strong>{{ t.scolarite | number:'1.0-0' }} F</strong></div>
+              <div class="tarif-row"><span>Inscription</span><strong>{{ t.inscription | number:'1.0-0' }} F</strong></div>
+              <div class="tarif-total">Total : {{ t.total | number:'1.0-0' }} FCFA</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Filtres -->
+      <div class="sout-filters mb-16">
+        <input class="sout-search" type="text" placeholder="🔍 Rechercher étudiant ou matricule…"
+          [value]="scolSearch()" (input)="scolSearch.set($any($event.target).value)" />
+        <select class="sout-date-filter" [value]="scolFiltreStatut()" (change)="scolFiltreStatut.set($any($event.target).value)">
+          <option value="tous">Tous les étudiants</option>
+          <option value="en_retard">En retard / impayé</option>
+          <option value="engagement">Avec engagement actif</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" (click)="chargerScolarite()">↺</button>
+      </div>
+
+      @if (scolLoading()) {
+        <div class="loading-cell">Chargement…</div>
+      } @else {
+
+        <!-- Tableau étudiants scolarité -->
+        <div class="card">
+          <table class="sout-table">
+            <thead>
+              <tr>
+                <th>Matricule</th>
+                <th>Étudiant</th>
+                <th>Année</th>
+                <th>Total dû</th>
+                <th>Total payé</th>
+                <th>Restant</th>
+                <th>Engagement</th>
+                <th>Statut</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of etudiantsScolFiltered(); track e.etudiant_id) {
+                <tr [class.row-valide]="e.en_regle" [class.row-warning]="!e.en_regle">
+                  <td class="mono">{{ e.matricule }}</td>
+                  <td><strong>{{ e.nom }} {{ e.prenom }}</strong></td>
+                  <td>{{ e.annee_label || ('Année ' + e.annee_formation) }}</td>
+                  <td class="mono">{{ e.total_du | number:'1.0-0' }}</td>
+                  <td class="mono" style="color:#1B5E20;font-weight:700">{{ e.total_paye | number:'1.0-0' }}</td>
+                  <td class="mono" [style.color]="e.restant > 0 ? '#991b1b' : '#1B5E20'" style="font-weight:700">
+                    {{ e.restant | number:'1.0-0' }}
+                  </td>
+                  <td>
+                    @if (e.a_engagement) {
+                      <span class="badge" [class]="statutEngagementClass(e.engagement_statut ?? '')">
+                        {{ e.engagement_statut }}
+                      </span>
+                    } @else {
+                      <span class="neant small">—</span>
+                    }
+                  </td>
+                  <td>
+                    @if (e.en_regle) {
+                      <span class="badge badge-success">✅ En règle</span>
+                    } @else {
+                      <span class="badge badge-danger">❌ Solde restant</span>
+                    }
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm"
+                      (click)="selectionnerEtudiantScol(e.etudiant_id)">
+                      {{ scolEtudiantSelId() === e.etudiant_id ? '▲ Fermer' : '▼ Détail' }}
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- Panneau détail étudiant -->
+                @if (scolEtudiantSelId() === e.etudiant_id) {
+                  <tr>
+                    <td colspan="9" style="padding:0">
+                      <div class="scol-detail-panel">
+
+                        <!-- Boutons d'action -->
+                        <div class="scol-actions">
+                          <button class="btn btn-gold btn-sm" (click)="ouvrirPaiementForm()">
+                            ➕ Enregistrer un versement
+                          </button>
+                          @if (!e.a_engagement) {
+                            <button class="btn btn-secondary btn-sm" (click)="ouvrirEngagementForm()">
+                              📋 Créer un engagement de paiement
+                            </button>
+                          }
+                        </div>
+
+                        <!-- Formulaire versement -->
+                        @if (showPaiementForm()) {
+                          <div class="scol-form-card">
+                            <div class="scol-form-title">💰 Nouveau versement — {{ e.nom }} {{ e.prenom }}</div>
+                            <div class="scol-form-grid">
+                              <div class="form-group">
+                                <label class="form-label">Montant (FCFA) *</label>
+                                <input type="number" class="form-select" [(ngModel)]="paiementForm.montant" min="1000" placeholder="Ex : 200000" />
+                              </div>
+                              <div class="form-group">
+                                <label class="form-label">Type</label>
+                                <select class="form-select" [(ngModel)]="paiementForm.type_paiement">
+                                  <option value="SCOLARITE">Scolarité</option>
+                                  <option value="INSCRIPTION">Inscription</option>
+                                  <option value="PARTIEL">Versement partiel</option>
+                                  <option value="SOLDE">Solde du compte</option>
+                                </select>
+                              </div>
+                              <div class="form-group">
+                                <label class="form-label">Mode de paiement</label>
+                                <select class="form-select" [(ngModel)]="paiementForm.mode_paiement">
+                                  <option value="ESPECES">Espèces</option>
+                                  <option value="VIREMENT">Virement bancaire</option>
+                                  <option value="CHEQUE">Chèque</option>
+                                  <option value="MOBILE">Mobile money</option>
+                                </select>
+                              </div>
+                              <div class="form-group">
+                                <label class="form-label">Référence / N° reçu</label>
+                                <input type="text" class="form-select" [(ngModel)]="paiementForm.reference" placeholder="Optionnel" />
+                              </div>
+                            </div>
+                            <div class="form-group" style="margin-top:8px">
+                              <label class="form-label">Remarques</label>
+                              <textarea class="form-textarea" rows="2" [(ngModel)]="paiementForm.remarques" placeholder="Notes internes…"></textarea>
+                            </div>
+                            <div class="reattrib-btns">
+                              <button class="btn-submit-reattrib" [disabled]="paiementInProg()" (click)="soumettrePaiement()">
+                                @if (paiementInProg()) { Enregistrement… } @else { ✓ Enregistrer le versement }
+                              </button>
+                              <button class="btn-cancel" (click)="fermerForms()">Annuler</button>
+                            </div>
+                          </div>
+                        }
+
+                        <!-- Formulaire engagement -->
+                        @if (showEngagementForm()) {
+                          <div class="scol-form-card">
+                            <div class="scol-form-title">📋 Engagement de paiement — {{ e.nom }} {{ e.prenom }}</div>
+                            <div class="scol-form-grid">
+                              <div class="form-group">
+                                <label class="form-label">Montant total engagé (FCFA) *</label>
+                                <input type="number" class="form-select" [(ngModel)]="engagementForm.montant_total" placeholder="Ex : 850000" />
+                              </div>
+                              <div class="form-group">
+                                <label class="form-label">Fréquence</label>
+                                <select class="form-select" [(ngModel)]="engagementForm.frequence">
+                                  <option value="MENSUEL">Mensuel</option>
+                                  <option value="BIMESTRIEL">Bimestriel</option>
+                                  <option value="TRIMESTRIEL">Trimestriel</option>
+                                  <option value="LIBRE">Libre (selon disponibilité)</option>
+                                </select>
+                              </div>
+                              <div class="form-group">
+                                <label class="form-label">Date de début *</label>
+                                <input type="date" class="form-select" [(ngModel)]="engagementForm.date_debut" />
+                              </div>
+                              <div class="form-group">
+                                <label class="form-label">Date de fin prévue</label>
+                                <input type="date" class="form-select" [(ngModel)]="engagementForm.date_fin_prevue" />
+                              </div>
+                            </div>
+                            <div class="form-group" style="margin-top:8px">
+                              <label class="form-label">Notes / conditions</label>
+                              <textarea class="form-textarea" rows="2" [(ngModel)]="engagementForm.notes" placeholder="Conditions de l'engagement, accord verbal, etc."></textarea>
+                            </div>
+                            <div class="reattrib-btns">
+                              <button class="btn-submit-reattrib" [disabled]="engagementInProg()" (click)="soumettreEngagement()">
+                                @if (engagementInProg()) { Enregistrement… } @else { ✓ Créer l'engagement }
+                              </button>
+                              <button class="btn-cancel" (click)="fermerForms()">Annuler</button>
+                            </div>
+                          </div>
+                        }
+
+                        <!-- Historique versements -->
+                        @if (scolPaiements().length > 0) {
+                          <div class="scol-sub-title">💰 Versements enregistrés</div>
+                          <table class="sout-table" style="margin-bottom:12px">
+                            <thead><tr><th>Date</th><th>Montant</th><th>Type</th><th>Mode</th><th>Référence</th><th>Saisi par</th></tr></thead>
+                            <tbody>
+                              @for (p of scolPaiements(); track p.id) {
+                                <tr>
+                                  <td class="small">{{ p.date_paiement | date:'dd/MM/yyyy HH:mm' }}</td>
+                                  <td class="mono" style="font-weight:700;color:#1B5E20">{{ p.montant | number:'1.0-0' }} F</td>
+                                  <td>{{ p.type_paiement }}</td>
+                                  <td>{{ p.mode_paiement }}</td>
+                                  <td class="mono small">{{ p.reference || '—' }}</td>
+                                  <td class="small">{{ p.valide_par_nom || '—' }}</td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        } @else {
+                          <div class="small neant" style="padding:8px 0">Aucun versement enregistré pour cet étudiant.</div>
+                        }
+
+                        <!-- Engagements -->
+                        @if (scolEngagements().length > 0) {
+                          <div class="scol-sub-title">📋 Engagements de paiement</div>
+                          @for (eng of scolEngagements(); track eng.id) {
+                            <div class="eng-card">
+                              <div class="eng-header">
+                                <span>{{ eng.frequence_label }} — {{ eng.montant_total | number:'1.0-0' }} FCFA</span>
+                                <span class="badge" [class]="statutEngagementClass(eng.statut)">{{ eng.statut_label }}</span>
+                              </div>
+                              <div class="eng-meta">Début : {{ eng.date_debut }} @if (eng.date_fin_prevue) { · Fin prévue : {{ eng.date_fin_prevue }} }</div>
+                              @if (eng.notes) { <div class="eng-notes">{{ eng.notes }}</div> }
+                              @if (eng.statut === 'ACTIF' || eng.statut === 'EN_RETARD') {
+                                <div class="eng-btns">
+                                  <button class="btn btn-sm btn-secondary" (click)="mettreAJourStatutEngagement(eng.id, 'HONORE')">✅ Solder</button>
+                                  <button class="btn btn-sm btn-secondary" (click)="mettreAJourStatutEngagement(eng.id, 'EN_RETARD')">⚠ En retard</button>
+                                  <button class="btn btn-sm btn-secondary" (click)="mettreAJourStatutEngagement(eng.id, 'ROMPU')">❌ Rompre</button>
+                                </div>
+                              }
+                            </div>
+                          }
+                        }
+
+                      </div>
+                    </td>
+                  </tr>
+                }
+              } @empty {
+                <tr><td colspan="9" class="empty-cell">Aucun étudiant trouvé.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- ══ VUE : ALERTES ══════════════════════════════════════════════════ -->
+    @if (vue() === 'alertes') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚠ Alertes — Étudiants non en règle</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Matricule</th>
+              <th>Nom &amp; Prénom</th>
+              <th>Filière</th>
+              <th>Email</th>
+              <th>Bordereau soumis</th>
+              <th>N° Bordereau</th>
+              <th>Montant (FCFA)</th>
+              <th>Date soumission</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of alertes(); track a.etudiant_id) {
+              <tr [class.row-warning]="!a.bordereau_soumis">
+                <td class="mono">{{ a.matricule }}</td>
+                <td><strong>{{ a.nom }}</strong> {{ a.prenom }}</td>
+                <td>{{ a.filiere }}</td>
+                <td class="small">{{ a.email }}</td>
+                <td>
+                  @if (a.bordereau_soumis) {
+                    <span class="badge badge-pending">⏳ En vérification</span>
+                  } @else {
+                    <span class="badge badge-danger">❌ Non soumis</span>
+                  }
+                </td>
+                <td class="mono">{{ a.numero_bordereau ?? '—' }}</td>
+                <td class="mono">{{ a.montant != null ? (a.montant | number:'1.0-0') : '—' }}</td>
+                <td class="small">{{ a.date_soumission ? (a.date_soumission | date:'dd/MM/yyyy') : '—' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="8" class="empty-cell">Tous les étudiants sont en règle. ✅</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ══ VUE : RAPPORT ══════════════════════════════════════════════════ -->
+    @if (vue() === 'rapport') {
+      <div class="stats-grid" style="margin-bottom:0">
+        <div class="stat-card green">
+          <div class="stat-label">Montant encaissé</div>
+          <div class="stat-value" style="font-size:22px">{{ totalEncaisse() | number:'1.0-0' }}</div>
+          <div class="stat-sub">FCFA — paiements validés</div>
+          <div class="stat-icon">💰</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Montant en attente</div>
+          <div class="stat-value" style="font-size:22px">{{ totalEnAttente() | number:'1.0-0' }}</div>
+          <div class="stat-sub">FCFA — à confirmer</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Total prévu</div>
+          <div class="stat-value" style="font-size:22px">{{ (totalEncaisse() + totalEnAttente()) | number:'1.0-0' }}</div>
+          <div class="stat-sub">FCFA — bordereaux soumis</div>
+          <div class="stat-icon">📊</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-header">
+          <span class="card-title">✅ Paiements confirmés ({{ bordereauValides().length }})</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>#</th><th>Étudiant</th><th>N° Bordereau</th><th>Banque</th><th>Montant (FCFA)</th><th>Date dépôt</th></tr>
+          </thead>
+          <tbody>
+            @for (b of bordereauValides(); track b.id; let i = $index) {
+              <tr>
+                <td class="small neant">{{ i + 1 }}</td>
+                <td><strong>{{ b.etudiant_nom }}</strong></td>
+                <td class="mono">{{ b.numero_bordereau }}</td>
+                <td>{{ b.banque }}</td>
+                <td class="mono" style="font-weight:600;color:#1B5E20">{{ b.montant | number:'1.0-0' }}</td>
+                <td class="small">{{ b.date_depot | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="empty-cell">Aucun paiement confirmé.</td></tr>
+            }
+          </tbody>
+          @if (bordereauValides().length > 0) {
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4" style="text-align:right;font-weight:700">TOTAL ENCAISSÉ</td>
+                <td class="mono" style="font-weight:700;color:#1B5E20">{{ totalEncaisse() | number:'1.0-0' }} FCFA</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          }
+        </table>
+      </div>
+    }
+
   </div>
 </div>

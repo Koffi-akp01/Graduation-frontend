@@ -1,58 +1,107 @@
-.jury-container {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
+// ── Sidebar button fix ────────────────────────────────────────────────────
+button.nav-item {
+  width: 100%; text-align: left; background: none;
+  border: none; cursor: pointer; font: inherit; padding: 0;
 }
 
-.notes-grid {
+// ── Alert messages ────────────────────────────────────────────────────────
+.alert-msg {
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+
+  &.error   { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+  &.success { background: #D8F3DC; color: #276749; border: 1px solid #B7E4C7; }
+}
+
+// ── Info boxes soutenance ─────────────────────────────────────────────────
+.notation-info-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
 }
 
-.input-group {
-  display: grid;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+.info-panel {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 14px;
 }
 
-input,
-textarea {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 0.75rem;
-  font: inherit;
+.info-panel-lbl {
+  font-size: 11px;
+  color: var(--ink3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
 }
 
-.summary-zone {
-  background-color: var(--cream);
-  padding: 1.5rem;
-  border-radius: 8px;
+.info-panel-val {
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 4px;
+  color: var(--ink);
+
+  &--sm { font-size: 13px; }
+}
+
+.info-panel-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+
+// ── Table de notation ─────────────────────────────────────────────────────
+.coeff-cell {
   text-align: center;
-  margin-bottom: 2rem;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  color: var(--accent2);
+  width: 60px;
+}
 
-  .moyenne-display {
-    span {
-      display: block;
-      font-size: 0.9rem;
-      color: var(--ink2);
-    }
+.note-input {
+  width: 72px;
+  height: 36px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  outline: none;
+  background: var(--surface);
+  transition: border .15s, box-shadow .15s;
 
-    strong {
-      font-size: 2.5rem;
-      font-family: 'DM Sans', sans-serif;
-    }
+  &:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px #2B6CB018;
+  }
+
+  &:disabled {
+    background: var(--bg);
+    color: var(--ink3);
+    cursor: not-allowed;
   }
 }
 
-.btn-navy {
-  background-color: var(--navy);
-  color: white;
-  width: 100%;
-  padding: 1rem;
-  font-weight: bold;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 0;
+.tr-total td {
+  background: var(--gold-lt, #F5E6C8);
+  font-weight: 600;
+}
+
+.note-finale-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.note-finale-num {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'DM Mono', monospace;
+  color: var(--accent, #1A3C5E);
+}
+
+.note-finale-mention {
+  font-size: 12px;
+  color: var(--ink3);
 }

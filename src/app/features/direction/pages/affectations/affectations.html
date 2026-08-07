@@ -1,0 +1,186 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#1A3C5E">DA</div>
+      <div>
+        <div class="avatar-name">Direction Acad.</div>
+        <div class="avatar-role">Administration</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Gestion</div>
+    <a class="nav-item" routerLink="/direction/themes" routerLinkActive="active">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item active" routerLink="/direction/affectations">
+      <span class="ico">🔗</span> Affectations
+      @if (enAttente().length > 0) {
+        <span class="badge-pill">{{ enAttente().length }}</span>
+      }
+    </a>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Affectations</div>
+        <div class="page-subtitle">Acceptez ou réattribuez les directeurs de mémoire aux étudiants</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" (click)="charger()">↺ Actualiser</button>
+    </div>
+
+    @if (successMsg()) {
+      <div class="alert alert-success mb-16">✅ {{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-16">{{ errorMsg() }}</div>
+    }
+
+    <!-- ── Demandes en attente ──────────────────────────────────────────── -->
+    <div class="card mb-16">
+      <div class="card-header">
+        <span class="card-title">⏳ En attente ({{ enAttente().length }})</span>
+      </div>
+
+      @if (isLoading()) {
+        <div class="aff-empty">Chargement…</div>
+      } @else if (enAttente().length === 0) {
+        <div class="aff-empty">✅ Aucune demande en attente.</div>
+      } @else {
+        <div class="aff-list">
+          @for (a of enAttente(); track a.id) {
+            <div class="aff-card" [class.aff-card-open]="reattributionFor() === a.id">
+
+              <div class="aff-info">
+                <div class="aff-row">
+                  <span class="aff-lbl">Étudiant</span>
+                  <span class="aff-val">{{ a.etudiant_nom }}</span>
+                </div>
+                <div class="aff-row">
+                  <span class="aff-lbl">Directeur demandé</span>
+                  <span class="aff-val bold">{{ a.directeur_nom }}</span>
+                </div>
+                <div class="aff-row">
+                  <span class="aff-lbl">Date de demande</span>
+                  <span class="aff-val">{{ a.date_demande | date:'dd/MM/yyyy à HH:mm' }}</span>
+                </div>
+              </div>
+
+              <div class="aff-actions">
+                <button class="btn btn-gold btn-sm"
+                  [disabled]="actionInProgress() === a.id"
+                  (click)="accepter(a.id)">
+                  ✓ Accepter
+                </button>
+                <button class="btn btn-secondary btn-sm"
+                  [class.active]="reattributionFor() === a.id"
+                  [disabled]="actionInProgress() === a.id"
+                  (click)="ouvrirReattribution(a.id)">
+                  ↺ Réattribuer
+                </button>
+              </div>
+
+              <!-- Panneau réattribution (dépliable) -->
+              @if (reattributionFor() === a.id) {
+                <div class="reattrib-panel">
+                  <div class="reattrib-title">↺ Réattribution du directeur de mémoire</div>
+                  <div class="reattrib-hint">
+                    Choisissez un nouveau directeur. L'étudiant et le nouveau directeur seront notifiés automatiquement.
+                  </div>
+                  <div class="reattrib-form">
+                    <div class="form-group">
+                      <label class="form-label">Nouveau directeur <span class="req">*</span></label>
+                      <select class="form-select" [(ngModel)]="nouveauDirecteurId">
+                        <option [ngValue]="0" disabled>— Sélectionner un directeur —</option>
+                        @for (d of directeurs(); track d.id) {
+                          <option [ngValue]="d.id">{{ directeurNom(d) }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Motif de réattribution <span class="req">*</span></label>
+                      <textarea class="form-textarea" rows="3" [(ngModel)]="motifReattribution"
+                        placeholder="Expliquez la raison de ce changement de directeur…"></textarea>
+                    </div>
+                    <div class="reattrib-btns">
+                      <button class="btn-submit-reattrib"
+                        [disabled]="actionInProgress() === a.id || !nouveauDirecteurId || !motifReattribution.trim()"
+                        (click)="soumettrReattribution(a.id)">
+                        @if (actionInProgress() === a.id) { Traitement… }
+                        @else { ✓ Confirmer la réattribution }
+                      </button>
+                      <button class="btn-cancel" (click)="fermerReattribution()">Annuler</button>
+                    </div>
+                  </div>
+                </div>
+              }
+
+            </div><!-- /aff-card -->
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ── Historique ──────────────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🗂 Historique ({{ traitees().length }})</span>
+      </div>
+
+      @if (traitees().length === 0) {
+        <div class="aff-empty">Aucune demande traitée.</div>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Directeur affecté</th>
+              <th>Décision</th>
+              <th>Motif</th>
+              <th>Décidé le</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of traitees(); track a.id) {
+              <tr>
+                <td><strong>{{ a.etudiant_nom }}</strong></td>
+                <td>{{ a.directeur_nom }}</td>
+                <td>
+                  <span class="badge"
+                    [class.badge-success]="a.statut === 'ACCEPTE'"
+                    [class.badge-warn]="a.statut === 'REFUSE'">
+                    {{ a.statut === 'ACCEPTE' ? '✓ Accepté' : '✕ Refusé' }}
+                  </span>
+                </td>
+                <td class="small">
+                  @if (a.motif_reattribution) { {{ a.motif_reattribution }} }
+                  @else if (a.motif_refus) { {{ a.motif_refus }} }
+                  @else { <span class="neant">—</span> }
+                </td>
+                <td class="small">
+                  @if (a.date_decision) { {{ a.date_decision | date:'dd/MM/yyyy' }} }
+                  @else { <span class="neant">—</span> }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app-page -->

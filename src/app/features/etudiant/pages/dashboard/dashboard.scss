@@ -1,66 +1,127 @@
-// ══ STEPPER : labels SOUS les cercles (override du style global) ════════════
+.refresh-hint {
+  font-size: 11px;
+  color: var(--ink3);
+  margin-top: 4px;
+}
+
+// ══ STEPPER ══════════════════════════════════════════════════════════════════
 .stepper-wrap {
   padding: 20px 24px 24px;
 }
 
 .stepper-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 24px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink2);
+  margin-bottom: 20px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .stepper {
+  display: flex;
   align-items: flex-start;
   overflow-x: auto;
   padding-bottom: 4px;
-  margin-bottom: 0;
   gap: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
-// Chaque étape devient une colonne (cercle en haut, label en dessous)
 .step {
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   flex: 1;
-  min-width: 64px;
+  min-width: 68px;
+  position: relative;
 }
 
-.step:last-child {
-  flex: 0 0 auto;
-}
+.step:last-child { flex: 0 0 auto; }
 
+// ── Cercle ──────────────────────────────────────────────────────────────────
 .step-circle {
-  width: 36px;
-  height: 36px;
-  font-size: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
   flex-shrink: 0;
+  background: var(--border);
+  color: var(--ink3);
+  transition: background .2s, color .2s;
 }
 
-// Cercle vert vif pour les étapes terminées
 .step.done .step-circle {
-  background: #22C55E;
-  border-color: #22C55E;
+  background: var(--success);
+  color: #fff;
 }
 
+.step.active .step-circle {
+  background: var(--navy);
+  color: #fff;
+}
+
+// ── Label ────────────────────────────────────────────────────────────────────
 .step-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink3);
   text-align: center;
-  white-space: normal;
-  max-width: 84px;
+  max-width: 68px;
   line-height: 1.3;
 }
 
-// La ligne doit être au centre des cercles de 36px : 36/2 - 1px ≈ 17px
+.step.done .step-label   { color: var(--success); }
+.step.active .step-label { color: var(--navy); font-weight: 700; }
+
+// ── Ligne de connexion ───────────────────────────────────────────────────────
 .step-line {
   flex: 1;
-  min-width: 16px;
-  margin: 0;
-  margin-top: 17px;
+  min-width: 20px;
+  height: 2px;
+  background: var(--border);
+  margin-top: 16px;
   align-self: flex-start;
+  border-radius: 1px;
+  transition: background .2s;
 }
 
-// ══ DEUX COLONNES mémoire / checklist (60 / 40) ═════════════════════════════
+.step-line.done { background: var(--success); }
+
+// ── Étapes suivi mémoire (sous-étapes intercalées) ───────────────────────────
+.step.suivi-step {
+  flex: 0 0 auto;
+  min-width: 56px;
+  max-width: 72px;
+
+  .step-circle {
+    width: 24px;
+    height: 24px;
+    font-size: 13px;
+    background: var(--info-light);
+    color: var(--info);
+    margin: 0 auto 4px;
+  }
+
+  .step-label {
+    font-size: 9px;
+    max-width: 68px;
+    color: var(--ink3);
+    line-height: 1.2;
+  }
+
+  &.done .step-circle  { background: var(--success); color: #fff; }
+  &.done .step-label   { color: var(--success); }
+  &.active .step-circle { background: var(--info); color: #fff; }
+  &.active .step-label  { color: var(--info); font-weight: 700; }
+}
+
+// ══ DEUX COLONNES mémoire / checklist (60/40) ════════════════════════════════
 .dash-two-col {
   display: grid;
   grid-template-columns: 3fr 2fr;
@@ -74,7 +135,7 @@
 
 // ══ MÉMOIRE CARD ═════════════════════════════════════════════════════════════
 .mem-body {
-  padding: 20px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -109,12 +170,12 @@
 }
 
 .dir-comment {
-  background: #FFFBEB;
-  border: 1px solid #FCD34D;
-  border-left: 4px solid #F59E0B;
+  background: var(--warning-light);
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
   padding: 10px 14px;
   font-size: 12px;
-  color: #92400E;
+  color: var(--warning);
   border-radius: 6px;
   line-height: 1.5;
 }
@@ -131,21 +192,21 @@
   padding: 10px 0;
   font-size: 13px;
   color: var(--ink2);
-  border-bottom: 1px solid #F3F4F6;
+  border-bottom: 1px solid var(--border);
 
   &:last-child { border-bottom: none; }
 
   .elig-ico {
     font-size: 12px;
     font-weight: 700;
-    min-width: 20px;
+    min-width: 18px;
     text-align: center;
     flex-shrink: 0;
   }
 
-  &.ok  .elig-ico { color: #22C55E; }
-  &.nok .elig-ico { color: #EF4444; }
-  &.pnd .elig-ico { color: #9CA3AF; font-weight: 400; letter-spacing: 1px; }
+  &.ok  .elig-ico { color: var(--success); }
+  &.nok .elig-ico { color: var(--danger); }
+  &.pnd .elig-ico { color: var(--ink3); font-weight: 400; letter-spacing: 1px; }
 }
 
 .elig-footer {
@@ -178,11 +239,140 @@
 }
 
 .sout-val {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--gold);
   margin-top: 4px;
   font-family: 'DM Mono', monospace;
+}
+
+// ══ SOUTENANCE — état vide ════════════════════════════════════════════════════
+.sout-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 24px;
+  text-align: center;
+}
+
+.sout-empty-icon  { font-size: 36px; opacity: .4; }
+.sout-empty-title { font-size: 15px; font-weight: 700; color: var(--ink2); }
+.sout-empty-sub   { font-size: 13px; color: var(--ink3); max-width: 460px; line-height: 1.6; }
+
+// ══ SUIVI MÉMOIRE ════════════════════════════════════════════════════════════
+.suivi-loading {
+  padding: 28px;
+  text-align: center;
+  color: var(--ink3);
+  font-style: italic;
+}
+
+.suivi-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px 8px;
+}
+
+.suivi-progress-bar {
+  flex: 1;
+  height: 7px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.suivi-progress-fill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 4px;
+  transition: width .4s ease;
+}
+
+.suivi-progress-pct {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+  min-width: 34px;
+  text-align: right;
+}
+
+.suivi-etapes {
+  padding: 12px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.suivi-etape {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: var(--bg2);
+  border-left-width: 4px;
+
+  &.etape-locked   { border-left-color: var(--border);   opacity: .65; }
+  &.etape-active   { border-left-color: var(--info);      background: var(--info-light); }
+  &.etape-soumis   { border-left-color: #7c3aed;          background: #f5f3ff; }
+  &.etape-revision { border-left-color: #ea580c;          background: #fff7ed; }
+  &.etape-valide   { border-left-color: var(--success);   background: var(--success-light); }
+}
+
+.suivi-etape-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.suivi-etape-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.suivi-etape-info  { flex: 1; min-width: 0; }
+.suivi-etape-titre { font-size: 13px; font-weight: 700; color: var(--navy); }
+.suivi-etape-desc  { font-size: 11px; color: var(--ink3); margin-top: 3px; }
+
+.suivi-statut-label {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ink2);
+  flex-shrink: 0;
+}
+
+.suivi-remarques-box {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--warning-light);
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ink2);
+}
+
+.suivi-date {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.suivi-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 // ══ RESPONSIVE ═══════════════════════════════════════════════════════════════

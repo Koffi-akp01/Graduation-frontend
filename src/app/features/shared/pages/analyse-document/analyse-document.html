@@ -1,0 +1,311 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-ico">🔬</span>
+      <span class="logo-txt">Analyse IA</span>
+    </div>
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item active" routerLink="/analyse">
+      <span class="ico">🔬</span> Analyse Plagiat / IA
+    </a>
+  </aside>
+
+  <!-- ═══ CONTENU ════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Détection Plagiat &amp; Contenu IA</div>
+        <div class="page-subtitle">Sélectionnez un mémoire pour lancer l'analyse, puis validez ou rejetez</div>
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="alert-danger">{{ error() }}</div>
+    }
+
+    @if (loading()) {
+      <div class="loading-wrap">
+        <div class="spinner-lg"></div>
+        <span>Chargement des documents…</span>
+      </div>
+    }
+
+    <!-- ── Table des documents ── -->
+    @if (!loading()) {
+      <div class="section-card">
+        <div class="section-title">Mémoires soumis ({{ documents().length }})</div>
+
+        @if (documents().length === 0) {
+          <p class="empty-msg">Aucun mémoire disponible pour l'analyse.</p>
+        }
+
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Titre</th>
+              <th>Ver.</th>
+              <th>Taille</th>
+              <th>Dépôt</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (doc of documents(); track doc.id) {
+              <tr>
+                <td>{{ doc.etudiant }}</td>
+                <td class="titre-cell">{{ doc.titre }}</td>
+                <td>v{{ doc.version }}</td>
+                <td>{{ formatSize(doc.taille) }}</td>
+                <td>{{ doc.date_upload | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span class="badge" [class]="statutClass(doc.statut)">
+                    {{ statutLabel(doc.statut) }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <button
+                    class="btn-voir"
+                    (click)="voirDocument(doc)"
+                    [disabled]="!doc.url"
+                    title="Le document reste consultable même une fois validé">
+                    👁 Voir le document
+                  </button>
+                  <button
+                    class="btn-analyse"
+                    (click)="analyser(doc)"
+                    [disabled]="analysing() !== null">
+                    @if (analysing() === doc.id) {
+                      <span class="spinner-sm"></span> Analyse…
+                    } @else {
+                      🔬 Analyser
+                    }
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ═══ RÉSULTATS ═══ -->
+      @if (resultat(); as r) {
+        <div class="results-section">
+
+          <!-- ── Bandeau plagiat auto-rejet ── -->
+          @if (isPlagiatDetecte(r)) {
+            <div class="plagiat-alert">
+              <div class="plagiat-alert-icon">🚫</div>
+              <div class="plagiat-alert-body">
+                <div class="plagiat-alert-title">Plagiat détecté — Document automatiquement rejeté</div>
+                <div class="plagiat-alert-sub">
+                  Taux de similarité : <strong>{{ r.plagiat.score }}%</strong> —
+                  L'étudiant a été notifié avec le motif « Plagiat détecté ».
+                </div>
+              </div>
+              <div class="plagiat-alert-score">{{ r.plagiat.score }}%</div>
+            </div>
+          }
+
+          <div class="results-wrap">
+
+            <!-- Carte Plagiat -->
+            <div class="result-card" [class]="'result-card--' + plagiatClass(r.plagiat.score)">
+              <div class="result-card-header">
+                <span class="result-ico">📋</span>
+                <div>
+                  <div class="result-title">Analyse Plagiat</div>
+                  <div class="result-subtitle">{{ r.etudiant }} — v{{ r.version }}</div>
+                </div>
+                <div class="result-score" [class]="plagiatClass(r.plagiat.score)">
+                  {{ r.plagiat.score }}%
+                </div>
+              </div>
+
+              <div class="result-label" [class]="plagiatClass(r.plagiat.score)">
+                {{ r.plagiat.label }}
+              </div>
+
+              <div class="score-bar-wrap">
+                <div class="score-bar">
+                  <div class="score-fill" [class]="plagiatClass(r.plagiat.score)"
+                       [style.width.%]="r.plagiat.score"></div>
+                </div>
+                <div class="score-legend">
+                  <span class="leg safe">0–19% Aucun</span>
+                  <span class="leg warn">20–29% Suspect</span>
+                  <span class="leg danger">30%+ Plagiat</span>
+                </div>
+              </div>
+
+              @if (r.plagiat.matches.length > 0) {
+                <div class="matches-title">Documents similaires détectés :</div>
+                <ul class="matches-list">
+                  @for (m of r.plagiat.matches; track m.doc_id) {
+                    <li>
+                      <span class="match-sim" [class]="plagiatClass(m.similarite)">{{ m.similarite }}%</span>
+                      <span class="match-titre">{{ m.titre }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="no-match">Aucun document similaire trouvé dans la base.</p>
+              }
+            </div>
+
+            <!-- Carte IA -->
+            <div class="result-card" [class]="'result-card--' + iaClass(r.ia.score)">
+              <div class="result-card-header">
+                <span class="result-ico">🤖</span>
+                <div>
+                  <div class="result-title">Détection Contenu IA</div>
+                  <div class="result-subtitle">Analyse statistique du style rédactionnel</div>
+                </div>
+                <div class="result-score" [class]="iaClass(r.ia.score)">
+                  {{ r.ia.score }}%
+                </div>
+              </div>
+
+              <div class="result-label" [class]="iaClass(r.ia.score)">
+                {{ r.ia.label }}
+              </div>
+
+              <div class="score-bar-wrap">
+                <div class="score-bar">
+                  <div class="score-fill" [class]="iaClass(r.ia.score)"
+                       [style.width.%]="r.ia.score"></div>
+                </div>
+                <div class="score-legend">
+                  <span class="leg safe">0–20% Humain</span>
+                  <span class="leg warn">21–59% Mixte</span>
+                  <span class="leg danger">60%+ IA probable</span>
+                </div>
+              </div>
+
+              <div class="metrics-grid">
+                <div class="metric">
+                  <div class="metric-label">Uniformité des phrases</div>
+                  <div class="metric-val">{{ r.ia.metrics.uniformite_phrases }}%</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Formules IA détectées</div>
+                  <div class="metric-val">{{ r.ia.metrics.formules_ia_detectees }}</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Richesse vocabulaire</div>
+                  <div class="metric-val">{{ r.ia.metrics.richesse_vocabulaire_pct }}%</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-label">Uniformité paragraphes</div>
+                  <div class="metric-val">{{ r.ia.metrics.uniformite_paragraphes }}%</div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /results-wrap -->
+
+          <!-- ══ ZONE DÉCISION ══════════════════════════════════════════════ -->
+          @if (!isPlagiatDetecte(r)) {
+            <div class="decision-panel">
+              <div class="decision-title">Décision du directeur</div>
+
+              @if (decisionMsg()) {
+                <div class="decision-feedback"
+                  [class.feedback-ok]="docStatut() === 'valide'"
+                  [class.feedback-ko]="docStatut() === 'rejete'">
+                  {{ decisionMsg() }}
+                </div>
+              }
+
+              @if (decisionErr()) {
+                <div class="decision-error">{{ decisionErr() }}</div>
+              }
+
+              @if (docStatut() === null || docStatut() === 'en_attente') {
+
+                @if (!showRejetForm()) {
+                  <div class="decision-btns">
+                    <button class="btn-valider" (click)="validerDocument()" [disabled]="decisioning()">
+                      @if (decisioning()) { <span class="spinner-sm"></span> } @else { ✓ }
+                      Valider le document
+                    </button>
+                    <button class="btn-rejeter" (click)="ouvrirRejet()" [disabled]="decisioning()">
+                      ✗ Rejeter le document
+                    </button>
+                  </div>
+                }
+
+                @if (showRejetForm()) {
+                  <div class="rejet-form">
+                    <label class="rejet-label">Motif du rejet <span class="required">*</span></label>
+                    <textarea
+                      class="rejet-textarea"
+                      [(ngModel)]="motifRejet"
+                      rows="3"
+                      placeholder="Expliquez la raison du rejet à l'étudiant…"></textarea>
+                    <div class="rejet-actions">
+                      <button class="btn-rejeter-confirm" (click)="confirmerRejet()" [disabled]="decisioning()">
+                        @if (decisioning()) { <span class="spinner-sm spinner-sm--dark"></span> Envoi… }
+                        @else { ✗ Confirmer le rejet }
+                      </button>
+                      <button class="btn-annuler-rejet" (click)="annulerRejet()">Annuler</button>
+                    </div>
+                  </div>
+                }
+
+              } @else {
+                <div class="decision-done"
+                  [class.done-ok]="docStatut() === 'valide'"
+                  [class.done-ko]="docStatut() === 'rejete'">
+                  @if (docStatut() === 'valide') {
+                    ✓ Ce document a été validé.
+                  } @else {
+                    ✗ Ce document a été rejeté.
+                  }
+                </div>
+              }
+
+            </div>
+          }
+
+          <!-- ══ HISTORIQUE / TRAÇABILITÉ ═══════════════════════════════════ -->
+          <div class="historique-panel">
+            <div class="decision-title">🕒 Historique des actions sur ce document</div>
+
+            @if (historiqueLoading()) {
+              <p class="empty-msg">Chargement de l'historique…</p>
+            } @else if (historique().length === 0) {
+              <p class="empty-msg">Aucune trace enregistrée pour ce document.</p>
+            } @else {
+              <ul class="historique-list">
+                @for (h of historique(); track h.id) {
+                  <li class="historique-item">
+                    <div class="historique-dot"></div>
+                    <div class="historique-body">
+                      <div class="historique-top">
+                        <span class="historique-action">{{ h.action_label }}</span>
+                        <span class="historique-date">{{ h.date | date:'dd/MM/yyyy HH:mm' }}</span>
+                      </div>
+                      <div class="historique-user">Par {{ h.utilisateur }}</div>
+                      @if (historiqueDetail(h)) {
+                        <div class="historique-detail">{{ historiqueDetail(h) }}</div>
+                      }
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+        </div><!-- /results-section -->
+      }
+    }
+
+  </div>
+</div>

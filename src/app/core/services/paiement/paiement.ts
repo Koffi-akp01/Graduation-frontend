@@ -1,15 +1,19 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { Paiement, StatsPaiement } from '../../models/paiement.model';
+import {
+  AlerteImpaye, Bordereau, StatsPaiement,
+  TarifScolarite, EtudiantScolarite, PaiementScolarite,
+  EngagementPaiement, NouveauPaiementForm, NouvelEngagementForm,
+} from '../../models/paiement.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PaiementService {
-  private readonly apiUrl = `${environment.apiUrl}/paiements/`;
+  private readonly apiUrl = `${environment.apiUrl}/bordereaux/`;
 
   constructor(private http: HttpClient) {}
 
@@ -17,15 +21,65 @@ export class PaiementService {
     return this.http.get<StatsPaiement>(`${this.apiUrl}stats/`);
   }
 
-  getAllPaiements(params?: any): Observable<any> {
-    return this.http.get<any>(this.apiUrl, { params });
+  getAllBordereaux(params?: Record<string, string>): Observable<Bordereau[]> {
+    return this.http.get<Bordereau[]>(this.apiUrl, { params });
   }
 
-  validerPaiement(id: number): Observable<Paiement> {
-    return this.http.post<Paiement>(`${this.apiUrl}${id}/valider/`, {});
+  /** @deprecated Use getAllBordereaux */
+  getAllPaiements(params?: Record<string, string>): Observable<Bordereau[]> {
+    return this.getAllBordereaux(params);
   }
 
-  getRecu(id: number): Observable<{ url: string }> {
-    return this.http.get<{ url: string }>(`${this.apiUrl}${id}/recu/`);
+  validerPaiement(id: number): Observable<Bordereau> {
+    return this.http.patch<Bordereau>(`${this.apiUrl}${id}/`, { est_valide: true });
+  }
+
+  soumettreBordereau(formData: FormData): Observable<Bordereau> {
+    return this.http.post<Bordereau>(this.apiUrl, formData);
+  }
+
+  getAlertes(): Observable<AlerteImpaye[]> {
+    return this.http.get<AlerteImpaye[]>(`${this.apiUrl}alertes/`);
+  }
+
+  validerBordereau(id: number): Observable<Bordereau> {
+    return this.http.patch<Bordereau>(`${this.apiUrl}${id}/valider/`, {});
+  }
+
+  // ── Scolarité ────────────────────────────────────────────────────────────
+  private readonly scol = `${environment.apiUrl}/scolarite`;
+
+  getTarifs(): Observable<TarifScolarite[]> {
+    return this.http.get<TarifScolarite[]>(`${this.scol}/tarifs/`);
+  }
+
+  getEtudiantsScolarite(annee?: string): Observable<EtudiantScolarite[]> {
+    let params = new HttpParams();
+    if (annee) params = params.set('annee_academique', annee);
+    return this.http.get<EtudiantScolarite[]>(`${this.scol}/etudiants/`, { params });
+  }
+
+  getPaiementsScolarite(etudiantId?: number): Observable<PaiementScolarite[]> {
+    let params = new HttpParams();
+    if (etudiantId) params = params.set('etudiant', String(etudiantId));
+    return this.http.get<PaiementScolarite[]>(`${this.scol}/paiements/`, { params });
+  }
+
+  enregistrerPaiement(form: NouveauPaiementForm): Observable<{ id: number; message: string }> {
+    return this.http.post<{ id: number; message: string }>(`${this.scol}/paiements/`, form);
+  }
+
+  getEngagements(etudiantId?: number): Observable<EngagementPaiement[]> {
+    let params = new HttpParams();
+    if (etudiantId) params = params.set('etudiant', String(etudiantId));
+    return this.http.get<EngagementPaiement[]>(`${this.scol}/engagements/`, { params });
+  }
+
+  creerEngagement(form: NouvelEngagementForm): Observable<{ id: number; message: string }> {
+    return this.http.post<{ id: number; message: string }>(`${this.scol}/engagements/`, form);
+  }
+
+  mettreAJourEngagement(id: number, data: Partial<EngagementPaiement>): Observable<{ id: number; statut: string }> {
+    return this.http.patch<{ id: number; statut: string }>(`${this.scol}/engagements/${id}/`, data);
   }
 }

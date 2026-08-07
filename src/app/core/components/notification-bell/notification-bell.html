@@ -1,0 +1,100 @@
+<div class="bell-wrapper">
+  <button class="bell-btn" (click)="toggle()" [class.has-unread]="totalBadge() > 0" title="Notifications">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11a6 6 0 0 0-5-5.91V4a1 1 0 0 0-2 0v1.09A6 6 0 0 0 6 11v5l-2 2v1h16v-1l-2-2z"/>
+    </svg>
+    @if (totalBadge() > 0) {
+      <span class="badge">{{ totalBadge() > 9 ? '9+' : totalBadge() }}</span>
+    }
+  </button>
+
+  @if (isOpen()) {
+    <div class="dropdown" (click)="$event.stopPropagation()">
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn" [class.active]="activeTab() === 'notifs'" (click)="setTab('notifs')">
+          🔔 Notifications
+          @if (nonLues() > 0) {
+            <span class="tab-count">{{ nonLues() }}</span>
+          }
+        </button>
+        <button class="tab-btn" [class.active]="activeTab() === 'messages'" (click)="setTab('messages')">
+          ✉️ Messages
+          @if (messagesNonLus() > 0) {
+            <span class="tab-count">{{ messagesNonLus() }}</span>
+          }
+        </button>
+      </div>
+
+      <!-- ── Onglet Notifications ── -->
+      @if (activeTab() === 'notifs') {
+        <div class="tab-header">
+          @if (nonLues() > 0) {
+            <button class="btn-tout-lire" (click)="toutMarquerLues()">Tout lire</button>
+          }
+        </div>
+
+        <div class="notif-list">
+          @if (notifications().length === 0) {
+            <div class="empty">
+              <div class="empty-icon">🔔</div>
+              <div>Aucune notification.</div>
+            </div>
+          }
+          @for (n of notifications(); track n.id) {
+            <div class="notif-item" [class.unread]="!n.lu" [class.clickable]="!!n.lien" (click)="cliquerNotif(n, $event)">
+              <div class="notif-top">
+                <span class="notif-icon">{{ iconFor(n.type_notif) }}</span>
+                <div class="notif-body">
+                  <div class="notif-titre">{{ n.titre }}</div>
+                  <div class="notif-message">{{ n.message }}</div>
+                </div>
+                @if (!n.lu) {
+                  <span class="unread-dot"></span>
+                }
+              </div>
+              <div class="notif-footer">
+                <span class="notif-date">{{ n.date_creation | date:'dd/MM/yyyy HH:mm' }}</span>
+                @if (n.lien) {
+                  <span class="notif-link-hint">Voir →</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── Onglet Messages ── -->
+      @if (activeTab() === 'messages') {
+        <div class="notif-list">
+          @if (messages().length === 0) {
+            <div class="empty">
+              <div class="empty-icon">✉️</div>
+              <div>Aucun message reçu.</div>
+            </div>
+          }
+          @for (m of messages(); track m.id) {
+            <div class="notif-item msg-item" [class.unread]="!m.lu" (click)="ouvrirMessage(m, $event)">
+              <div class="notif-top">
+                <span class="notif-icon">✉️</span>
+                <div class="notif-body">
+                  <div class="notif-titre">{{ m.expediteur_nom }}</div>
+                  <div class="notif-message">{{ m.contenu }}</div>
+                </div>
+                @if (!m.lu) {
+                  <span class="unread-dot"></span>
+                }
+              </div>
+              <div class="notif-footer">
+                <span class="notif-date">{{ m.date_envoi | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span class="notif-link-hint">Ouvrir →</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+  }
+</div>

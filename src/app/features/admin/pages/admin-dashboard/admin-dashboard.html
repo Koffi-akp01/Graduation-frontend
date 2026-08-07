@@ -1,7 +1,8 @@
 <app-top-nav></app-top-nav>
 
 <div class="app-page">
-  <!-- Sidebar -->
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
   <aside class="sidebar">
     <div class="sidebar-avatar">
       <div class="avatar-circle" style="background:#0F0E0C">AD</div>
@@ -10,177 +11,350 @@
         <div class="avatar-role">Système — Accès total</div>
       </div>
     </div>
+
     <div class="sidebar-section">Système</div>
-    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
-    <a class="nav-item"><span class="ico">👥</span> Gestion utilisateurs</a>
-    <a class="nav-item"><span class="ico">🔑</span> Gestion des rôles</a>
-    <div class="sidebar-section">Monitoring</div>
-    <a class="nav-item"><span class="ico">📊</span> Statistiques globales</a>
-    <a class="nav-item"><span class="ico">📋</span> Journal d'audit</a>
-    <a class="nav-item"><span class="ico">🔒</span> Sécurité & accès</a>
-    <div class="sidebar-section">Paramètres</div>
-    <a class="nav-item"><span class="ico">⚙</span> Configuration système</a>
-    <a class="nav-item"><span class="ico">💾</span> Sauvegarde</a>
+    <button class="nav-item" [class.active]="vue() === 'dashboard'" (click)="setVue('dashboard')">
+      <span class="ico">🏠</span> Tableau de bord
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'utilisateurs'" (click)="setVue('utilisateurs')">
+      <span class="ico">👥</span> Gestion utilisateurs
+      @if (users().length > 0) {
+        <span class="badge-count">{{ users().length }}</span>
+      }
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'audit'" (click)="setVue('audit')">
+      <span class="ico">📋</span> Journal d'audit
+    </button>
+
+    <div class="sidebar-section">Pages d'administration</div>
+    <a class="nav-item" routerLink="/direction/themes" routerLinkActive="active">
+      <span class="ico">💡</span> Thèmes mémoires
+    </a>
+    <a class="nav-item" routerLink="/direction/affectations" routerLinkActive="active">
+      <span class="ico">🔗</span> Affectations directeurs
+    </a>
+    <a class="nav-item" routerLink="/recouvrement/liste" routerLinkActive="active">
+      <span class="ico">💳</span> Recouvrement
+    </a>
+    <a class="nav-item" routerLink="/organisation/planification" routerLinkActive="active">
+      <span class="ico">📅</span> Planification
+    </a>
+    <a class="nav-item" routerLink="/examen/conformite" routerLinkActive="active">
+      <span class="ico">🔍</span> Service Examen
+    </a>
   </aside>
 
-  <!-- Contenu principal -->
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
   <div class="main">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Administration système</div>
-        <div class="page-subtitle">IPNET — Tableau de bord global</div>
-      </div>
-      <button class="btn btn-primary" (click)="exporterDonnees()">📤 Créer un utilisateur</button>
-    </div>
 
-    <!-- Stat cards -->
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <div class="stat-label">Utilisateurs actifs</div>
-        <div class="stat-value">{{ stats()?.total_etudiants || 143 }}</div>
-        <div class="stat-sub">Sur 158 comptes créés</div>
-        <div class="stat-icon">👥</div>
-      </div>
-      <div class="stat-card gold">
-        <div class="stat-label">Sessions actives</div>
-        <div class="stat-value">12</div>
-        <div class="stat-sub">En ce moment</div>
-        <div class="stat-icon">🟢</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">Soutenances archivées</div>
-        <div class="stat-value">{{ stats()?.soutenances_terminees || 312 }}</div>
-        <div class="stat-sub">Depuis 2022</div>
-        <div class="stat-icon">📋</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">Alertes système</div>
-        <div class="stat-value">2</div>
-        <div class="stat-sub">À traiter</div>
-        <div class="stat-icon">🔔</div>
-      </div>
-    </div>
+    <!-- Messages -->
+    @if (successMsg()) {
+      <div class="alert alert-success mb-16">{{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-16">{{ errorMsg() }}</div>
+    }
 
-    <div class="two-col">
-      <!-- Gestion des utilisateurs -->
+    <!-- ══ VUE : TABLEAU DE BORD ══════════════════════════════════════════ -->
+    @if (vue() === 'dashboard') {
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Administration système</div>
+          <div class="page-subtitle">IPNET — Tableau de bord global</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" (click)="charger()">↺ Actualiser</button>
+          <button class="btn btn-primary" (click)="ouvrirModal()">+ Créer un utilisateur</button>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Utilisateurs actifs</div>
+          <div class="stat-value">{{ stats()?.utilisateurs_actifs ?? '—' }}</div>
+          <div class="stat-sub">Sur {{ stats()?.total_utilisateurs ?? '—' }} comptes</div>
+          <div class="stat-icon">👥</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Étudiants inscrits</div>
+          <div class="stat-value">{{ stats()?.total_etudiants ?? '—' }}</div>
+          <div class="stat-sub">Profils actifs</div>
+          <div class="stat-icon">🎓</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Soutenances terminées</div>
+          <div class="stat-value">{{ stats()?.soutenances_terminees ?? '—' }}</div>
+          <div class="stat-sub">Taux réussite : {{ stats()?.taux_reussite ?? '—' }}%</div>
+          <div class="stat-icon">📋</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Paiements validés</div>
+          <div class="stat-value">{{ stats()?.total_paiements ?? '—' }}</div>
+          <div class="stat-sub">Frais de soutenance</div>
+          <div class="stat-icon">💰</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Aperçu utilisateurs -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">👥 Derniers utilisateurs</span>
+            <button class="btn btn-primary btn-sm" (click)="setVue('utilisateurs')">Voir tous →</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Nom</th><th>Rôle</th><th>Statut</th></tr>
+            </thead>
+            <tbody>
+              @for (user of users().slice(0, 8); track user.id) {
+                <tr>
+                  <td><strong>{{ user.nom }}</strong></td>
+                  <td><span class="badge" [class]="roleBadgeClass(user.role_code)">{{ user.role }}</span></td>
+                  <td>
+                    @if (user.actif) {
+                      <span class="badge badge-success">Actif</span>
+                    } @else {
+                      <span class="badge badge-warn">Inactif</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="empty-cell">Aucun utilisateur</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Journal d'audit -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📋 Dernières connexions</span>
+            <button class="btn btn-secondary btn-sm" (click)="setVue('audit')">Tout voir →</button>
+          </div>
+          <div class="timeline">
+            @for (log of logs().slice(0, 6); track log.id) {
+              <div class="tl-item">
+                <div class="tl-dot done"></div>
+                <div class="tl-content">
+                  <div class="tl-title">{{ log.utilisateur }}</div>
+                  <div class="tl-desc">{{ log.action }}</div>
+                  <div class="tl-date">{{ log.date | date:'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+              </div>
+            } @empty {
+              <div class="tl-item">
+                <div class="tl-dot wait"></div>
+                <div class="tl-content">
+                  <div class="tl-title">Aucun log disponible</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Liens rapides -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">👥 Gestion utilisateurs</span>
-          <button class="btn btn-primary btn-sm">+ Ajouter</button>
+          <span class="card-title">🔗 Accès rapides</span>
         </div>
+        <div class="quick-links">
+          <a routerLink="/direction/themes" class="ql-item">
+            <span class="ql-ico">💡</span>
+            <div class="ql-label">Thèmes mémoires</div>
+            <div class="ql-sub">Valider, rejeter les thèmes</div>
+          </a>
+          <a routerLink="/direction/affectations" class="ql-item">
+            <span class="ql-ico">🔗</span>
+            <div class="ql-label">Affectations</div>
+            <div class="ql-sub">Réattribuer les directeurs</div>
+          </a>
+          <a routerLink="/recouvrement/liste" class="ql-item">
+            <span class="ql-ico">💳</span>
+            <div class="ql-label">Recouvrement</div>
+            <div class="ql-sub">Paiements & scolarité</div>
+          </a>
+          <a routerLink="/organisation/planification" class="ql-item">
+            <span class="ql-ico">📅</span>
+            <div class="ql-label">Planification</div>
+            <div class="ql-sub">Organiser les soutenances</div>
+          </a>
+          <a routerLink="/examen/conformite" class="ql-item">
+            <span class="ql-ico">🔍</span>
+            <div class="ql-label">Service Examen</div>
+            <div class="ql-sub">Dossiers, notes, calendrier</div>
+          </a>
+        </div>
+      </div>
+    }
+
+    <!-- ══ VUE : GESTION UTILISATEURS ════════════════════════════════════ -->
+    @if (vue() === 'utilisateurs') {
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">👥 Gestion des utilisateurs</div>
+          <div class="page-subtitle">{{ users().length }} comptes — {{ users().filter(u => u.actif).length }} actifs</div>
+        </div>
+        <button class="btn btn-primary" (click)="ouvrirModal()">+ Créer un utilisateur</button>
+      </div>
+
+      <!-- Filtres -->
+      <div class="admin-filters">
+        <input class="admin-search" type="text" placeholder="🔍 Rechercher par nom ou email…"
+          [value]="searchUser()" (input)="searchUser.set($any($event.target).value)" />
+        <select class="admin-select" [value]="filtreRole()" (change)="filtreRole.set($any($event.target).value)">
+          <option value="">Tous les rôles</option>
+          @for (r of roles; track r.code) {
+            <option [value]="r.code">{{ r.label }}</option>
+          }
+        </select>
+        <button class="btn btn-secondary btn-sm" (click)="searchUser.set(''); filtreRole.set('')">Réinitialiser</button>
+      </div>
+
+      <div class="card">
         <table>
           <thead>
             <tr>
-              <th>Nom</th>
+              <th>Nom complet</th>
+              <th>Email</th>
               <th>Rôle</th>
+              <th>Dernière connexion</th>
               <th>Statut</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>Ama Koffi</strong></td>
-              <td><span class="badge badge-info">Étudiant</span></td>
-              <td><span class="badge badge-success">Actif</span></td>
-              <td><button class="btn btn-secondary btn-sm">✏</button></td>
-            </tr>
-            <tr>
-              <td><strong>Dr. Kofi Mensah</strong></td>
-              <td><span class="badge badge-pending">Directeur</span></td>
-              <td><span class="badge badge-success">Actif</span></td>
-              <td><button class="btn btn-secondary btn-sm">✏</button></td>
-            </tr>
-            <tr>
-              <td><strong>Pr. Jean Asante</strong></td>
-              <td><span class="badge badge-neutral">Jury</span></td>
-              <td><span class="badge badge-success">Actif</span></td>
-              <td><button class="btn btn-secondary btn-sm">✏</button></td>
-            </tr>
-            <tr>
-              <td><strong>Mme. Esi Quaye</strong></td>
-              <td><span class="badge badge-info">Organisation</span></td>
-              <td><span class="badge badge-warn">Inactif</span></td>
-              <td><button class="btn btn-secondary btn-sm">✏</button></td>
-            </tr>
+            @for (user of filteredUsers(); track user.id) {
+              <tr [class.row-inactive]="!user.actif">
+                <td><strong>{{ user.nom }}</strong></td>
+                <td class="small">{{ user.email }}</td>
+                <td><span class="badge" [class]="roleBadgeClass(user.role_code)">{{ user.role }}</span></td>
+                <td class="small">
+                  @if (user.last_login) {
+                    {{ user.last_login | date:'dd/MM/yyyy HH:mm' }}
+                  } @else {
+                    <span class="neant">Jamais connecté</span>
+                  }
+                </td>
+                <td>
+                  @if (user.actif) {
+                    <span class="badge badge-success">✅ Actif</span>
+                  } @else {
+                    <span class="badge badge-warn">⚠ Inactif</span>
+                  }
+                </td>
+                <td>
+                  <button class="btn btn-sm"
+                    [class.btn-danger]="user.actif"
+                    [class.btn-secondary]="!user.actif"
+                    [disabled]="toggleInProg() === user.id"
+                    (click)="toggleActif(user)">
+                    @if (toggleInProg() === user.id) { ⏳ }
+                    @else if (user.actif) { 🔒 Désactiver }
+                    @else { ✅ Activer }
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="empty-cell">Aucun utilisateur trouvé.</td></tr>
+            }
           </tbody>
         </table>
       </div>
+    }
 
-      <!-- Journal d'audit -->
+    <!-- ══ VUE : JOURNAL D'AUDIT ══════════════════════════════════════════ -->
+    @if (vue() === 'audit') {
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">📋 Journal d'audit</div>
+          <div class="page-subtitle">Dernières activités enregistrées</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" (click)="charger()">↺ Actualiser</button>
+      </div>
+
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">📋 Journal d'audit récent</span>
-        </div>
-        <div class="timeline">
-          @for (log of logs(); track log.id) {
-            <div class="tl-item">
-              <div class="tl-dot done"></div>
-              <div class="tl-content">
-                <div class="tl-title">{{ log.action }}</div>
-                <div class="tl-desc">{{ log.utilisateur }}</div>
-                <div class="tl-date">{{ log.date | date:'yyyy-MM-dd HH:mm' }} — IP : {{ log.ip_address }}</div>
-              </div>
-            </div>
-          } @empty {
-            <div class="tl-item">
-              <div class="tl-dot done"></div>
-              <div class="tl-content">
-                <div class="tl-title">Mémoire validé par Dr. Mensah</div>
-                <div class="tl-desc">Ama Koffi — v2.1 approuvée</div>
-                <div class="tl-date">2026-06-02 14:32</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot done"></div>
-              <div class="tl-content">
-                <div class="tl-title">Paiement validé</div>
-                <div class="tl-desc">Ama Koffi — 20 000 FCFA</div>
-                <div class="tl-date">2026-05-28 09:14</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot active"></div>
-              <div class="tl-content">
-                <div class="tl-title">Tentative connexion échouée</div>
-                <div class="tl-desc">IP : 197.234.x.x — Compte bloqué</div>
-                <div class="tl-date">2026-06-02 08:02</div>
-              </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot wait"></div>
-              <div class="tl-content">
-                <div class="tl-title">Jury constitué</div>
-                <div class="tl-desc">Soutenance Yaw Boateng — Juillet</div>
-                <div class="tl-date">2026-06-01 16:45</div>
-              </div>
-            </div>
-          }
-        </div>
+        <table>
+          <thead>
+            <tr><th>Utilisateur</th><th>Action</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            @for (log of logs(); track log.id) {
+              <tr>
+                <td><strong>{{ log.utilisateur }}</strong></td>
+                <td>{{ log.action }}</td>
+                <td class="small mono">{{ log.date | date:'dd/MM/yyyy HH:mm' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="empty-cell">Aucun log disponible.</td></tr>
+            }
+          </tbody>
+        </table>
       </div>
-    </div>
+    }
 
-    <!-- Statistiques financières -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">💰 Revenus totaux</span>
-        <button class="btn btn-secondary btn-sm" (click)="exporterDonnees()">📤 Exporter rapport annuel</button>
+  </div>
+</div>
+
+<!-- ══ MODAL : CRÉER UN UTILISATEUR ═════════════════════════════════════ -->
+@if (showCreateModal()) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">👤 Créer un utilisateur</span>
+        <button class="modal-close" (click)="fermerModal()">✕</button>
       </div>
-      <div style="padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
-        <div style="text-align:center">
-          <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;font-weight:600;margin-bottom:8px">Frais encaissés</div>
-          <div style="font-size:28px;font-weight:700;color:var(--success);font-family:'DM Mono',monospace">
-            {{ stats()?.total_paiements ? (stats()!.total_paiements | number:'1.0-0') : '1 450 000' }} FCFA
+      <div class="modal-body">
+
+        @if (createError()) {
+          <div class="alert alert-danger mb-12">{{ createError() }}</div>
+        }
+        @if (createSuccess()) {
+          <div class="alert alert-success mb-12">{{ createSuccess() }}</div>
+        }
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Prénom <span class="req">*</span></label>
+            <input class="form-input" type="text" [(ngModel)]="createForm.first_name" placeholder="Ex : Koffi" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nom <span class="req">*</span></label>
+            <input class="form-input" type="text" [(ngModel)]="createForm.last_name" placeholder="Ex : AFOLA" />
           </div>
         </div>
-        <div style="text-align:center">
-          <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;font-weight:600;margin-bottom:8px">Taux de recouvrement</div>
-          <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace">83%</div>
+
+        <div class="form-group">
+          <label class="form-label">Email <span class="req">*</span></label>
+          <input class="form-input" type="email" [(ngModel)]="createForm.email" placeholder="prenom.nom@ipnet.edu" />
         </div>
-        <div style="text-align:center">
-          <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;font-weight:600;margin-bottom:8px">Impayés en cours</div>
-          <div style="font-size:28px;font-weight:700;color:var(--warn);font-family:'DM Mono',monospace">290 000 FCFA</div>
+
+        <div class="form-group">
+          <label class="form-label">Rôle <span class="req">*</span></label>
+          <select class="form-input" [(ngModel)]="createForm.role">
+            @for (r of roles; track r.code) {
+              <option [value]="r.code">{{ r.label }}</option>
+            }
+          </select>
         </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe provisoire <span class="req">*</span></label>
+          <input class="form-input" type="password" [(ngModel)]="createForm.password" placeholder="Min. 8 caractères" />
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerModal()">Annuler</button>
+        <button class="btn btn-primary" [disabled]="createLoading()" (click)="soumettre()">
+          @if (createLoading()) { Création… } @else { ✓ Créer le compte }
+        </button>
       </div>
     </div>
   </div>
-</div>
+}

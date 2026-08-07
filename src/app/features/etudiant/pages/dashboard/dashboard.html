@@ -6,11 +6,13 @@
   <aside class="sidebar">
     <div class="sidebar-avatar">
       <div class="avatar-circle">
-        {{ (etudiantData()?.prenom || 'A')[0] }}{{ (etudiantData()?.nom || 'K')[0] }}
+        {{ displayPrenom()[0] }}{{ displayNom()[0] || '' }}
       </div>
       <div>
-        <div class="avatar-name">{{ etudiantData()?.prenom || 'Ama' }} {{ etudiantData()?.nom || 'Koffi' }}</div>
-        <div class="avatar-role">Étudiant · {{ etudiantData()?.niveau || 'Master 2' }}</div>
+        <div class="avatar-name">{{ displayPrenom() }} {{ displayNom() }}</div>
+        <div class="avatar-role">
+          Étudiant{{ etudiantData()?.filiere ? ' · ' + etudiantData()!.filiere : '' }} — {{ etudiantData()?.niveau || 'Licence' }}
+        </div>
       </div>
     </div>
 
@@ -18,45 +20,88 @@
     <a class="nav-item active" routerLink="/etudiant">
       <span class="ico">🏠</span> Tableau de bord
     </a>
-    <a class="nav-item" routerLink="/etudiant/memoire">
+    <a class="nav-item" routerLink="/etudiant/notes" routerLinkActive="active">
+      <span class="ico">📊</span> Relevé de notes
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
       <span class="ico">📄</span> Mon mémoire
     </a>
-    <a class="nav-item" routerLink="/etudiant/memoire">
-      <span class="ico">📁</span> Déposer un document
+    <!-- Fix 3 — label et route dynamiques selon existence du thème -->
+    <a class="nav-item" [routerLink]="themeNavRoute()" routerLinkActive="active">
+      <span class="ico">💡</span> {{ themeNavLabel() }}
     </a>
 
     <div class="sidebar-section">Soutenance</div>
-    <a class="nav-item" routerLink="/etudiant">
-      <span class="ico">📅</span> Ma soutenance
+    <a class="nav-item" routerLink="/etudiant/chat" routerLinkActive="active">
+      <span class="ico">💬</span> Chat directeur
     </a>
-    <a class="nav-item" routerLink="/etudiant/eligibilite">
+    <a class="nav-item" routerLink="/etudiant/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📋</span> Suivi mémoire
+      @if (suivi() && nbEtapesValidees < (suivi()!.etapes.length)) {
+        <span class="badge-pill">{{ suivi()!.etapes.length - nbEtapesValidees }}</span>
+      }
+    </a>
+    <!-- Fix 1 — "Ma soutenance" supprimé, gardé seulement "Éligibilité" -->
+    <a class="nav-item" routerLink="/etudiant/eligibilite" routerLinkActive="active">
       <span class="ico">☑</span> Éligibilité
     </a>
-    <a class="nav-item" routerLink="/recouvrement">
+    <a class="nav-item" routerLink="/etudiant/paiement" routerLinkActive="active">
       <span class="ico">💳</span> Paiement des frais
     </a>
 
-    <div class="sidebar-section">Résultats</div>
-    <a class="nav-item" routerLink="/etudiant">
-      <span class="ico">🏆</span> Mes résultats
+    <div class="sidebar-section">Ressources</div>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives (consultation)
     </a>
-    <a class="nav-item" routerLink="/etudiant">
-      <span class="ico">🔔</span> Notifications
-    </a>
+    <!-- Fix 2 — "Notifications" remplacé par "Alertes actives" avec badge réel -->
+    <button class="nav-item" (click)="scrollToAlertes()" style="background:none;border:none;width:100%;text-align:left;cursor:pointer">
+      <span class="ico">🔔</span> Alertes actives
+      @if (alertesActives().length) {
+        <span class="badge-pill">{{ alertesActives().length }}</span>
+      }
+    </button>
   </aside>
 
   <!-- ═══ CONTENU PRINCIPAL ══════════════════════════════════════════════════ -->
   <div class="main">
 
+    <!-- Fix 8 — Bannière erreur réseau avec bouton réessayer -->
+    @if (hasError()) {
+      <div class="alert alert-danger" style="margin-bottom:20px">
+        <span>⚠</span>
+        <div>
+          <strong>Impossible de charger vos données.</strong>
+          Vérifiez votre connexion internet.
+          <button class="btn btn-danger btn-sm" style="margin-left:12px" (click)="charger()">
+            ⟳ Réessayer
+          </button>
+        </div>
+      </div>
+    }
+
     <!-- En-tête page -->
     <div class="page-header">
       <div>
-        <div class="page-title">Bonjour, {{ etudiantData()?.prenom || 'Ama' }} 👋</div>
+        <div class="page-title">Bonjour, {{ displayPrenom() }} 👋</div>
         <div class="page-subtitle">
-          {{ etudiantData()?.filiere || 'Master 2 Informatique' }} — Session de soutenance : Juillet 2026
+          {{ etudiantData()?.filiere || 'Filière non renseignée' }} — {{ etudiantData()?.niveau || 'Licence' }}
         </div>
+        @if (lastRefreshed()) {
+          <div class="refresh-hint">Mis à jour à {{ lastRefreshed() }}</div>
+        }
       </div>
-      <a class="btn btn-gold" routerLink="/etudiant/memoire">📄 Déposer mon mémoire</a>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" (click)="charger()" [disabled]="loading()" title="Actualiser les données">
+          @if (loading()) { ⟳ Chargement… } @else { ⟳ Actualiser }
+        </button>
+        @if (canDeposeMemoire) {
+          <a class="btn btn-gold" routerLink="/etudiant/memoire">📄 Déposer mon mémoire</a>
+        } @else {
+          <button class="btn btn-gold" disabled title="Terminez toutes les étapes du suivi mémoire pour débloquer le dépôt">
+            🔒 Déposer mon mémoire
+          </button>
+        }
+      </div>
     </div>
 
     <!-- ── Stepper progression ─────────────────────────────────────────────── -->
@@ -64,21 +109,21 @@
       <div class="stepper-wrap">
         <div class="stepper-title">Progression de mon dossier de soutenance</div>
         <div class="stepper">
-          @for (s of dossierSteps; track s.id; let last = $last) {
-            <div
-              class="step"
-              [class.done]="dossierStepCompleted(currentStep(), s.id)"
-              [class.active]="dossierStepActive(currentStep(), s.id)"
-              [class.wait]="dossierStepDisabled(currentStep(), s.id)"
-            >
+          @for (step of allDossierSteps; track step.id; let last = $last) {
+            <div class="step"
+              [class.suivi-step]="step.isSuivi"
+              [class.done]="step.completed"
+              [class.active]="step.active"
+              [class.wait]="!step.completed && !step.active">
               <div class="step-circle">
-                @if (dossierStepCompleted(currentStep(), s.id)) { ✓ }
-                @else { {{ s.id }} }
+                @if (step.completed) { ✓ }
+                @else if (step.isSuivi) { · }
+                @else { {{ step.stepNumber }} }
               </div>
-              <div class="step-label">{{ s.label }}</div>
+              <div class="step-label">{{ step.label }}</div>
             </div>
             @if (!last) {
-              <div class="step-line" [class.done]="dossierLineActive(currentStep(), s.id)"></div>
+              <div class="step-line" [class.done]="step.completed"></div>
             }
           }
         </div>
@@ -97,13 +142,32 @@
           <div class="stat-label">{{ card.label }}</div>
           <div class="stat-value">
             {{ card.value }}
-            @if (card.showCheck) {<span class="stat-chk">✓</span>}
+            @if (card.showCheck) { <span class="stat-chk">✓</span> }
           </div>
           <div class="stat-sub">{{ card.sub }}</div>
           <div class="stat-icon">{{ card.icon }}</div>
         </div>
       }
     </div>
+
+    <!-- Fix 2 — Section alertes actives (id="alertes" pour le scroll) -->
+    @if (alertesActives().length) {
+      <div id="alertes" class="card" style="border-left:4px solid var(--danger);margin-bottom:20px">
+        <div class="card-header" style="background:var(--danger-light)">
+          <span class="card-title" style="color:var(--danger)">
+            🔔 Alertes actives ({{ alertesActives().length }})
+          </span>
+        </div>
+        <div style="padding:4px 0">
+          @for (alerte of alertesActives(); track $index) {
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--border);font-size:13px;color:var(--ink2)">
+              <span style="color:var(--danger);font-size:16px;flex-shrink:0">⚠</span>
+              {{ alerte }}
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <!-- ── Mon mémoire + Checklist ─────────────────────────────────────────── -->
     <div class="dash-two-col">
@@ -141,18 +205,36 @@
           </div>
           <div>
             <div class="fl" style="margin-bottom:6px">
-              Progression du mémoire ({{ m.pagesCurrent }} / {{ m.pagesTarget }} pages)
+              Progression ({{ m.pagesCurrent }} / {{ m.pagesTarget }} pages)
             </div>
             <div class="progress">
               <div class="progress-bar blue" [style.width.%]="memoireProgressPercent(m)"></div>
             </div>
           </div>
-          <div class="dir-comment">
-            ⚠ Commentaire du directeur : {{ m.commentBody }}
-          </div>
-          <div style="display:flex;gap:8px">
-            <a class="btn btn-primary btn-sm" routerLink="/etudiant/memoire">⬆ Nouvelle version</a>
-            <a class="btn btn-secondary btn-sm" routerLink="/etudiant/memoire">👁 Consulter</a>
+
+          <!-- Fix 6 — commentaire affiché seulement si non vide -->
+          @if (m.commentBody) {
+            <div class="dir-comment">
+              ⚠ Commentaire du directeur : {{ m.commentBody }}
+            </div>
+          }
+
+          <!-- Fix 7 — boutons conditionnels selon statut mémoire -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            @if (m.statusVariant === 'success') {
+              <!-- Mémoire validé → consulter uniquement -->
+              <a class="btn btn-secondary btn-sm" routerLink="/etudiant/memoire/voir">👁 Consulter mon mémoire</a>
+              <a class="btn btn-secondary btn-sm" routerLink="/etudiant/chat">💬 Chat directeur</a>
+            } @else if (m.statusVariant === 'warning') {
+              <!-- En révision ou rejeté → nouvelle version en priorité -->
+              <a class="btn btn-primary btn-sm" routerLink="/etudiant/memoire">⬆ Soumettre une correction</a>
+              <a class="btn btn-secondary btn-sm" routerLink="/etudiant/memoire/voir">👁 Consulter</a>
+              <a class="btn btn-secondary btn-sm" routerLink="/etudiant/chat">💬 Chat directeur</a>
+            } @else {
+              <!-- Non déposé ou en attente → déposer -->
+              <a class="btn btn-primary btn-sm" routerLink="/etudiant/memoire">⬆ Déposer mon mémoire</a>
+              <a class="btn btn-secondary btn-sm" routerLink="/etudiant/chat">💬 Chat directeur</a>
+            }
           </div>
         </div>
       </div>
@@ -190,6 +272,11 @@
           <div class="progress" style="margin-top:6px">
             <div class="progress-bar gold" [style.width.%]="eligibilityProgress().percent"></div>
           </div>
+          <div style="margin-top:12px">
+            <a class="btn btn-secondary btn-sm" routerLink="/etudiant/eligibilite">
+              Voir le détail →
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -199,31 +286,127 @@
       @let s = soutenanceSchedule();
       <div class="card-header">
         <span class="card-title">📅 Ma soutenance planifiée</span>
+        @if (s.isPlanned) {
+          <span class="badge badge-success">Planifiée</span>
+        } @else {
+          <span class="badge badge-neutral">Non communiquée</span>
+        }
       </div>
-      <div class="sout-grid">
-        <div>
-          <div class="fl">Date &amp; Heure</div>
-          <div class="sout-val">{{ s.dateHeure }}</div>
+
+      @if (s.isPlanned) {
+        <div class="sout-grid">
+          <div>
+            <div class="fl">Date &amp; Heure</div>
+            <div class="sout-val">{{ s.dateHeure }}</div>
+          </div>
+          <div>
+            <div class="fl">Salle</div>
+            <div class="sout-val">{{ s.salle }}</div>
+          </div>
+          <div>
+            <div class="fl">Président du jury</div>
+            <div class="fv">{{ s.presidentJury }}</div>
+          </div>
+          <div>
+            <div class="fl">Examinateur</div>
+            <div class="fv">{{ s.examinateur }}</div>
+          </div>
         </div>
-        <div>
-          <div class="fl">Salle</div>
-          <div class="sout-val">{{ s.salle }}</div>
+        <div style="padding:0 20px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          @if (s.convocationUrl) {
+            <a class="btn btn-gold btn-sm" [href]="s.convocationUrl" target="_blank" rel="noopener">
+              ⬇ Télécharger la convocation
+            </a>
+          } @else {
+            <span style="font-size:12px;color:var(--ink3);font-style:italic">
+              📬 La convocation officielle vous sera remise par le Service Organisation.
+            </span>
+          }
         </div>
-        <div>
-          <div class="fl">Président du jury</div>
-          <div class="fv">{{ s.presidentJury }}</div>
+      } @else {
+        <div class="sout-empty">
+          <div class="sout-empty-icon">🗓</div>
+          <div class="sout-empty-title">Soutenance non encore planifiée</div>
+          <div class="sout-empty-sub">
+            La date et la composition du jury seront communiquées par le Service Organisation
+            dès que votre dossier sera complet et validé.
+          </div>
+          <a class="btn btn-gold btn-sm" routerLink="/etudiant/eligibilite">Voir mon éligibilité</a>
         </div>
-        <div>
-          <div class="fl">Examinateur</div>
-          <div class="fv">{{ s.examinateur }}</div>
-        </div>
-      </div>
-      <div style="padding:0 20px 16px">
-        <button class="btn btn-secondary btn-sm" (click)="downloadConvocation()" [disabled]="!s.convocationUrl">
-          ⬇ Télécharger la convocation
-        </button>
-      </div>
+      }
     </div>
+
+    <!-- ── Suivi mémoire — résumé allégé (plus la liste complète des étapes) -->
+    @if (suiviAffectationId() !== null) {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Suivi mémoire</span>
+          @if (suivi()) {
+            <span class="badge badge-neutral">
+              {{ nbEtapesValidees }} / {{ suivi()!.etapes.length }} étapes validées
+            </span>
+          }
+        </div>
+
+        @if (suiviLoading()) {
+          <div class="suivi-loading">Chargement…</div>
+        }
+
+        @if (suivi(); as sv) {
+          <!-- Barre de progression globale -->
+          <div class="suivi-progress-wrap">
+            <div class="suivi-progress-bar">
+              <div class="suivi-progress-fill"
+                   [style.width.%]="(nbEtapesValidees / sv.etapes.length) * 100">
+              </div>
+            </div>
+            <span class="suivi-progress-pct">
+              {{ (nbEtapesValidees / sv.etapes.length * 100) | number:'1.0-0' }}%
+            </span>
+          </div>
+
+          <!-- Étape courante seulement (la première active ou verrouillée) -->
+          @if (getEtapeCourante(sv.etapes); as etapeCourante) {
+            <div style="padding:12px 20px 16px">
+              <div class="fl" style="margin-bottom:8px">Étape en cours</div>
+              <div class="suivi-etape" [class]="suiviStatutClass(etapeCourante.statut)">
+                <div class="suivi-etape-header">
+                  <span class="suivi-etape-num">{{ etapeCourante.ordre }}</span>
+                  <div class="suivi-etape-info">
+                    <div class="suivi-etape-titre">{{ etapeCourante.titre }}</div>
+                    <div class="suivi-etape-desc">{{ etapeCourante.description }}</div>
+                  </div>
+                  <span class="suivi-statut-label">{{ suiviStatutLabel(etapeCourante.statut) }}</span>
+                </div>
+                @if (etapeCourante.remarques) {
+                  <div class="suivi-remarques-box">
+                    <strong>Remarques :</strong> {{ etapeCourante.remarques }}
+                  </div>
+                }
+                @if (etapeCourante.statut === 'EN_COURS' || etapeCourante.statut === 'EN_REVISION') {
+                  <div class="suivi-actions">
+                    <a class="btn btn-sm btn-primary" routerLink="/etudiant/suivi-memoire">
+                      📤 Soumettre au directeur
+                    </a>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state" style="padding:28px 24px">
+              <span class="empty-icon">✅</span>
+              <div class="empty-title">Toutes les étapes sont validées</div>
+            </div>
+          }
+
+          <div style="padding:0 20px 16px;border-top:1px solid var(--border);padding-top:12px">
+            <a class="btn btn-secondary btn-sm" routerLink="/etudiant/suivi-memoire">
+              Voir toutes les étapes →
+            </a>
+          </div>
+        }
+      </div>
+    }
 
   </div><!-- /main -->
 </div><!-- /app-page -->

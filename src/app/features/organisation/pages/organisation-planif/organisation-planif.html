@@ -1,160 +1,457 @@
 <app-top-nav></app-top-nav>
 
 <div class="app-page">
-  <!-- Sidebar -->
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
   <aside class="sidebar">
     <div class="sidebar-avatar">
       <div class="avatar-circle" style="background:#6B21A8">CO</div>
       <div>
-        <div class="avatar-name">Mme. Esi Quaye</div>
-        <div class="avatar-role">Chargée d'organisation</div>
+        <div class="avatar-name">Chargé(e) d'organisation</div>
+        <div class="avatar-role">Planification</div>
       </div>
     </div>
+
     <div class="sidebar-section">Planification</div>
-    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
-    <a class="nav-item"><span class="ico">📅</span> Planifier soutenances</a>
-    <a class="nav-item"><span class="ico">🏛</span> Gestion des salles</a>
-    <a class="nav-item"><span class="ico">📧</span> Envoyer convocations</a>
-    <div class="sidebar-section">Sessions</div>
-    <a class="nav-item"><span class="ico">✚</span> Créer une session</a>
-    <a class="nav-item"><span class="ico">📋</span> Liste des sessions</a>
+    <button class="nav-item" [class.active]="vue() === 'dashboard'" (click)="afficherVue('dashboard')">
+      <span class="ico">🏠</span> Tableau de bord
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'planifier'" (click)="afficherVue('planifier')">
+      <span class="ico">📅</span> Planifier soutenances
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'soutenances'" (click)="afficherVue('soutenances')">
+      <span class="ico">📋</span> Liste des soutenances
+    </button>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
   </aside>
 
-  <!-- Contenu principal -->
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════════ -->
   <div class="main">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Planification des soutenances</div>
-        <div class="page-subtitle">Session Juillet 2026 — Organisation mensuelle</div>
-      </div>
-      <button class="btn btn-primary">✚ Créer une session</button>
-    </div>
 
-    <!-- Stat cards -->
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <div class="stat-label">Soutenances à planifier</div>
-        <div class="stat-value">15</div>
-        <div class="stat-sub">Dossiers éligibles</div>
-        <div class="stat-icon">📋</div>
-      </div>
-      <div class="stat-card gold">
-        <div class="stat-label">Salles disponibles</div>
-        <div class="stat-value">6</div>
-        <div class="stat-sub">Ce mois-ci</div>
-        <div class="stat-icon">🏛</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">Planifiées</div>
-        <div class="stat-value">9</div>
-        <div class="stat-sub">Convocations envoyées</div>
-        <div class="stat-icon">✅</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">Conflits détectés</div>
-        <div class="stat-value">2</div>
-        <div class="stat-sub">À résoudre</div>
-        <div class="stat-icon">⚠</div>
-      </div>
-    </div>
-
-    <!-- Formulaire de planification manuelle -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">✚ Planifier une soutenance</span>
-      </div>
-      <div class="card-form">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Étudiant</label>
-            <select>
-              <option>Ama Koffi — M2 Informatique</option>
-              <option>Yaw Boateng — M1 Gestion</option>
-              <option>Abena Mensah — L3 Mathématiques</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Session de soutenance</label>
-            <select>
-              <option selected>Session Juillet 2026</option>
-              <option>Session Août 2026</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Date de soutenance</label>
-            <input type="date" value="2026-07-15"/>
-          </div>
-          <div class="form-group">
-            <label>Heure de début</label>
-            <input type="time" value="09:30"/>
-            <div class="form-hint">Durée : 1 heure (règle institutionnelle)</div>
-          </div>
-          <div class="form-group">
-            <label>Salle</label>
-            <select>
-              <option>Salle B204 — 30 places (Disponible ✓)</option>
-              <option>Salle A101 — 50 places (Disponible ✓)</option>
-              <option disabled>Salle C302 — 20 places (Occupée ✗)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Type de soutenance</label>
-            <select>
-              <option>Master 2 — Soutenance principale</option>
-              <option>Master 1</option>
-              <option>Licence 3</option>
-            </select>
-          </div>
+    <!-- ── DASHBOARD ──────────────────────────────────────────────────────── -->
+    @if (vue() === 'dashboard') {
+      <div class="page-header">
+        <div>
+          <div class="page-title">Planification des soutenances</div>
+          <div class="page-subtitle">Vue d'ensemble de la session en cours</div>
         </div>
-        <div style="margin-top:16px">
-          <div class="alert alert-info">
-            ℹ Pré-soutenance obligatoire : vérifier que la pré-soutenance a eu lieu avant de planifier.
-          </div>
-        </div>
-        <div class="form-actions" style="margin-top:12px">
-          <button class="btn btn-secondary">Annuler</button>
-          <button class="btn btn-primary">📅 Confirmer la planification</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Conflits détectés -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">⚠ Conflits détectés</span>
-        <span class="badge badge-warn">2 conflits</span>
-      </div>
-      <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
-        <div class="alert alert-warn">
-          ⚠ <strong>Conflit de salle :</strong> Salle B204 déjà réservée le 14 Juillet à 14h00 (K. Asante). Proposer Salle A101.
-        </div>
-        <div class="alert alert-warn">
-          ⚠ <strong>Indisponibilité jury :</strong> Dr. Afia Boateng indisponible le 15 Juillet. Remplacer l'examinateur.
-        </div>
-      </div>
-    </div>
-
-    <!-- Génération automatique -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">🤖 Génération automatique du planning</span>
-      </div>
-      <div style="padding:24px">
-        <p style="font-size:13px;color:var(--ink3);margin-bottom:20px">
-          L'algorithme va répartir les <strong>étudiants éligibles</strong> selon la disponibilité
-          des <strong>jurys</strong> et des <strong>salles</strong>, en respectant toutes les règles institutionnelles.
-        </p>
-        <button class="btn btn-gold" [disabled]="isProcessing()" (click)="lancerAlgorithme()">
-          {{ isProcessing() ? '⏳ Calcul du planning en cours...' : '🤖 Lancer la planification automatique' }}
+        <button class="btn btn-primary" (click)="afficherVue('planifier')">
+          ✚ Planifier une soutenance
         </button>
-        @if (generationSuccess()) {
-          <div class="alert alert-success" style="margin-top:16px">
-            ✅ <strong>Planning généré avec succès !</strong>
-            Un brouillon du calendrier est disponible pour vérification avant publication.
-            <a routerLink="/calendrier" style="color:var(--success);font-weight:700;margin-left:8px">Voir le calendrier →</a>
-          </div>
-        }
       </div>
-    </div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Total soutenances</div>
+          <div class="stat-value">{{ stats()?.total_soutenances ?? 0 }}</div>
+          <div class="stat-icon">📋</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">À planifier</div>
+          <div class="stat-value">{{ etudiantsSans().length }}</div>
+          <div class="stat-icon">⏳</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Clôturées</div>
+          <div class="stat-value">{{ stats()?.soutenances_cloturees ?? 0 }}</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Moyenne générale</div>
+          <div class="stat-value">
+            {{ stats()?.moyenne_generale != null ? (stats()!.moyenne_generale | number:'1.1-1') : '—' }}
+          </div>
+          <div class="stat-icon">📊</div>
+        </div>
+      </div>
+
+      <!-- Génération automatique -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🤖 Génération automatique du planning</span>
+        </div>
+        <div style="padding:24px">
+          <p style="font-size:13px;color:var(--ink3);margin-bottom:20px">
+            L'algorithme va répartir les <strong>étudiants éligibles</strong> sur les créneaux définis,
+            selon la disponibilité des <strong>jurys</strong> et des <strong>salles</strong>,
+            en respectant toutes les règles institutionnelles.
+          </p>
+          <button class="btn btn-gold" (click)="ouvrirAutoModal()">
+            🤖 Configurer et lancer la planification automatique
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ══ MODAL : PLANIFICATION AUTOMATIQUE ════════════════════════════════ -->
+    @if (showAutoModal()) {
+      <div class="modal-overlay" (click)="showAutoModal.set(false)">
+        <div class="modal-card modal-large" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <span class="modal-title">🤖 Planification automatique</span>
+            <button class="modal-close" (click)="showAutoModal.set(false)">✕</button>
+          </div>
+          <div class="modal-body">
+
+            <!-- Session -->
+            <div class="field-group" style="margin-bottom:16px">
+              <label>Session <span class="req">*</span></label>
+              <select [(ngModel)]="autoForm.session">
+                @for (sc of SESSION_CHOICES; track sc.value) {
+                  <option [value]="sc.value">{{ sc.label }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Créneaux -->
+            <div class="field-group" style="margin-bottom:16px">
+              <label>Créneaux disponibles <span class="req">*</span></label>
+              <textarea rows="5" [(ngModel)]="autoForm.creneauxRaw"
+                placeholder="Un créneau par ligne, format ISO&#10;Ex :&#10;2026-07-15T08:00:00&#10;2026-07-15T10:00:00&#10;2026-07-16T08:00:00"></textarea>
+              <small style="color:var(--ink3);font-size:11px">Format : AAAA-MM-JJTHH:MM:SS — un créneau par ligne</small>
+            </div>
+
+            <!-- Ressources optionnelles -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+              <label class="check-label">
+                <input type="checkbox" [(ngModel)]="autoForm.sallesAll" />
+                Utiliser toutes les salles disponibles
+              </label>
+              <label class="check-label">
+                <input type="checkbox" [(ngModel)]="autoForm.presidentsAll" />
+                Utiliser tous les présidents disponibles
+              </label>
+              <label class="check-label">
+                <input type="checkbox" [(ngModel)]="autoForm.examinateursAll" />
+                Utiliser tous les examinateurs disponibles
+              </label>
+            </div>
+
+            <!-- Résultat -->
+            @if (autoResult(); as res) {
+              <div style="background:#f0fdf4;border:2px solid #22c55e;border-radius:10px;padding:16px;margin-bottom:12px">
+                <div style="font-size:15px;font-weight:700;color:#15803d;margin-bottom:10px">
+                  ✅ Planification terminée !
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px">
+                  <div style="text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:#166534">{{ res.planifiees }}</div>
+                    <div style="font-size:11px;color:#15803d">Soutenances créées</div>
+                  </div>
+                  <div style="text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:#c2410c">{{ res.non_planifiees }}</div>
+                    <div style="font-size:11px;color:#c2410c">Non planifiées</div>
+                  </div>
+                  <div style="text-align:center">
+                    <div style="font-size:24px;font-weight:800;color:#1d4ed8">{{ res.taux | number:'1.0-0' }}%</div>
+                    <div style="font-size:11px;color:#1d4ed8">Taux de couverture</div>
+                  </div>
+                </div>
+                @if (res.message) {
+                  <div style="font-size:12px;color:#374151">{{ res.message }}</div>
+                }
+              </div>
+            }
+
+            @if (autoError()) {
+              <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;color:#991b1b;font-size:13px">
+                ⚠ {{ autoError() }}
+              </div>
+            }
+
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="showAutoModal.set(false)">Fermer</button>
+            <button class="btn btn-gold" [disabled]="isProcessing()" (click)="lancerAlgorithme()">
+              {{ isProcessing() ? '⏳ Calcul en cours...' : '🤖 Lancer la planification' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── PLANIFIER ──────────────────────────────────────────────────────── -->
+    @if (vue() === 'planifier') {
+      <div class="page-header">
+        <div>
+          <div class="page-title">Planifier une soutenance</div>
+          <div class="page-subtitle">{{ etudiantsSans().length }} étudiant(s) sans soutenance planifiée</div>
+        </div>
+        <button class="btn btn-secondary" (click)="afficherVue('dashboard')">← Retour</button>
+      </div>
+
+      <!-- Liste étudiants éligibles -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <span class="card-title">📋 Étudiants à planifier</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Titre du mémoire</th>
+              <th>Éligible</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of etudiantsSans(); track e.etudiant_id) {
+              <tr [style.background]="selectedEtudiant?.etudiant_id === e.etudiant_id ? '#f0fdf4' : ''">
+                <td>
+                  <strong>{{ e.prenom }} {{ e.nom }}</strong>
+                  <div style="font-size:11px;color:var(--ink3)">{{ e.matricule }}</div>
+                </td>
+                <td>{{ e.filiere }}</td>
+                <td style="font-size:12px;max-width:180px">{{ e.titre_theme }}</td>
+                <td>
+                  @if (e.est_eligible) {
+                    <span class="badge badge-success">Éligible</span>
+                  } @else {
+                    <span class="badge badge-danger">Non éligible</span>
+                  }
+                </td>
+                <td>
+                  <button class="btn btn-primary btn-sm" (click)="selectionnerEtudiant(e)"
+                    [disabled]="!e.est_eligible">
+                    Sélectionner
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" style="text-align:center;padding:32px;color:var(--ink3)">
+                  Tous les étudiants éligibles ont déjà une soutenance planifiée.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Formulaire de planification -->
+      @if (selectedEtudiant) {
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">
+              ✚ Planifier — {{ selectedEtudiant.prenom }} {{ selectedEtudiant.nom }}
+            </span>
+          </div>
+          <div style="padding:20px">
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px">
+              📋 {{ selectedEtudiant.titre_theme }}
+            </div>
+
+            <div class="form-grid">
+              <div class="field-group">
+                <label>Directeur de mémoire <span class="req">*</span></label>
+                <select [(ngModel)]="form.directeur_memoire">
+                  <option [value]="0">Sélectionner...</option>
+                  @for (d of directeurs(); track d.id) {
+                    <option [value]="d.id">{{ membreNom(d) }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Président du jury <span class="req">*</span></label>
+                <select [(ngModel)]="form.president">
+                  <option [value]="0">Sélectionner...</option>
+                  @for (p of presidents(); track p.id) {
+                    <option [value]="p.id">{{ membreNom(p) }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Examinateur <span class="req">*</span></label>
+                <select [(ngModel)]="form.examinateur">
+                  <option [value]="0">Sélectionner...</option>
+                  @for (ex of examinateurs(); track ex.id) {
+                    <option [value]="ex.id">{{ membreNom(ex) }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Salle <span class="req">*</span></label>
+                <select [(ngModel)]="form.salle">
+                  <option [value]="0">Sélectionner...</option>
+                  @for (s of salles(); track s.id) {
+                    <option [value]="s.id">{{ s.nom }} ({{ s.capacite }} places)</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Date et heure <span class="req">*</span></label>
+                <input type="datetime-local" [(ngModel)]="form.date_soutenance"/>
+              </div>
+
+              <div class="field-group">
+                <label>Session</label>
+                <select [(ngModel)]="form.session">
+                  @for (sc of SESSION_CHOICES; track sc.value) {
+                    <option [value]="sc.value">{{ sc.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="field-group" style="grid-column:1/-1">
+                <label>Lien Meet (optionnel)</label>
+                <input type="url" [(ngModel)]="form.lien_meet" placeholder="https://meet.google.com/..."/>
+              </div>
+            </div>
+
+            <!-- ── Checklist matériel ──────────────────────────────────── -->
+            <div class="materiel-card">
+              <div class="materiel-title">
+                🔧 Vérification du matériel
+                @if (materielPret) {
+                  <span class="badge badge-success" style="margin-left:10px">✓ Tout prêt</span>
+                } @else {
+                  <span class="badge badge-warn" style="margin-left:10px">À vérifier</span>
+                }
+              </div>
+              <div class="materiel-grid">
+                @for (m of MATERIEL; track m.key) {
+                  <label class="materiel-item" [class.checked]="materielCheck[m.key]">
+                    <input type="checkbox" [(ngModel)]="materielCheck[m.key]" />
+                    <span class="materiel-ico">{{ m.ico }}</span>
+                    <span class="materiel-lbl">{{ m.label }}</span>
+                  </label>
+                }
+              </div>
+              <div style="margin-top:10px">
+                <label style="font-size:12px;font-weight:600;color:var(--ink3)">Remarques logistiques</label>
+                <textarea class="materiel-note" rows="2" [(ngModel)]="materielNote"
+                  placeholder="Problèmes constatés, besoins spéciaux, contacts…"></textarea>
+              </div>
+            </div>
+
+            @if (errorMsg) {
+              <div class="alert-msg error" style="margin-top:12px">{{ errorMsg }}</div>
+            }
+            @if (successMsg) {
+              <div class="alert-msg success" style="margin-top:12px">{{ successMsg }}</div>
+            }
+
+            <div class="form-actions" style="margin-top:16px">
+              <button class="btn btn-secondary" (click)="selectedEtudiant = null; resetMateriel()">Annuler</button>
+              <button class="btn btn-primary" (click)="planifierSoutenance()" [disabled]="isLoading">
+                {{ isLoading ? 'Planification...' : '📅 Confirmer la planification' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ── LISTE SOUTENANCES ───────────────────────────────────────────────── -->
+    @if (vue() === 'soutenances') {
+      <div class="page-header">
+        <div>
+          <div class="page-title">Soutenances planifiées</div>
+          <div class="page-subtitle">
+            {{ soutenances().length }} soutenance(s) —
+            {{ soutenances().length - (stats()?.soutenances_cloturees ?? 0) }} à venir,
+            {{ stats()?.soutenances_cloturees ?? 0 }} clôturée(s)
+          </div>
+        </div>
+        <button class="btn btn-secondary" (click)="chargerSoutenances()">↺ Actualiser</button>
+      </div>
+
+      <!-- Stats rapides -->
+      <div class="stats-grid" style="margin-bottom:16px">
+        <div class="stat-card blue">
+          <div class="stat-label">Total</div>
+          <div class="stat-value">{{ soutenances().length }}</div>
+          <div class="stat-icon">📋</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Clôturées</div>
+          <div class="stat-value">{{ stats()?.soutenances_cloturees ?? 0 }}</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">À venir</div>
+          <div class="stat-value">{{ soutenances().length - (stats()?.soutenances_cloturees ?? 0) }}</div>
+          <div class="stat-icon">📅</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Moyenne générale</div>
+          <div class="stat-value">
+            {{ stats()?.moyenne_generale != null ? (stats()!.moyenne_generale | number:'1.1-1') : '—' }}
+          </div>
+          <div class="stat-icon">📊</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Toutes les soutenances planifiées</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Date &amp; Heure</th>
+              <th>Salle</th>
+              <th>Jury (Président / Examinateur / Directeur)</th>
+              <th>Session</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of soutenances(); track s.id) {
+              <tr [style.background]="s.est_cloturee ? '#f9fafb' : ''">
+                <td>
+                  <strong>{{ s.etudiant_details }}</strong>
+                  @if (s.theme_titre) {
+                    <div style="font-size:11px;color:var(--ink3);max-width:180px;white-space:normal">
+                      {{ s.theme_titre.slice(0, 60) }}{{ s.theme_titre.length > 60 ? '…' : '' }}
+                    </div>
+                  }
+                </td>
+                <td>{{ s.filiere }}</td>
+                <td style="font-size:12px;white-space:nowrap">
+                  {{ s.date_soutenance | date:'dd/MM/yyyy' }}<br>
+                  <span style="color:var(--ink3)">{{ s.date_soutenance | date:'HH:mm' }}</span>
+                </td>
+                <td>{{ s.salle_nom || '—' }}</td>
+                <td style="font-size:11px;line-height:1.6">
+                  @if (s.president_nom) {
+                    <div>👑 <strong>Prés.</strong> {{ s.president_nom }}</div>
+                  }
+                  @if (s.examinateur_nom) {
+                    <div>🔬 <strong>Exam.</strong> {{ s.examinateur_nom }}</div>
+                  }
+                  @if (s.directeur_nom) {
+                    <div>📚 <strong>Dir.</strong> {{ s.directeur_nom }}</div>
+                  }
+                </td>
+                <td>Session {{ s.session }}</td>
+                <td>
+                  <span class="badge" [ngClass]="statutBadge(s)">
+                    {{ s.est_cloturee ? '🔒 Clôturée' : '📅 Planifiée' }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" style="text-align:center;padding:40px;color:var(--ink3)">
+                  Aucune soutenance planifiée.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
   </div>
 </div>

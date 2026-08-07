@@ -1,0 +1,98 @@
+// ── Sidebar button fix ────────────────────────────────────────────────────
+button.nav-item {
+  width: 100%; text-align: left; background: none;
+  border: none; cursor: pointer; font: inherit; padding: 0;
+}
+
+// ── Badge compteur sidebar ────────────────────────────────────────────────
+.badge-pill {
+  margin-left: auto;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 99px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+// ── Badge mini dans les boutons d'onglets ─────────────────────────────────
+.badge-pill-sm {
+  background: var(--warn);
+  color: #fff;
+  border-radius: 99px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+// ── Alertes ───────────────────────────────────────────────────────────────
+.alert-danger {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+.mb-16 { margin-bottom: 16px; }
+
+// ── Tags d'identification étudiant ────────────────────────────────────────
+.tag-matricule {
+  background: #EFF6FF; color: #1E40AF;
+  border-radius: 6px; font-size: 11px; font-weight: 600; padding: 2px 8px;
+}
+.tag-filiere {
+  background: #F0FDF4; color: #166534;
+  border-radius: 6px; font-size: 11px; font-weight: 600; padding: 2px 8px;
+}
+
+.total-estime {
+  font-size: 13px; color: var(--ink3);
+  strong { color: var(--ink); font-size: 14px; font-weight: 700; }
+}
+
+// ── UE code inline ────────────────────────────────────────────────────────
+.ue-code {
+  background: #F3F4F6; border-radius: 4px;
+  padding: 2px 6px; margin-right: 6px;
+  font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600;
+}
+
+// ── Helpers typographiques ────────────────────────────────────────────────
+.mono  { font-family: 'DM Mono', monospace; }
+.small { font-size: 12px; }
+.neant { color: var(--ink3); }
+
+// ── Ligne totale pied de tableau ──────────────────────────────────────────
+tfoot .total-row td {
+  background: #F1F8F1;
+  border-top: 2px solid var(--success);
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+// ── Ligne validée ─────────────────────────────────────────────────────────
+.row-valide { background: #F0FDF4; }
+
+// ── Loading ───────────────────────────────────────────────────────────────
+.loading-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 48px;
+  text-align: center;
+  color: var(--ink3);
+  font-size: 13px;
+}
+
+// ── État vide ─────────────────────────────────────────────────────────────
+.empty-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 48px;
+  text-align: center;
+
+  .empty-icon  { font-size: 40px; margin-bottom: 12px; opacity: .4; }
+  .empty-title { font-size: 15px; font-weight: 700; color: var(--ink2); margin-bottom: 6px; }
+  .empty-sub   { font-size: 13px; color: var(--ink3); }
+}

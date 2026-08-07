@@ -1,0 +1,192 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">{{ initiales }}</div>
+      <div>
+        <div class="avatar-name">{{ prenom() }} {{ nom() }}</div>
+        <div class="avatar-role">Étudiant</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Mon espace</div>
+    <a class="nav-item" routerLink="/etudiant" [routerLinkActiveOptions]="{exact:true}" routerLinkActive="active">
+      <span class="ico">🏠</span> Tableau de bord
+    </a>
+    <a class="nav-item" routerLink="/etudiant/memoire/voir" routerLinkActive="active">
+      <span class="ico">📄</span> Mon mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/theme/nouveau" routerLinkActive="active">
+      <span class="ico">💡</span> Mes thèmes
+    </a>
+
+    <div class="sidebar-section">Financier</div>
+    <a class="nav-item" routerLink="/etudiant/paiement" routerLinkActive="active">
+      <span class="ico">💳</span> Frais de soutenance
+    </a>
+    <a class="nav-item active" routerLink="/etudiant/rattrapages" routerLinkActive="active">
+      <span class="ico">📋</span> Factures rattrapage
+      @if (aRegler().length > 0) {
+        <span class="badge-pill">{{ aRegler().length }}</span>
+      }
+    </a>
+
+    <div class="sidebar-section">Soutenance</div>
+    <a class="nav-item" routerLink="/etudiant/suivi-memoire" routerLinkActive="active">
+      <span class="ico">📊</span> Suivi mémoire
+    </a>
+    <a class="nav-item" routerLink="/etudiant/eligibilite" routerLinkActive="active">
+      <span class="ico">☑</span> Éligibilité
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">📋 Factures de rattrapage</div>
+        <div class="page-subtitle">Consultez et téléchargez vos factures, soumettez votre preuve de paiement</div>
+      </div>
+      <div class="header-actions">
+        @if (factures().length > 0) {
+          <button class="btn btn-gold" (click)="telechargerFacture()">
+            ⬇ Télécharger la facture proforma
+          </button>
+        }
+        <button class="btn btn-secondary" (click)="charger()" [disabled]="isLoading()">
+          ↺ Actualiser
+        </button>
+      </div>
+    </div>
+
+    @if (successMsg()) {
+      <div class="alert alert-success mb-16">{{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert-danger mb-16">{{ errorMsg() }}</div>
+    }
+
+    @if (isLoading()) {
+      <div class="loading-card">Chargement…</div>
+    }
+
+    @if (!isLoading()) {
+
+      <!-- Résumé montant dû -->
+      @if (aRegler().length > 0) {
+        <div class="summary-banner mb-24">
+          <div class="summary-icon">⚠️</div>
+          <div class="summary-content">
+            <div class="summary-title">{{ aRegler().length }} UE(s) à régler</div>
+            <div class="summary-sub">
+              Montant total dû : <strong>{{ totalDu().toLocaleString('fr-FR') }} FCFA</strong>
+            </div>
+          </div>
+          <button class="btn btn-gold" (click)="telechargerFacture()">
+            ⬇ Facture proforma PDF
+          </button>
+        </div>
+      }
+
+      <!-- Tableau des rattrapages facturés -->
+      @if (factures().length === 0) {
+        <div class="empty-card">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">Aucune facture reçue</div>
+          <div class="empty-sub">
+            Le service recouvrement vous enverra une facture si vous avez des UE à rattraper.
+          </div>
+        </div>
+      } @else {
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🧾 Mes factures de rattrapage</span>
+            <button class="btn btn-gold btn-sm" (click)="telechargerFacture()">
+              ⬇ Télécharger PDF
+            </button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>UE</th>
+                <th>Crédits</th>
+                <th>Tarif/crédit</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Preuve de paiement</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of factures(); track r.id) {
+                <tr>
+                  <td>
+                    <div class="ue-code">{{ r.ue_code }}</div>
+                    <div class="ue-libelle">{{ r.ue_libelle }}</div>
+                  </td>
+                  <td class="center">{{ r.ue_credits }}</td>
+                  <td class="center mono">{{ r.ue_tarif.toLocaleString('fr-FR') }} F</td>
+                  <td class="mono bold">{{ r.frais.toLocaleString('fr-FR') }} FCFA</td>
+                  <td>
+                    <span class="badge" [class]="statutClass(r.statut)">
+                      {{ statutLabel(r.statut) }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (r.preuve_paiement) {
+                      <a [href]="r.preuve_paiement" target="_blank" rel="noopener"
+                         class="btn btn-secondary btn-sm">👁 Voir</a>
+                    } @else {
+                      <span class="text-muted">Non soumise</span>
+                    }
+                  </td>
+                  <td>
+                    @if (r.statut === 'EN_ATTENTE_PAIEMENT') {
+                      @if (inProgress() === r.id) {
+                        <span class="text-muted">Envoi…</span>
+                      } @else if (uploadFor() === r.id) {
+                        <div class="upload-inline">
+                          <label class="upload-label">
+                            📎 Choisir un fichier
+                            <input type="file" accept="image/*,.pdf"
+                              (change)="onFichierChange($event, r.id)" hidden />
+                          </label>
+                          <button class="btn btn-secondary btn-sm" (click)="annulerUpload()">
+                            Annuler
+                          </button>
+                        </div>
+                      } @else {
+                        <button class="btn btn-primary btn-sm" (click)="ouvrirUpload(r.id)">
+                          📤 Soumettre le paiement
+                        </button>
+                      }
+                    } @else if (r.statut === 'PAIEMENT_SOUMIS') {
+                      <span class="text-muted">En vérification</span>
+                    } @else if (r.valide_par_recouvrement) {
+                      <span class="badge badge-success">✅ Validé</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="3"><strong>TOTAL</strong></td>
+                <td class="mono bold">{{ totalFactures().toLocaleString('fr-FR') }} FCFA</td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      }
+    }
+
+  </div>
+</div>

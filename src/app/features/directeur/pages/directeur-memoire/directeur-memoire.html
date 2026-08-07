@@ -1,0 +1,167 @@
+<app-top-nav></app-top-nav>
+
+<div class="memoire-layout">
+
+  <!-- ══ PANNEAU GAUCHE — PDF ══════════════════════════════════════════════ -->
+  <div class="pdf-panel">
+    <div class="pdf-header">
+      <a routerLink="/directeur/suivi" class="btn-back">← Retour</a>
+      <div class="pdf-title">
+        <span class="pdf-title-label">Mémoire de</span>
+        <span class="pdf-title-name">{{ etudiantNom() || 'Étudiant' }}</span>
+      </div>
+      @if (memoireUrl()) {
+        <a [href]="memoireUrl()" target="_blank" rel="noopener" class="btn-open-pdf">
+          ↗ Ouvrir dans un onglet
+        </a>
+      }
+    </div>
+
+    <!-- Chargement du PDF -->
+    @if (isPdfLoading()) {
+      <div class="pdf-placeholder">
+        <div class="pdf-spinner"></div>
+        <div class="pdf-placeholder-text">Chargement du document…</div>
+      </div>
+    }
+
+    <!-- PDF chargé via blob -->
+    @if (blobSafeUrl() && !isPdfLoading()) {
+      <iframe
+        class="pdf-frame"
+        [src]="blobSafeUrl()!"
+        type="application/pdf"
+        title="Mémoire étudiant">
+      </iframe>
+    }
+
+    <!-- Erreur ou aucun document -->
+    @if (!isPdfLoading() && !blobSafeUrl()) {
+      <div class="pdf-placeholder">
+        <div class="pdf-placeholder-icon">📄</div>
+        <div class="pdf-placeholder-text">
+          @if (pdfError()) { Impossible de charger le document } @else { Document non disponible }
+        </div>
+        <div class="pdf-placeholder-sub">
+          @if (pdfError()) {
+            <button class="btn-retry" (click)="rechargerPdf()">↺ Réessayer</button>
+            &nbsp;ou&nbsp;
+            <a [href]="memoireUrl()" target="_blank" rel="noopener">ouvrir dans un onglet</a>
+          } @else {
+            Le mémoire n'a pas encore été déposé ou l'URL est introuvable.
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ══ PANNEAU DROIT — ANNOTATIONS ══════════════════════════════════════ -->
+  <aside class="ann-panel">
+
+    <!-- En-tête -->
+    <div class="ann-header">
+      <span class="ann-title">📝 Remarques</span>
+      @if (nbNonResolues() > 0) {
+        <span class="ann-badge">{{ nbNonResolues() }} ouverte(s)</span>
+      }
+    </div>
+
+    <!-- Formulaire nouvelle annotation -->
+    <div class="ann-form">
+      <div class="ann-form-title">Ajouter une remarque</div>
+
+      <div class="form-row">
+        <label class="form-label">Page</label>
+        <input class="form-input form-input--sm" type="number" min="1" [(ngModel)]="form.page" />
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Couleur</label>
+        <div class="color-row">
+          @for (c of couleurs; track c.val) {
+            <button
+              class="color-dot"
+              [style.background]="c.val"
+              [class.selected]="form.couleur === c.val"
+              (click)="form.couleur = c.val"
+              [title]="c.label">
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Commentaire</label>
+        <textarea
+          class="form-textarea"
+          rows="3"
+          placeholder="Décrivez la correction à apporter sur cette page…"
+          [(ngModel)]="form.texte">
+        </textarea>
+      </div>
+
+      <button
+        class="btn-add-ann"
+        [disabled]="isSaving() || !form.texte.trim()"
+        (click)="ajouterAnnotation()">
+        @if (isSaving()) { Envoi… } @else { ＋ Ajouter la remarque }
+      </button>
+    </div>
+
+    <!-- Filtre par page -->
+    @if (pagesDisponibles().length > 0) {
+      <div class="page-filter">
+        <button class="page-chip" [class.active]="pageActive() === null" (click)="filtrerPage(null)">
+          Toutes ({{ annotations().length }})
+        </button>
+        @for (p of pagesDisponibles(); track p) {
+          <button class="page-chip" [class.active]="pageActive() === p" (click)="filtrerPage(p)">
+            p. {{ p }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Liste des annotations -->
+    <div class="ann-list">
+      @if (isLoading()) {
+        <div class="ann-loading">Chargement…</div>
+      } @else if (annotationsFiltrees().length === 0) {
+        <div class="ann-empty">
+          <div class="ann-empty-icon">✏️</div>
+          <div>Aucune remarque pour l'instant.</div>
+          <div class="ann-empty-sub">Utilisez le formulaire ci-dessus pour en ajouter.</div>
+        </div>
+      } @else {
+        @for (ann of annotationsFiltrees(); track ann.id) {
+          <div class="ann-item" [class.resolved]="ann.est_resolu" [style.border-left-color]="ann.couleur">
+            <div class="ann-item-top">
+              <span class="ann-page-tag" [style.background]="ann.couleur + '22'" [style.color]="ann.couleur">
+                p. {{ ann.page }}
+              </span>
+              @if (ann.est_resolu) {
+                <span class="ann-resolved-tag">✓ Résolu</span>
+              }
+            </div>
+            <div class="ann-item-text">{{ ann.texte }}</div>
+            <div class="ann-item-meta">
+              <span>{{ ann.annotateur }}</span>
+              <span>{{ ann.date_creation | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            @if (!ann.est_resolu) {
+              <div class="ann-item-actions">
+                <button class="btn-resolve" (click)="resoudre(ann)">✓ Résoudre</button>
+                <button class="btn-delete"  (click)="supprimer(ann)">🗑</button>
+              </div>
+            } @else {
+              <div class="ann-item-actions">
+                <button class="btn-delete" (click)="supprimer(ann)">🗑</button>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+
+  </aside>
+</div>

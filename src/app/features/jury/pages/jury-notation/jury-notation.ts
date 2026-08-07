@@ -1,47 +1,201 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
 import { TopNav } from '../../../../core/components/top-nav/top-nav';
-import { JuryService } from '../../../../core/services/jury/jury';
+import { Evaluation, Soutenance } from '../../../../core/models/soutenance.model';
+import { SoutenanceService } from '../../../../core/services/soutenance/soutenance';
+
+export type JuryVue = 'dashboard' | 'notation';
 
 @Component({
   selector: 'app-jury-notation',
-  imports: [CommonModule, ReactiveFormsModule, TopNav],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TopNav],
   templateUrl: './jury-notation.html',
   styleUrl: './jury-notation.scss',
 })
 export class JuryNotationComponent implements OnInit {
-  notationForm!: FormGroup;
-  isSubmitting = signal(false);
+  vue = signal<JuryVue>('dashboard');
 
-  moyenne = computed(() => {
-    if (!this.notationForm) {
-      return '0.00';
-    }
+  soutenances  = signal<Soutenance[]>([]);
+  evaluations  = signal<Evaluation[]>([]);
+  selected     = signal<Soutenance | null>(null);
 
-    const f = this.notationForm.value;
-    return (((+f.note_rapport || 0) + (+f.note_presentation || 0) + (+f.note_reponses || 0)) / 3).toFixed(2);
-  });
+  // Form fields
+  notePresentation = 0;
+  noteMaitrise     = 0;
+  noteMemoire      = 0;
+  noteReponses     = 0;
+  remarques        = '';
 
-  constructor(private fb: FormBuilder, private juryService: JuryService) {}
+  // PV
+  pvUrl = signal<string | null>(null);
+
+  isLoading    = false;
+  errorMsg     = '';
+  successMsg   = '';
+
+  constructor(private soutenanceService: SoutenanceService) {}
 
   ngOnInit(): void {
-    this.notationForm = this.fb.group({
-      note_rapport: [0, [Validators.required, Validators.min(0), Validators.max(20)]],
-      note_presentation: [0, [Validators.required, Validators.min(0), Validators.max(20)]],
-      note_reponses: [0, [Validators.required, Validators.min(0), Validators.max(20)]],
-      observations: ['', Validators.required],
+    this.charger();
+  }
+
+  charger(): void {
+    forkJoin({
+      soutenances: this.soutenanceService.getSoutenances(),
+      evaluations: this.soutenanceService.getEvaluations(),
+    }).subscribe({
+      next: ({ soutenances, evaluations }) => {
+        this.soutenances.set(soutenances);
+        this.evaluations.set(evaluations);
+      },
+      error: () => {},
     });
   }
 
-  validerNote(): void {
-    if (this.notationForm.valid) {
-      this.isSubmitting.set(true);
-      this.juryService.submitNotes(this.notationForm.value).subscribe({
-        next: () => this.isSubmitting.set(false),
-        error: () => this.isSubmitting.set(false),
-      });
+  // ── Computed helpers ────────────────────────────────────────────────────
+
+  get noteFinale(): string {
+    const weighted =
+      +this.noteMemoire      * 3 +
+      +this.noteMaitrise     * 4 +
+      +this.notePresentation * 3 +
+      +this.noteReponses     * 3;
+    return (weighted / 13).toFixed(2);
+  }
+
+  getEval(soutenanceId: number): Evaluation | undefined {
+    return this.evaluations().find((e) => e.soutenance === soutenanceId);
+  }
+
+  statut(s: Soutenance): string {
+    const e = this.getEval(s.id!);
+    if (!e)                return 'Notes à saisir';
+    if (e.est_signe_par_tous) return 'PV signé';
+    return 'Notes enregistrées';
+  }
+
+  statutClass(s: Soutenance): string {
+    const e = this.getEval(s.id!);
+    if (!e)                return 'badge-warn';
+    if (e.est_signe_par_tous) return 'badge-success';
+    return 'badge-info';
+  }
+
+  // ── Navigation ──────────────────────────────────────────────────────────
+
+  ouvrirNotation(s: Soutenance): void {
+    this.selected.set(s);
+    const e = this.getEval(s.id!);
+    if (e) {
+      this.notePresentation = e.note_presentation;
+      this.noteMaitrise     = e.note_maitrise;
+      this.noteMemoire      = e.note_memoire;
+      this.noteReponses     = e.note_reponses;
+      this.remarques        = e.remarques_jury ?? '';
+      this.pvUrl.set(e.pv_genere ?? null);
+    } else {
+      this.notePresentation = 0;
+      this.noteMaitrise     = 0;
+      this.noteMemoire      = 0;
+      this.noteReponses     = 0;
+      this.remarques        = '';
+      this.pvUrl.set(null);
     }
+    this.errorMsg   = '';
+    this.successMsg = '';
+    this.vue.set('notation');
+  }
+
+  retour(): void {
+    this.vue.set('dashboard');
+    this.selected.set(null);
+    this.pvUrl.set(null);
+  }
+
+  // ── Enregistrement des notes ────────────────────────────────────────────
+
+  enregistrerNotes(): void {
+    const s = this.selected();
+    if (!s) return;
+
+    this.isLoading = true;
+    this.errorMsg  = '';
+
+    const payload: Partial<Evaluation> = {
+      soutenance:         s.id!,
+      note_presentation:  +this.notePresentation,
+      note_maitrise:      +this.noteMaitrise,
+      note_memoire:       +this.noteMemoire,
+      note_reponses:      +this.noteReponses,
+      remarques_jury:     this.remarques,
+    };
+
+    const existing = this.getEval(s.id!);
+    const obs = existing
+      ? this.soutenanceService.mettreAJourEvaluation(existing.id, payload)
+      : this.soutenanceService.creerEvaluation(payload);
+
+    obs.subscribe({
+      next: (e) => {
+        this.isLoading  = false;
+        this.successMsg = 'Notes enregistrées avec succès !';
+        const autres = this.evaluations().filter((ev) => ev.soutenance !== s.id!);
+        this.evaluations.set([...autres, e]);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMsg  = err?.error?.detail ?? 'Erreur lors de l\'enregistrement.';
+      },
+    });
+  }
+
+  // ── Validation / signature du PV (président uniquement) ─────────────────
+
+  validerPV(): void {
+    const s = this.selected();
+    if (!s) return;
+    const e = this.getEval(s.id!);
+    if (!e) return;
+
+    this.isLoading = true;
+    this.errorMsg  = '';
+    this.soutenanceService.validerEvaluation(e.id).subscribe({
+      next: (res) => {
+        this.isLoading  = false;
+        this.successMsg = 'PV généré et signé avec succès !';
+        if (res.pv_url) {
+          this.pvUrl.set(res.pv_url);
+        }
+        // Mettre à jour l'évaluation localement (est_signe_par_tous = true)
+        const autres = this.evaluations().filter(ev => ev.soutenance !== s.id!);
+        const updated: Evaluation = { ...e, est_signe_par_tous: true, pv_genere: res.pv_url };
+        this.evaluations.set([...autres, updated]);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMsg  = err?.error?.detail ?? 'Erreur lors de la validation.';
+      },
+    });
+  }
+
+  telechargerPV(): void {
+    const s = this.selected();
+    if (!s) return;
+    const e = this.getEval(s.id!);
+    if (!e) return;
+    const url = this.soutenanceService.telechargerPVUrl(e.id);
+    window.open(url, '_blank');
+  }
+
+  mentionFor(noteFinale: number): string {
+    if (noteFinale >= 16) return 'Très bien';
+    if (noteFinale >= 14) return 'Bien';
+    if (noteFinale >= 12) return 'Assez bien';
+    if (noteFinale >= 10) return 'Passable';
+    return 'Non admis';
   }
 }

@@ -1,0 +1,166 @@
+<app-top-nav></app-top-nav>
+
+<div class="app-page">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-avatar">
+      <div class="avatar-circle" style="background:#DC2626">SE</div>
+      <div>
+        <div class="avatar-name">Service Examen</div>
+        <div class="avatar-role">Vérification &amp; Contrôle</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Vérifications</div>
+    <a class="nav-item" routerLink="/examen/conformite" routerLinkActive="active">
+      <span class="ico">🔍</span> Dossiers mémoires
+    </a>
+    <a class="nav-item active" routerLink="/examen/rattrapages">
+      <span class="ico">🔄</span> Rattrapages
+      @if (aAutoriser().length > 0) {
+        <span class="badge-pill">{{ aAutoriser().length }}</span>
+      }
+    </a>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
+  </aside>
+
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">🔄 Gestion des rattrapages</div>
+        <div class="page-subtitle">
+          {{ rattrapages().length }} rattrapages enregistrés
+          @if (aAutoriser().length > 0) {
+            — <span style="color:#C8963E;font-weight:700">{{ aAutoriser().length }} à autoriser</span>
+          }
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" (click)="charger()">↺ Actualiser</button>
+        @if (role() === 'CHEF_SERVICE_EXAM') {
+          <button class="btn btn-primary" (click)="showForm.set(!showForm())">
+            {{ showForm() ? '✕ Annuler' : '+ Nouveau rattrapage' }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (successMsg()) { <div class="alert alert-success mb-16">✅ {{ successMsg() }}</div> }
+    @if (errorMsg())   { <div class="alert alert-danger mb-16">❌ {{ errorMsg() }}</div> }
+
+    <!-- ── Alerte paiements à autoriser ──────────────────────────────────── -->
+    @if (aAutoriser().length > 0) {
+      <div class="alert-autoriser">
+        <span class="alert-ico">💰</span>
+        <div>
+          <strong>{{ aAutoriser().length }} paiement(s) validé(s) par le Recouvrement</strong> en attente d'autorisation.
+          Le Service Recouvrement a confirmé ces paiements — vous pouvez maintenant autoriser les étudiants à passer.
+        </div>
+      </div>
+    }
+
+    <!-- ── Formulaire nouveau rattrapage ─────────────────────────────────── -->
+    @if (showForm()) {
+      <div class="card mb-20">
+        <div class="card-header">
+          <span class="card-title">📋 Programmer un rattrapage</span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">ID Étudiant <span class="req">*</span></label>
+            <input class="form-input" type="number" [(ngModel)]="form.etudiant" placeholder="ID de l'étudiant" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID UE <span class="req">*</span></label>
+            <input class="form-input" type="number" [(ngModel)]="form.ue" placeholder="ID de l'UE" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date et heure <span class="req">*</span></label>
+            <input class="form-input" type="datetime-local" [(ngModel)]="form.date" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Salle</label>
+            <input class="form-input" [(ngModel)]="form.salle" placeholder="Ex : Salle A1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Frais (FCFA)</label>
+            <input class="form-input" type="number" [(ngModel)]="form.frais" />
+          </div>
+        </div>
+        <div style="padding:16px;display:flex;gap:10px">
+          <button class="btn btn-primary" (click)="creer()">✓ Enregistrer</button>
+          <button class="btn btn-secondary" (click)="showForm.set(false)">Annuler</button>
+        </div>
+      </div>
+    }
+
+    <!-- ── Filtres ──────────────────────────────────────────────────────── -->
+    <div class="rat-filters">
+      <input class="rat-search" type="text" placeholder="🔍 Rechercher étudiant ou UE…"
+        [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
+    </div>
+
+    <!-- ── Table ───────────────────────────────────────────────────────── -->
+    @if (isLoading()) {
+      <div class="loading-card">Chargement…</div>
+    } @else {
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>UE</th>
+              <th>Date</th>
+              <th>Salle</th>
+              <th>Frais (FCFA)</th>
+              <th>Paiement</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of filteredRattrapages(); track r.id) {
+              <tr [class.row-autoriser]="r.statut === 'PAIEMENT_SOUMIS' && r.valide_par_recouvrement">
+                <td><strong>{{ r.etudiant_nom }}</strong></td>
+                <td><code style="font-size:12px;background:#F3F4F6;padding:2px 6px;border-radius:4px">{{ r.ue_code }}</code></td>
+                <td class="small mono">{{ r.date | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="small">{{ r.salle || '—' }}</td>
+                <td class="mono">{{ r.frais | number:'1.0-0' }}</td>
+                <td>
+                  @if (r.valide_par_recouvrement) {
+                    <span class="badge badge-success">✅ Validé</span>
+                  } @else if (r.preuve_paiement) {
+                    <span class="badge badge-pending">📤 Soumis</span>
+                  } @else {
+                    <span class="badge badge-neutral">—</span>
+                  }
+                </td>
+                <td><span class="badge" [class]="statutClass(r.statut)">{{ statutLabel(r.statut) }}</span></td>
+                <td>
+                  @if (role() === 'CHEF_SERVICE_EXAM' && r.statut === 'PAIEMENT_SOUMIS' && r.valide_par_recouvrement) {
+                    <button class="btn btn-primary btn-sm" (click)="autoriser(r.id)">
+                      ✅ Autoriser
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="8" class="empty-cell">Aucun rattrapage enregistré.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
+</div>

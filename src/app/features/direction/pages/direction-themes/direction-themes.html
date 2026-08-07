@@ -1,7 +1,7 @@
 <app-top-nav></app-top-nav>
 
 <div class="app-page">
-  <!-- Sidebar -->
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
   <aside class="sidebar">
     <div class="sidebar-avatar">
       <div class="avatar-circle" style="background:#1A3C5E">DA</div>
@@ -10,180 +10,845 @@
         <div class="avatar-role">Administration</div>
       </div>
     </div>
+
     <div class="sidebar-section">Gestion</div>
-    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
-    <a class="nav-item"><span class="ico">👨‍🏫</span> Affecter directeurs</a>
-    <a class="nav-item"><span class="ico">⚖</span> Constituer les jurys</a>
-    <a class="nav-item"><span class="ico">✅</span> Valider les résultats</a>
-    <div class="sidebar-section">Sessions</div>
-    <a class="nav-item"><span class="ico">📅</span> Calendrier mensuel</a>
-    <a class="nav-item"><span class="ico">📊</span> Statistiques</a>
+    <button class="nav-item" [class.active]="vue() === 'dashboard'" (click)="afficherVue('dashboard')">
+      <span class="ico">🏠</span> Tableau de bord
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'proposer_theme'" (click)="afficherVue('proposer_theme')">
+      <span class="ico">💡</span> Proposer un thème
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'affecter'" (click)="afficherVue('affecter')">
+      <span class="ico">👨‍🏫</span> Affecter directeurs
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'jury'" (click)="afficherVue('jury')">
+      <span class="ico">⚖</span> Constituer les jurys
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'resultats'" (click)="afficherVue('resultats')">
+      <span class="ico">✅</span> Valider les résultats
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'etudiants'" (click)="afficherVue('etudiants')">
+      <span class="ico">👥</span> Liste des étudiants
+    </button>
+    <a class="nav-item" routerLink="/direction/affectations" routerLinkActive="active">
+      <span class="ico">🔗</span> Affectations
+    </a>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
   </aside>
 
-  <!-- Contenu principal -->
+  <!-- ══ CONTENU PRINCIPAL ═══════════════════════════════════════════════════ -->
   <div class="main">
+
+    <!-- En-tête commun -->
     <div class="page-header">
       <div>
         <div class="page-title">Direction Académique</div>
         <div class="page-subtitle">Session de soutenance — Juillet 2026</div>
       </div>
-      <button class="btn btn-primary">✚ Nouvelle session</button>
-    </div>
-
-    <!-- Stat cards -->
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <div class="stat-label">Soutenances planifiées</div>
-        <div class="stat-value">34</div>
-        <div class="stat-sub">Session Juillet 2026</div>
-        <div class="stat-icon">🎓</div>
-      </div>
-      <div class="stat-card gold">
-        <div class="stat-label">Jurys à constituer</div>
-        <div class="stat-value">8</div>
-        <div class="stat-sub">En attente d'affectation</div>
-        <div class="stat-icon">⚖</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">Directeurs affectés</div>
-        <div class="stat-value">51</div>
-        <div class="stat-sub">Encadrements actifs</div>
-        <div class="stat-icon">👨‍🏫</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">Résultats à valider</div>
-        <div class="stat-value">12</div>
-        <div class="stat-sub">PV en attente de signature</div>
-        <div class="stat-icon">📋</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" (click)="actualiser()">🔄 Actualiser</button>
+        <button class="btn btn-primary" (click)="ouvrirSessionModal()">✚ Nouvelle session</button>
       </div>
     </div>
 
-    <!-- Thèmes en attente de validation -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">📋 Thèmes en attente de validation</span>
-        <button class="btn btn-primary btn-sm" (click)="chargerThemes()">🔄 Actualiser</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Étudiant</th>
-            <th>Thème proposé</th>
-            <th>Domaine</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (theme of themesEnAttente(); track theme.id) {
-            <tr>
-              <td><strong>{{ theme.etudiant_nom }}</strong></td>
-              <td>{{ theme.titre }}</td>
-              <td><span class="badge badge-info">{{ theme.domaine }}</span></td>
-              <td style="white-space:nowrap">
-                <button class="btn btn-gold btn-sm" (click)="valider(theme.id!)">✅ Valider</button>
-                <button class="btn btn-secondary btn-sm" style="margin-left:6px" (click)="demanderCorrection(theme.id!)">💬 Corriger</button>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="4" style="text-align:center;padding:40px;color:var(--ink3)">
-                ✅ Aucun thème en attente de validation.
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Constitution des jurys -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">⚖ Constitution des jurys</span>
-        <button class="btn btn-primary btn-sm">+ Constituer un jury</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Étudiant</th>
-            <th>Niveau</th>
-            <th>Directeur mémoire</th>
-            <th>Président jury</th>
-            <th>Examinateur</th>
-            <th>Règle Doctorat</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Ama Koffi</strong></td>
-            <td>Master 2</td>
-            <td>Dr. Kofi Mensah</td>
-            <td>Pr. Jean Asante</td>
-            <td>Dr. Afia Boateng</td>
-            <td><span class="badge badge-success">2 Docteurs ✓</span></td>
-            <td><span class="badge badge-success">Complet</span></td>
-          </tr>
-          <tr>
-            <td><strong>Kofi Asante</strong></td>
-            <td>Master 2</td>
-            <td>Dr. Yaw Darko</td>
-            <td>—</td>
-            <td>Dr. Esi Quaye</td>
-            <td><span class="badge badge-warn">1/2 Docteurs</span></td>
-            <td><span class="badge badge-warn">Incomplet</span></td>
-          </tr>
-          <tr>
-            <td><strong>Abena Adjei</strong></td>
-            <td>Licence 3</td>
-            <td>M. Kwesi Adu</td>
-            <td>Dr. Ama Sarpong</td>
-            <td>M. Fiifi Osei</td>
-            <td><span class="badge badge-info">N/A (Licence)</span></td>
-            <td><span class="badge badge-success">Complet</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Calendrier mensuel -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">📅 Calendrier mensuel — Juillet 2026</span>
-      </div>
-      <div style="padding:16px">
-        <div class="cal-grid">
-          <div class="cal-header">Lun</div><div class="cal-header">Mar</div><div class="cal-header">Mer</div>
-          <div class="cal-header">Jeu</div><div class="cal-header">Ven</div><div class="cal-header">Sam</div><div class="cal-header">Dim</div>
-          <div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day"><div class="day-num">01</div></div>
-          <div class="cal-day"><div class="day-num">02</div></div><div class="cal-day"><div class="day-num">03</div></div>
-          <div class="cal-day"><div class="day-num">04</div></div><div class="cal-day"><div class="day-num">05</div></div>
-          <div class="cal-day"><div class="day-num">07</div></div><div class="cal-day"><div class="day-num">08</div></div>
-          <div class="cal-day"><div class="day-num">09</div></div><div class="cal-day"><div class="day-num">10</div></div>
-          <div class="cal-day"><div class="day-num">11</div></div><div class="cal-day"><div class="day-num">12</div></div>
-          <div class="cal-day"><div class="day-num">13</div></div>
-          <div class="cal-day has-event">
-            <div class="day-num">14</div>
-            <div class="cal-event">A. Koffi 09h30</div>
-            <div class="cal-event gold">K. Asante 14h00</div>
-          </div>
-          <div class="cal-day has-event">
-            <div class="day-num">15</div>
-            <div class="cal-event">Y. Boateng 10h00</div>
-          </div>
-          <div class="cal-day"><div class="day-num">16</div></div><div class="cal-day"><div class="day-num">17</div></div>
-          <div class="cal-day"><div class="day-num">18</div></div><div class="cal-day"><div class="day-num">19</div></div>
-          <div class="cal-day"><div class="day-num">20</div></div>
-          <div class="cal-day has-event">
-            <div class="day-num">21</div>
-            <div class="cal-event green">A. Mensah 09h00</div>
-          </div>
-          <div class="cal-day"><div class="day-num">22</div></div><div class="cal-day"><div class="day-num">23</div></div>
-          <div class="cal-day"><div class="day-num">24</div></div><div class="cal-day"><div class="day-num">25</div></div>
-          <div class="cal-day"><div class="day-num">26</div></div><div class="cal-day"><div class="day-num">27</div></div>
-          <div class="cal-day"><div class="day-num">28</div></div><div class="cal-day"><div class="day-num">29</div></div>
-          <div class="cal-day"><div class="day-num">30</div></div><div class="cal-day"><div class="day-num">31</div></div>
+    <!-- ══ VUE : TABLEAU DE BORD ════════════════════════════════════════════ -->
+    @if (vue() === 'dashboard') {
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Soutenances planifiées</div>
+          <div class="stat-value">{{ statsSession()?.total_soutenances ?? '—' }}</div>
+          <div class="stat-sub">Session en cours</div>
+          <div class="stat-icon">🎓</div>
         </div>
+        <div class="stat-card gold">
+          <div class="stat-label">En attente affectation</div>
+          <div class="stat-value">{{ etudiantsSans().length || '—' }}</div>
+          <div class="stat-sub">Thèmes validés sans jury</div>
+          <div class="stat-icon">⚖</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Soutenances clôturées</div>
+          <div class="stat-value">{{ statsSession()?.soutenances_cloturees ?? '—' }}</div>
+          <div class="stat-sub">Résultats finalisés</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Thèmes à valider</div>
+          <div class="stat-value">{{ themesEnAttente().length }}</div>
+          <div class="stat-sub">En attente de décision</div>
+          <div class="stat-icon">📋</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Mémoires validés</div>
+          <div class="stat-value">{{ dossiersValides().length }}</div>
+          <div class="stat-sub">Après vérification IA/plagiat</div>
+          <div class="stat-icon">✅</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Mémoires rejetés</div>
+          <div class="stat-value">{{ dossiersRejetes().length }}</div>
+          <div class="stat-sub">Non conformes</div>
+          <div class="stat-icon">🚫</div>
+        </div>
+      </div>
+
+      <!-- Thèmes en attente -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Thèmes en attente de validation</span>
+          <button class="btn btn-primary btn-sm" (click)="chargerThemes()">🔄 Actualiser</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Thème proposé</th>
+              <th>Description</th>
+              <th>Domaine</th>
+              <th>Soumis le</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (theme of themesEnAttente(); track theme.id) {
+              <tr>
+                <td>
+                  <strong>{{ theme.etudiant_nom }}</strong>
+                  @if (theme.etudiant_matricule) {
+                    <div style="font-size:11px;color:var(--ink3)">{{ theme.etudiant_matricule }}</div>
+                  }
+                </td>
+                <td style="max-width:200px;font-size:13px;font-weight:600">{{ theme.titre }}</td>
+                <td style="max-width:220px;font-size:12px;color:var(--ink3)">
+                  @if (theme.description) {
+                    {{ theme.description.slice(0, 100) }}{{ theme.description.length > 100 ? '…' : '' }}
+                  } @else {
+                    <em>—</em>
+                  }
+                </td>
+                <td><span class="badge badge-info">{{ theme.domaine }}</span></td>
+                <td style="font-size:12px;white-space:nowrap">
+                  @if (theme.date_soumission) {
+                    {{ theme.date_soumission | date:'dd/MM/yyyy' }}
+                  } @else { — }
+                </td>
+                <td style="white-space:nowrap">
+                  <button class="btn btn-gold btn-sm" (click)="validerTheme(theme.id!)">✅ Valider</button>
+                  <button class="btn btn-danger btn-sm" style="margin-left:6px"
+                    (click)="ouvrirRejetModal(theme.id!, theme.etudiant_nom ?? '')">
+                    ❌ Rejeter
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" style="text-align:center;padding:40px;color:var(--ink3)">
+                  ✅ Aucun thème en attente de validation.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Documents validés après vérification ──────────────────────── -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header">
+          <span class="card-title">✅ Mémoires validés</span>
+          <span style="font-size:12px;color:var(--ink3)">
+            {{ dossiersValides().length }} document(s) validé(s)
+          </span>
+        </div>
+
+        @if (dossiersLoading()) {
+          <div style="text-align:center;padding:32px;color:var(--ink3)">Chargement…</div>
+        } @else if (dossiersValides().length === 0) {
+          <div style="text-align:center;padding:40px;color:var(--ink3)">
+            <div style="font-size:36px;margin-bottom:8px">📭</div>
+            Aucun mémoire validé pour l'instant.
+          </div>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Document déposé</th>
+                <th>Filière</th>
+                <th>UE</th>
+                <th>Paiement</th>
+                <th>Examinateur</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of dossiersValides(); track d.id) {
+                <tr>
+                  <td>
+                    <strong>{{ d.etudiant_nom }}</strong>
+                    <div style="font-size:11px;color:var(--ink3)">{{ d.matricule }}</div>
+                  </td>
+                  <td>
+                    @if (d.document_url && d.document_nom) {
+                      <a [href]="d.document_url" target="_blank" rel="noopener"
+                         style="display:flex;align-items:center;gap:6px;font-size:12px;color:#1d4ed8;text-decoration:none">
+                        <span style="font-size:16px">📄</span>
+                        <span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                          {{ d.document_nom }}
+                        </span>
+                        @if (d.document_version) {
+                          <span style="font-size:10px;color:var(--ink3);white-space:nowrap">v{{ d.document_version }}</span>
+                        }
+                      </a>
+                    } @else {
+                      <em style="font-size:12px;color:var(--ink3)">Aucun fichier</em>
+                    }
+                  </td>
+                  <td style="font-size:13px">{{ d.filiere }}</td>
+                  <td><span class="badge badge-info">{{ d.ue }}</span></td>
+                  <td>
+                    <span class="badge" [class.badge-success]="d.paiement==='PAYE'" [class.badge-danger]="d.paiement==='NON_PAYE'">
+                      {{ d.paiement === 'PAYE' ? '✓ Payé' : '✗ Non payé' }}
+                    </span>
+                  </td>
+                  <td style="font-size:12px">
+                    @if (d.examinateur_assigne_nom) {
+                      🔬 {{ d.examinateur_assigne_nom }}
+                    } @else {
+                      <em style="color:var(--ink3)">Non assigné</em>
+                    }
+                  </td>
+                  <td><span class="badge badge-success">✅ Validé</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <!-- ── Documents rejetés ──────────────────────────────────────────── -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header">
+          <span class="card-title">🚫 Mémoires rejetés</span>
+          <span style="font-size:12px;color:var(--ink3)">
+            {{ dossiersRejetes().length }} document(s) non conforme(s)
+          </span>
+        </div>
+
+        @if (!dossiersLoading() && dossiersRejetes().length === 0) {
+          <div style="text-align:center;padding:40px;color:var(--ink3)">
+            <div style="font-size:36px;margin-bottom:8px">🎉</div>
+            Aucun mémoire rejeté.
+          </div>
+        } @else if (!dossiersLoading()) {
+          <table>
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Document déposé</th>
+                <th>Filière</th>
+                <th>UE</th>
+                <th>Paiement</th>
+                <th>Plagiat</th>
+                <th>IA</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of dossiersRejetes(); track d.id) {
+                <tr>
+                  <td>
+                    <strong>{{ d.etudiant_nom }}</strong>
+                    <div style="font-size:11px;color:var(--ink3)">{{ d.matricule }}</div>
+                  </td>
+                  <td>
+                    @if (d.document_url && d.document_nom) {
+                      <a [href]="d.document_url" target="_blank" rel="noopener"
+                         style="display:flex;align-items:center;gap:6px;font-size:12px;color:#dc2626;text-decoration:none">
+                        <span style="font-size:16px">📄</span>
+                        <span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                          {{ d.document_nom }}
+                        </span>
+                        @if (d.document_version) {
+                          <span style="font-size:10px;color:var(--ink3);white-space:nowrap">v{{ d.document_version }}</span>
+                        }
+                      </a>
+                    } @else {
+                      <em style="font-size:12px;color:var(--ink3)">Aucun fichier</em>
+                    }
+                  </td>
+                  <td style="font-size:13px">{{ d.filiere }}</td>
+                  <td><span class="badge badge-info">{{ d.ue }}</span></td>
+                  <td>
+                    <span class="badge" [class.badge-success]="d.paiement==='PAYE'" [class.badge-danger]="d.paiement==='NON_PAYE'">
+                      {{ d.paiement === 'PAYE' ? '✓ Payé' : '✗ Non payé' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge-success]="d.verifie_plagiat" [class.badge-danger]="!d.verifie_plagiat">
+                      {{ d.verifie_plagiat ? '✓' : '✗' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge-success]="d.verifie_ia" [class.badge-danger]="!d.verifie_ia">
+                      {{ d.verifie_ia ? '✓' : '✗' }}
+                    </span>
+                  </td>
+                  <td><span class="badge badge-danger">🚫 Rejeté</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+
+    <!-- ══ MODAL : REJET DE THÈME ══════════════════════════════════════════ -->
+    @if (showRejetModal()) {
+      <div class="modal-overlay" (click)="fermerRejetModal()">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <span class="modal-title">❌ Rejeter le thème</span>
+            <button class="modal-close" (click)="fermerRejetModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <p style="font-size:13px;color:var(--ink3);margin-bottom:16px">
+              Thème de <strong>{{ rejetEtudiantNom() }}</strong> — veuillez saisir le motif du rejet.
+              L'étudiant sera notifié automatiquement.
+            </p>
+            <div class="field-group">
+              <label>Motif du rejet <span class="req">*</span></label>
+              <textarea rows="4" [value]="rejetMotif()"
+                (input)="rejetMotif.set($any($event.target).value)"
+                placeholder="Ex : Le sujet est trop vague, manque de cadrage théorique, hors domaine de la filière…"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fermerRejetModal()">Annuler</button>
+            <button class="btn btn-danger" (click)="confirmerRejet()"
+              [disabled]="!rejetMotif().trim() || isRejeting">
+              {{ isRejeting ? 'Envoi…' : '❌ Confirmer le rejet' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══ VUE : PROPOSER UN THÈME ══════════════════════════════════════════ -->
+    @if (vue() === 'proposer_theme') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">💡 Proposer un thème à un étudiant</span>
+        </div>
+        <div style="padding:24px;max-width:680px">
+
+          @if (themeMsg) {
+            <div class="alert" [class.alert-success]="themeMsgType==='success'" [class.alert-danger]="themeMsgType==='error'" style="margin-bottom:20px">
+              {{ themeMsg }}
+            </div>
+          }
+
+          <!-- Sélection étudiant -->
+          <div class="field-group">
+            <label>Étudiant <span class="req">*</span></label>
+            <select [(ngModel)]="themeForm.etudiant_id">
+              <option [value]="0">— Sélectionner un étudiant —</option>
+              @for (e of etudiants(); track e.id) {
+                <option [value]="e.id">{{ e.prenom }} {{ e.nom }} — {{ e.matricule }} ({{ e.filiere }})</option>
+              }
+            </select>
+            @if (!etudiants().length) {
+              <small style="color:#718096">Chargement de la liste…</small>
+            }
+          </div>
+
+          <!-- Titre -->
+          <div class="field-group">
+            <label>Titre du thème <span class="req">*</span></label>
+            <input type="text" [(ngModel)]="themeForm.titre"
+              placeholder="Ex : Système de détection d'intrusions réseau par Machine Learning" />
+          </div>
+
+          <!-- Domaine -->
+          <div class="field-group">
+            <label>Domaine <span class="req">*</span></label>
+            <select [(ngModel)]="themeForm.domaine">
+              <option value="">— Sélectionner un domaine —</option>
+              @for (d of domaines; track d.value) {
+                <option [value]="d.value">{{ d.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div class="field-group">
+            <label>Description détaillée <span class="req">*</span></label>
+            <textarea [(ngModel)]="themeForm.description" rows="6"
+              placeholder="Décrivez le sujet : contexte, objectifs, méthodologie, technologies…"></textarea>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:8px">
+            <button class="btn btn-gold" [disabled]="isSavingTheme" (click)="soumettreTheme()">
+              @if (isSavingTheme) { Envoi… } @else { 📤 Proposer ce thème }
+            </button>
+            <button class="btn btn-secondary" (click)="themeForm={etudiant_id:0,titre:'',domaine:'',description:''}; themeMsg=''">
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══ VUE : AFFECTER DIRECTEURS ════════════════════════════════════════ -->
+    @if (vue() === 'affecter') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">👨‍🏫 Étudiants — Planification soutenance</span>
+          <span style="color:var(--ink3);font-size:13px">
+            {{ etudiantsSans().length }} étudiant(s) avec thème validé sans jury affecté
+          </span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Matricule</th>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Thème</th>
+              <th>Éligibilité</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of etudiantsSans(); track e.etudiant_id) {
+              <tr>
+                <td style="font-family:'DM Mono',monospace;font-size:12px">{{ e.matricule }}</td>
+                <td><strong>{{ e.nom }}</strong> {{ e.prenom }}</td>
+                <td>{{ e.filiere }}</td>
+                <td style="font-size:12px;max-width:220px">{{ e.titre_theme }}</td>
+                <td>
+                  @if (e.est_eligible) {
+                    <span class="badge badge-success">✅ Éligible</span>
+                  } @else {
+                    <span class="badge badge-danger">⛔ Non éligible</span>
+                  }
+                </td>
+                <td>
+                  <button
+                    class="btn btn-gold btn-sm"
+                    (click)="ouvrirModal(e)"
+                    [disabled]="!e.est_eligible"
+                  >
+                    📅 Planifier
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" style="text-align:center;padding:48px;color:var(--ink3)">
+                  ✅ Tous les étudiants éligibles ont une soutenance planifiée.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ══ VUE : CONSTITUER LES JURYS ═══════════════════════════════════════ -->
+    @if (vue() === 'jury') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚖ Constitution des jurys</span>
+          <span style="color:var(--ink3);font-size:13px">{{ soutenances().length }} soutenance(s) planifiée(s)</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Directeur</th>
+              <th>Président jury</th>
+              <th>Examinateur</th>
+              <th>Date</th>
+              <th>Salle</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of soutenances(); track s.id) {
+              <tr>
+                <td><strong>{{ s.etudiant_details }}</strong></td>
+                <td style="font-size:12px">{{ s.filiere }}</td>
+                <td style="font-size:12px">{{ s.directeur_nom || '—' }}</td>
+                <td style="font-size:12px">{{ s.president_nom || '—' }}</td>
+                <td style="font-size:12px">{{ s.examinateur_nom || '—' }}</td>
+                <td style="font-family:'DM Mono',monospace;font-size:12px">
+                  {{ s.date_soutenance | date:'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td style="font-size:12px">{{ s.salle_nom || '—' }}</td>
+                <td>
+                  @if (s.est_cloturee) {
+                    <span class="badge badge-success">Clôturée</span>
+                  } @else if (s.president && s.examinateur && s.directeur_memoire) {
+                    <span class="badge badge-info">Jury complet</span>
+                  } @else {
+                    <span class="badge badge-warn">Incomplet</span>
+                  }
+                </td>
+                <td>
+                  @if (!s.est_cloturee) {
+                    <button class="btn btn-secondary btn-sm" (click)="ouvrirModalJury(s)">✏ Modifier</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Aucune soutenance planifiée. Utilisez « Affecter directeurs » pour commencer.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ══ VUE : VALIDER LES RÉSULTATS ══════════════════════════════════════ -->
+    @if (vue() === 'resultats') {
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📊 Résultats des soutenances</span>
+          <span style="color:var(--ink3);font-size:13px">{{ evaluations().length }} évaluation(s)</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Soutenance</th>
+              <th>Présentation /20</th>
+              <th>Maîtrise /20</th>
+              <th>Mémoire /20</th>
+              <th>Réponses /20</th>
+              <th>Moyenne</th>
+              <th>Mention</th>
+              <th>Signature jury</th>
+              <th>Action DA</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ev of evaluations(); track ev.id) {
+              <tr>
+                <td><strong>#{{ ev.soutenance }}</strong></td>
+                <td style="font-family:'DM Mono',monospace">{{ ev.note_presentation | number:'1.2-2' }}</td>
+                <td style="font-family:'DM Mono',monospace">{{ ev.note_maitrise | number:'1.2-2' }}</td>
+                <td style="font-family:'DM Mono',monospace">{{ ev.note_memoire | number:'1.2-2' }}</td>
+                <td style="font-family:'DM Mono',monospace">{{ ev.note_reponses | number:'1.2-2' }}</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700">{{ ev.note_finale | number:'1.2-2' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="mentionClass(ev.mention)">{{ ev.mention || '—' }}</span>
+                </td>
+                <td>
+                  @if (ev.est_signe_par_tous) {
+                    <span class="badge badge-success">✅ Signé</span>
+                  } @else {
+                    <span class="badge badge-pending">⏳ En attente</span>
+                  }
+                </td>
+                <td>
+                  @if (ev.est_signe_par_tous) {
+                    <button class="btn btn-gold btn-sm" (click)="cloturerSoutenance(ev.soutenance, 'Soutenance #' + ev.soutenance)">
+                      🔒 Clôturer
+                    </button>
+                  } @else {
+                    <span style="color:var(--ink3);font-size:12px">Attente signature</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Aucune évaluation disponible.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ══ VUE : LISTE DES ÉTUDIANTS ══════════════════════════════════════════ -->
+    @if (vue() === 'etudiants') {
+      <div class="section-title">👥 Liste des étudiants</div>
+
+      <div class="filters-bar">
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Rechercher par nom, prénom, matricule…"
+          [value]="etudiantsSearch()"
+          (input)="etudiantsSearch.set($any($event.target).value)"
+        />
+        <select [value]="etudiantsFiliereFilter()" (change)="etudiantsFiliereFilter.set($any($event.target).value)">
+          <option value="">Toutes les filières</option>
+          <option value="GL">Génie Logiciel</option>
+          <option value="RSS">Réseaux &amp; Sécurité</option>
+        </select>
+      </div>
+
+      @if (etudiantsLoading()) {
+        <div class="loading-state">Chargement…</div>
+      } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Étudiant</th>
+                <th>Matricule</th>
+                <th>Filière</th>
+                <th>UE validées</th>
+                <th>Avancement</th>
+                <th>Frais</th>
+                <th>Éligible</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of filteredTousEtudiants(); track e.id) {
+                <tr>
+                  <td><strong>{{ e.nom }} {{ e.prenom }}</strong></td>
+                  <td><span class="badge badge-neutral">{{ e.matricule }}</span></td>
+                  <td>{{ e.filiere_nom }}</td>
+                  <td>{{ e.ue_validees }} / {{ e.total_ue }}</td>
+                  <td><span class="badge {{ phaseBadge(e.phase) }}">{{ phaseLabel(e.phase) }}</span></td>
+                  <td>
+                    @if (e.has_paid_fees) {
+                      <span class="badge badge-success">Payé</span>
+                    } @else {
+                      <span class="badge badge-danger">Non payé</span>
+                    }
+                  </td>
+                  <td>
+                    @if (e.eligible) {
+                      <span class="badge badge-success">✔</span>
+                    } @else {
+                      <span class="badge badge-danger">✘</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="7" class="empty-row">Aucun étudiant trouvé.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">{{ filteredTousEtudiants().length }} étudiant(s)</div>
+      }
+    }
+
+  </div><!-- /main -->
+</div><!-- /app-page -->
+
+<!-- ══ MODAL : Planifier soutenance ════════════════════════════════════════ -->
+@if (showModal) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal-card modal-large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">
+          📅 Planifier soutenance — {{ selectedEtudiant?.prenom }} {{ selectedEtudiant?.nom }}
+        </span>
+        <button class="modal-close" (click)="fermerModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        @if (selectedEtudiant) {
+          <div class="modal-info-row">
+            <span>🎓 <strong>{{ selectedEtudiant.filiere }}</strong></span>
+            <span style="margin-left:16px">📄 {{ selectedEtudiant.titre_theme }}</span>
+          </div>
+        }
+
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Directeur de mémoire <span class="req">*</span></label>
+            <select [(ngModel)]="form.directeur_memoire">
+              <option [ngValue]="0" disabled>— Choisir un directeur —</option>
+              @for (d of directeurs(); track d.id) {
+                <option [ngValue]="d.id">{{ membreNom(d) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Président du jury <span class="req">*</span></label>
+            <select [(ngModel)]="form.president">
+              <option [ngValue]="0" disabled>— Choisir un président —</option>
+              @for (p of presidents(); track p.id) {
+                <option [ngValue]="p.id">{{ membreNom(p) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Examinateur <span class="req">*</span></label>
+            <select [(ngModel)]="form.examinateur">
+              <option [ngValue]="0" disabled>— Choisir un examinateur —</option>
+              @for (e of examinateurs(); track e.id) {
+                <option [ngValue]="e.id">{{ membreNom(e) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Salle <span class="req">*</span></label>
+            <select [(ngModel)]="form.salle">
+              <option [ngValue]="0" disabled>— Choisir une salle —</option>
+              @for (s of salles(); track s.id) {
+                <option [ngValue]="s.id">{{ s.nom }} ({{ s.capacite }} places)</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Date et heure <span class="req">*</span></label>
+            <input type="datetime-local" [(ngModel)]="form.date_soutenance" />
+          </div>
+
+          <div class="field-group">
+            <label>Session <span class="req">*</span></label>
+            <select [(ngModel)]="form.session">
+              @for (s of SESSION_CHOICES; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group" style="grid-column:1/-1">
+            <label>Lien Meet (optionnel)</label>
+            <input type="url" [(ngModel)]="form.lien_meet" placeholder="https://meet.google.com/..." />
+          </div>
+        </div>
+
+        @if (errorMsg) {
+          <div class="alert-msg error">❌ {{ errorMsg }}</div>
+        }
+        @if (successMsg) {
+          <div class="alert-msg success">✅ {{ successMsg }}</div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerModal()">Annuler</button>
+        <button class="btn btn-gold" (click)="soumettreSoutenance()" [disabled]="isLoading">
+          @if (isLoading) { Enregistrement… } @else { 📅 Planifier la soutenance }
+        </button>
       </div>
     </div>
   </div>
-</div>
+}
+
+<!-- ══ MODAL : Correction de thème ════════════════════════════════════════ -->
+@if (showCorrectionModal()) {
+  <div class="modal-overlay" (click)="fermerCorrectionModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">✏ Demander une correction</span>
+        <button class="modal-close" (click)="fermerCorrectionModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label>Motif de la correction <span class="req">*</span></label>
+          <textarea rows="4" [ngModel]="correctionMotif()" (ngModelChange)="correctionMotif.set($event)"
+            placeholder="Décrivez les points à corriger par l'étudiant…"
+            style="width:100%;resize:vertical;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:13px"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerCorrectionModal()">Annuler</button>
+        <button class="btn btn-warning" (click)="confirmerCorrection()" [disabled]="!correctionMotif().trim()">
+          ✏ Envoyer la demande
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ MODAL : Confirmer clôture soutenance ═══════════════════════════════ -->
+@if (clotureSoutenanceId() !== null) {
+  <div class="modal-overlay" (click)="annulerCloture()">
+    <div class="modal-card" style="max-width:420px" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">🔒 Confirmer la clôture</span>
+        <button class="modal-close" (click)="annulerCloture()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--ink2);line-height:1.6">
+          Vous êtes sur le point de clôturer définitivement la soutenance de
+          <strong>{{ clotureSoutenanceNom() }}</strong>.<br>
+          Cette action est <strong>irréversible</strong>.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="annulerCloture()">Annuler</button>
+        <button class="btn btn-danger" (click)="confirmerCloture()">🔒 Clôturer définitivement</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ MODAL : Nouvelle session ════════════════════════════════════════════ -->
+@if (showSessionModal) {
+  <div class="modal-overlay" (click)="fermerSessionModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">✚ Configurer une nouvelle session</span>
+        <button class="modal-close" (click)="fermerSessionModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        @if (sessionErrorMsg()) {
+          <div class="alert-msg error" style="margin-bottom:12px">{{ sessionErrorMsg() }}</div>
+        }
+        @if (sessionSuccessMsg()) {
+          <div class="alert-msg success" style="margin-bottom:12px">✓ {{ sessionSuccessMsg() }}</div>
+        }
+        <div class="form-grid">
+          <div class="field-group">
+            <label>Numéro de session</label>
+            <select [(ngModel)]="sessionForm.numero">
+              @for (s of SESSION_CHOICES; track s.value) {
+                <option [value]="s.value">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label>Libellé (optionnel)</label>
+            <input type="text" [(ngModel)]="sessionForm.label" placeholder="Ex: Juillet 2026" />
+          </div>
+
+          <div class="field-group">
+            <label>Date de début <span class="req">*</span></label>
+            <input type="date" [(ngModel)]="sessionForm.date_debut" />
+          </div>
+
+          <div class="field-group">
+            <label>Date de fin <span class="req">*</span></label>
+            <input type="date" [(ngModel)]="sessionForm.date_fin" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fermerSessionModal()">Annuler</button>
+        <button class="btn btn-primary" (click)="confirmerNouvelleSession()">✚ Créer la session</button>
+      </div>
+    </div>
+  </div>
+}

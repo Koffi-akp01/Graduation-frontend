@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToastService, Toast } from '../../services/toast';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-toast',
@@ -19,7 +19,7 @@ import { ToastService, Toast } from '../../services/toast';
     .toast-container {
       position: fixed; bottom: 24px; right: 24px;
       display: flex; flex-direction: column; gap: 10px;
-      z-index: 400; max-width: 360px;
+      z-index: 9100; max-width: 360px;
     }
     .toast {
       display: flex; align-items: center; gap: 10px;

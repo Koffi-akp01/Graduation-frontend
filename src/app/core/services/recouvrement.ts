@@ -2,30 +2,26 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-export interface Paiement {
-  id: number;
-  etudiant_nom: string;
-  montant: number;
-  statut: 'payé' | 'impayé' | 'en_verification';
-  date: string;
-  reçu_url?: string;
-}
+import { Bordereau, StatsPaiement, AlerteImpaye } from '../models/paiement.model';
 
 @Injectable({ providedIn: 'root' })
 export class RecouvrementService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  private apiUrl = `${environment.apiUrl}/bordereaux/`;
 
-  getPaiements(): Observable<Paiement[]> {
-    return this.http.get<Paiement[]>(`${this.apiUrl}/recouvrement/paiements/`);
+  getPaiements(): Observable<Bordereau[]> {
+    return this.http.get<Bordereau[]>(this.apiUrl);
   }
 
-  validerPaiement(id: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/recouvrement/paiements/${id}/valider/`, {});
+  getStats(): Observable<StatsPaiement> {
+    return this.http.get<StatsPaiement>(`${this.apiUrl}stats/`);
   }
 
-  getReçu(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/recouvrement/paiements/${id}/recu/`, { responseType: 'blob' });
+  getAlertes(): Observable<AlerteImpaye[]> {
+    return this.http.get<AlerteImpaye[]>(`${this.apiUrl}alertes/`);
+  }
+
+  validerPaiement(id: number): Observable<Bordereau> {
+    return this.http.patch<Bordereau>(`${this.apiUrl}${id}/valider/`, {});
   }
 }

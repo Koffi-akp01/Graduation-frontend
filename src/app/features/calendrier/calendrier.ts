@@ -1,26 +1,114 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TopNav } from '../../core/components/top-nav/top-nav';
+import { CalendrierService, EvenementCalendrier, EvenementForm } from '../../core/services/calendrier/calendrier';
+import { AuthService } from '../../core/services/auth/auth';
+import { EtudiantListItem, StudentService } from '../../core/services/student.service';
+
+const TYPES = [
+  { value: '', label: 'Tous' },
+  { value: 'DEPOT_MEMOIRE',      label: 'Dépôt mémoire' },
+  { value: 'LIMITE_CORRECTIONS', label: 'Limite corrections' },
+  { value: 'SOUTENANCE',         label: 'Soutenance' },
+  { value: 'RATTRAPAGE',         label: 'Rattrapage' },
+  { value: 'REUNION',            label: 'Réunion' },
+  { value: 'AUTRE',              label: 'Autre' },
+];
 
 @Component({
   selector: 'app-calendrier',
   standalone: true,
-  imports: [TopNav, RouterLink],
+  imports: [CommonModule, FormsModule, TopNav],
   templateUrl: './calendrier.html',
   styleUrls: ['./calendrier.scss'],
 })
-export class CalendrierComponent {
-  phases = [
-    { num: 1,  status: 'done',  titre: 'Dépôt des thèmes de mémoire',           desc: 'Les étudiants soumettent leur sujet de mémoire pour validation par la direction académique.',   periode: 'Jan – Fév 2026',  duree: '6 semaines', acteurs: 'Étudiants, Direction académique' },
-    { num: 2,  status: 'done',  titre: 'Validation des thèmes & affectation des directeurs', desc: 'La direction valide les thèmes et désigne un directeur de mémoire pour chaque étudiant.', periode: 'Fév – Mar 2026', duree: '3 semaines', acteurs: 'Direction académique, Directeurs' },
-    { num: 3,  status: 'done',  titre: 'Rédaction du mémoire',                   desc: 'Phase de rédaction encadrée par le directeur de mémoire. Suivi régulier et corrections.',       periode: 'Mar – Mai 2026',  duree: '10 semaines', acteurs: 'Étudiants, Directeurs de mémoire' },
-    { num: 4,  status: 'actif', titre: 'Dépôt du mémoire final',                 desc: 'Les étudiants déposent leur mémoire finalisé pour vérification de conformité et anti-plagiat.',  periode: 'Mai 2026',        duree: '2 semaines', acteurs: 'Étudiants, Service Examen' },
-    { num: 5,  status: 'wait',  titre: 'Vérification anti-plagiat / anti-IA',    desc: 'Le service examen vérifie la conformité des mémoires (taux plagiat < 20%, IA < 25%).',          periode: 'Juin 2026',       duree: '2 semaines', acteurs: 'Service Examen' },
-    { num: 6,  status: 'wait',  titre: 'Validation paiement des frais',           desc: 'Le service recouvrement confirme la réception des frais de soutenance (20 000 FCFA M2).',        periode: 'Juin 2026',       duree: '1 semaine',  acteurs: 'Service Recouvrement, Étudiants' },
-    { num: 7,  status: 'wait',  titre: 'Constitution des jurys',                  desc: 'La direction académique constitue les jurys (président + examinateur). Règle : 2 docteurs en M2.', periode: 'Juin 2026',    duree: '2 semaines', acteurs: 'Direction académique' },
-    { num: 8,  status: 'wait',  titre: 'Planification des soutenances',           desc: 'La chargée d\'organisation planifie les créneaux, salles et convocations.',                       periode: 'Juin 2026',       duree: '1 semaine',  acteurs: 'Chargée d\'organisation' },
-    { num: 9,  status: 'wait',  titre: 'Pré-soutenances',                         desc: 'Répétitions obligatoires devant le directeur et le jury. Identification des points à améliorer.', periode: 'Fin Juin 2026',   duree: '1 semaine',  acteurs: 'Étudiants, Directeurs, Jury' },
-    { num: 10, status: 'final', titre: 'Soutenances officielles',                 desc: 'Sessions de soutenance publiques. Le jury évalue et délibère. Durée : 1h par étudiant.',         periode: 'Juil 2026',       duree: '2 semaines', acteurs: 'Étudiants, Jury, Direction' },
-    { num: 11, status: 'final', titre: 'Publication des résultats & remise des diplômes', desc: 'La direction publie les notes finales, PV et organise la cérémonie de remise des diplômes.', periode: 'Juil – Août 2026', duree: '2 semaines', acteurs: 'Direction, MC Cérémonie' },
-  ];
+export class CalendrierComponent implements OnInit {
+  evenements         = signal<EvenementCalendrier[]>([]);
+  isLoading          = signal(false);
+  errorMsg           = signal('');
+  successMsg         = signal('');
+  canWrite           = signal(false);
+  showForm           = false;
+  filterType         = '';
+  types              = TYPES;
+  etudiantsEligibles = signal<EtudiantListItem[]>([]);
+  etudiantsLoading   = signal(false);
+  etudiantSelId      = 0;
+
+  form: EvenementForm = {
+    titre: '', type_evenement: 'AUTRE', description: '',
+    date_debut: '', date_fin: null, tout_la_journee: false,
+    couleur: '#C8963E', soutenance: null,
+  };
+
+  constructor(
+    private calendrierService: CalendrierService,
+    private authService: AuthService,
+    private studentService: StudentService,
+  ) {}
+
+  ngOnInit(): void {
+    const role = this.authService.currentUser()?.role;
+    this.canWrite.set(['ADMIN_ACADEMIC', 'SYSADMIN', 'CHARGE_ORGANISATION', 'CHEF_SERVICE_EXAM'].includes(role || ''));
+    this.charger();
+    if (this.canWrite()) this.chargerEligibles();
+  }
+
+  charger(): void {
+    this.isLoading.set(true);
+    this.calendrierService.getEvenements(this.filterType || undefined).subscribe({
+      next: (data) => { this.evenements.set(data); this.isLoading.set(false); },
+      error: () => { this.errorMsg.set('Chargement impossible.'); this.isLoading.set(false); },
+    });
+  }
+
+  applyFilter(): void { this.charger(); }
+
+  chargerEligibles(): void {
+    this.etudiantsLoading.set(true);
+    this.studentService.getAllEtudiants().subscribe({
+      next: data => {
+        this.etudiantsEligibles.set(data.filter(e => e.eligible));
+        this.etudiantsLoading.set(false);
+      },
+      error: () => this.etudiantsLoading.set(false),
+    });
+  }
+
+  onEtudiantChange(): void {
+    const e = this.etudiantsEligibles().find(x => x.id === +this.etudiantSelId);
+    if (!e) return;
+    this.form.titre          = `Soutenance — ${e.nom} ${e.prenom}`;
+    this.form.description    = `Étudiant : ${e.matricule} · Filière : ${e.filiere_code}`;
+    this.form.type_evenement = 'SOUTENANCE';
+    this.form.couleur        = '#276749';
+  }
+
+  soumettre(): void {
+    this.calendrierService.creer(this.form).subscribe({
+      next: (evt) => {
+        this.evenements.update(list => [...list, evt].sort(
+          (a, b) => new Date(a.date_debut).getTime() - new Date(b.date_debut).getTime()
+        ));
+        this.successMsg.set('Événement ajouté.');
+        this.showForm     = false;
+        this.etudiantSelId = 0;
+        this.form = { titre: '', type_evenement: 'AUTRE', description: '', date_debut: '', date_fin: null, tout_la_journee: false, couleur: '#C8963E', soutenance: null };
+      },
+      error: (err) => this.errorMsg.set(err?.error?.detail || 'Erreur.'),
+    });
+  }
+
+  supprimer(id: number): void {
+    if (!confirm('Supprimer cet événement ?')) return;
+    this.calendrierService.supprimer(id).subscribe({
+      next: () => { this.evenements.update(list => list.filter(e => e.id !== id)); this.successMsg.set('Supprimé.'); },
+      error: () => this.errorMsg.set('Erreur lors de la suppression.'),
+    });
+  }
+
+  typeLabel(val: string): string {
+    return TYPES.find(t => t.value === val)?.label || val;
+  }
 }

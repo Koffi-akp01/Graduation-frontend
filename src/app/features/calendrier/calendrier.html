@@ -1,169 +1,127 @@
 <app-top-nav></app-top-nav>
 
-<div class="app-page">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-avatar">
-      <div class="avatar-circle" style="background:#C8963E">CA</div>
-      <div>
-        <div class="avatar-name">Calendrier 2026</div>
-        <div class="avatar-role">Année académique</div>
-      </div>
+<div class="cal-container">
+  <div class="cal-header">
+    <h1>Calendrier des événements</h1>
+    <div class="header-actions">
+      <select [(ngModel)]="filterType" (change)="applyFilter()" class="filter-select">
+        @for (t of types; track t.value) {
+          <option [value]="t.value">{{ t.label }}</option>
+        }
+      </select>
+      @if (canWrite()) {
+        <button class="btn-primary" (click)="showForm = !showForm">
+          {{ showForm ? 'Annuler' : '+ Ajouter' }}
+        </button>
+      }
     </div>
-    <div class="sidebar-section">Navigation</div>
-    <a class="nav-item active"><span class="ico">📅</span> Calendrier annuel</a>
-    <a class="nav-item" routerLink="/direction/themes"><span class="ico">🏛</span> Direction académique</a>
-    <a class="nav-item" routerLink="/organisation/planification"><span class="ico">🗓</span> Organisation</a>
-    <a class="nav-item" routerLink="/etudiant"><span class="ico">🎓</span> Espace étudiant</a>
-    <div class="sidebar-section">Phases</div>
-    <a class="nav-item"><span class="ico">✅</span> Phases terminées (3)</a>
-    <a class="nav-item"><span class="ico">🟡</span> Phase active (1)</a>
-    <a class="nav-item"><span class="ico">⏳</span> À venir (7)</a>
-  </aside>
+  </div>
 
-  <!-- Contenu principal -->
-  <div class="main">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Calendrier Académique 2026</div>
-        <div class="page-subtitle">11 phases — Parcours de soutenance complet · IPNET</div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <span class="badge badge-success" style="font-size:12px;padding:7px 16px">✅ Backend livré</span>
-        <span class="badge badge-info" style="font-size:12px;padding:7px 16px">📅 Session Juillet 2026</span>
-      </div>
-    </div>
+  @if (successMsg()) { <div class="alert alert-success">{{ successMsg() }}</div> }
+  @if (errorMsg())   { <div class="alert alert-error">{{ errorMsg() }}</div> }
 
-    <!-- Barre de progression globale -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">📊 Progression globale de l'année académique</span>
-      </div>
-      <div style="padding:20px 24px">
-        <div style="display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--border);height:48px;margin-bottom:16px">
-          <div style="flex:3;background:#1A3C5E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;border-right:1px solid rgba(255,255,255,.2)">
-            PHASES 1–3<br>Terminées ✓
-          </div>
-          <div style="flex:1;background:#C8963E;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;border-right:1px solid rgba(255,255,255,.2)">
-            PHASE 4<br>En cours
-          </div>
-          <div style="flex:7;background:#E2E0D8;display:flex;align-items:center;justify-content:center;color:#7A7870;font-size:10px;font-weight:700">
-            PHASES 5–11 · À venir
-          </div>
-        </div>
-        <div style="display:flex;gap:20px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)">
-            <div style="width:12px;height:12px;border-radius:3px;background:#2D6A4F;flex-shrink:0"></div> Phase terminée
-          </div>
-          <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)">
-            <div style="width:12px;height:12px;border-radius:3px;background:#C8963E;flex-shrink:0"></div> Phase active
-          </div>
-          <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)">
-            <div style="width:12px;height:12px;border-radius:3px;background:#E2E0D8;flex-shrink:0"></div> À venir
-          </div>
-          <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)">
-            <div style="width:12px;height:12px;border-radius:3px;background:#1A3C5E;flex-shrink:0"></div> Phase finale
-          </div>
-        </div>
-      </div>
-    </div>
+  @if (showForm) {
+    <div class="form-card">
+      <h3>Nouvel événement</h3>
+      <div class="form-grid">
 
-    <!-- Liste des 11 phases -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">📅 Les 11 phases du parcours de soutenance</span>
-      </div>
-      <div>
-        <!-- En-tête colonnes -->
-        <div style="display:grid;grid-template-columns:36px 1fr 200px 180px 120px;align-items:center;gap:14px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--border)">
-          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase">#</div>
-          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase">Phase</div>
-          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase">Période</div>
-          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase">Acteurs</div>
-          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase">Durée</div>
-        </div>
-
-        @for (phase of phases; track phase.num) {
-          <div class="cal-phase-row"
-            [class.ph-done]="phase.status === 'done'"
-            [class.ph-actif]="phase.status === 'actif'"
-            [class.ph-wait]="phase.status === 'wait'"
-            [class.ph-final]="phase.status === 'final'">
-            <div class="ph-num">{{ phase.num }}</div>
-            <div>
-              <div class="ph-title">{{ phase.titre }}</div>
-              <div class="ph-desc">{{ phase.desc }}</div>
-            </div>
-            <div>
-              <div class="ph-period">{{ phase.periode }}</div>
-              <div class="ph-dur">{{ phase.duree }}</div>
-            </div>
-            <div class="ph-actors">{{ phase.acteurs }}</div>
-            <div>
-              @if (phase.status === 'done') {
-                <span class="badge badge-success">Terminé</span>
-              } @else if (phase.status === 'actif') {
-                <span class="badge badge-pending">En cours</span>
-              } @else if (phase.status === 'final') {
-                <span class="badge badge-info">Final</span>
-              } @else {
-                <span class="badge badge-neutral">À venir</span>
+        <!-- Sélecteur étudiant (soutenance) -->
+        <div class="form-row full">
+          <label>Étudiant prêt à soutenir
+            <span style="font-size:11px;color:#718096;font-weight:400;margin-left:6px">
+              ({{ etudiantsEligibles().length }} éligible(s))
+            </span>
+          </label>
+          @if (etudiantsLoading()) {
+            <div style="font-size:13px;color:#718096;padding:6px 0">Chargement…</div>
+          } @else {
+            <select [(ngModel)]="etudiantSelId" (change)="onEtudiantChange()">
+              <option [value]="0">— Choisir un étudiant (optionnel) —</option>
+              @for (e of etudiantsEligibles(); track e.id) {
+                <option [value]="e.id">
+                  {{ e.nom }} {{ e.prenom }} — {{ e.matricule }} ({{ e.filiere_code }})
+                </option>
+              }
+            </select>
+          }
+          @if (etudiantSelId && etudiantSelId !== 0) {
+            <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+              @for (e of etudiantsEligibles(); track e.id) {
+                @if (e.id === +etudiantSelId) {
+                  <span style="font-size:12px;background:#D1FAE5;color:#065F46;border-radius:6px;padding:3px 10px">
+                    ✓ {{ e.ue_validees }}/{{ e.total_ue }} UE validées
+                  </span>
+                  <span style="font-size:12px;background:#EFF6FF;color:#1E40AF;border-radius:6px;padding:3px 10px">
+                    {{ e.filiere_code }}
+                  </span>
+                  @if (e.has_paid_fees) {
+                    <span style="font-size:12px;background:#D1FAE5;color:#065F46;border-radius:6px;padding:3px 10px">
+                      💳 Frais payés
+                    </span>
+                  }
+                }
               }
             </div>
+          }
+        </div>
+
+        <div class="form-row">
+          <label>Titre</label>
+          <input [(ngModel)]="form.titre" placeholder="Titre de l'événement" />
+        </div>
+        <div class="form-row">
+          <label>Type</label>
+          <select [(ngModel)]="form.type_evenement">
+            @for (t of types.slice(1); track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Date début</label>
+          <input type="datetime-local" [(ngModel)]="form.date_debut" />
+        </div>
+        <div class="form-row">
+          <label>Date fin</label>
+          <input type="datetime-local" [(ngModel)]="form.date_fin" />
+        </div>
+        <div class="form-row full">
+          <label>Description</label>
+          <textarea [(ngModel)]="form.description" rows="2"></textarea>
+        </div>
+        <div class="form-row">
+          <label>Couleur</label>
+          <input type="color" [(ngModel)]="form.couleur" />
+        </div>
+      </div>
+      <button class="btn-submit" (click)="soumettre()">Créer l'événement</button>
+    </div>
+  }
+
+  @if (isLoading()) { <div class="loading">Chargement...</div> }
+
+  <div class="events-list">
+    @if (evenements().length === 0 && !isLoading()) {
+      <p class="empty">Aucun événement pour ce filtre.</p>
+    }
+    @for (evt of evenements(); track evt.id) {
+      <div class="event-card" [style.border-left-color]="evt.couleur">
+        <div class="event-type-badge" [style.background]="evt.couleur + '22'" [style.color]="evt.couleur">
+          {{ typeLabel(evt.type_evenement) }}
+        </div>
+        <div class="event-body">
+          <div class="event-titre">{{ evt.titre }}</div>
+          <div class="event-dates">
+            {{ evt.date_debut | date:'dd/MM/yyyy HH:mm' }}
+            @if (evt.date_fin) { → {{ evt.date_fin | date:'dd/MM/yyyy HH:mm' }} }
           </div>
+          @if (evt.description) { <div class="event-desc">{{ evt.description }}</div> }
+          <div class="event-meta">Par {{ evt.cree_par_nom || 'système' }}</div>
+        </div>
+        @if (canWrite()) {
+          <button class="btn-delete" (click)="supprimer(evt.id)">✕</button>
         }
       </div>
-    </div>
-
-    <!-- Règles institutionnelles -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">📏 Règles institutionnelles clés</span>
-      </div>
-      <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="cal-rule-card">
-          <div style="font-size:20px">⚖</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">Règle 2 docteurs (Master)</div>
-            <div style="font-size:12px;color:var(--ink3)">Le jury de soutenance Master doit comporter au minimum 2 membres titulaires d'un doctorat.</div>
-          </div>
-        </div>
-        <div class="cal-rule-card">
-          <div style="font-size:20px">🤖</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">Seuil anti-plagiat / anti-IA</div>
-            <div style="font-size:12px;color:var(--ink3)">Taux de plagiat max : 20%. Contenu IA max : 25%. Au-delà, le mémoire est rejeté.</div>
-          </div>
-        </div>
-        <div class="cal-rule-card">
-          <div style="font-size:20px">💳</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">Frais de soutenance</div>
-            <div style="font-size:12px;color:var(--ink3)">Master : 20 000 FCFA — Licence : 15 000 FCFA. Paiement obligatoire avant soutenance.</div>
-          </div>
-        </div>
-        <div class="cal-rule-card">
-          <div style="font-size:20px">🎯</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">Pré-soutenance obligatoire</div>
-            <div style="font-size:12px;color:var(--ink3)">Une pré-soutenance doit avoir lieu avant la soutenance officielle. Sans elle, la soutenance est bloquée.</div>
-          </div>
-        </div>
-        <div class="cal-rule-card">
-          <div style="font-size:20px">⏱</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">Durée de soutenance</div>
-            <div style="font-size:12px;color:var(--ink3)">Chaque soutenance dure 1 heure : 20 min présentation + 30 min questions + 10 min délibération.</div>
-          </div>
-        </div>
-        <div class="cal-rule-card">
-          <div style="font-size:20px">📖</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">Volume du mémoire</div>
-            <div style="font-size:12px;color:var(--ink3)">Master : 80–120 pages. Licence : 50–80 pages. Hors références et annexes.</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    }
   </div>
 </div>

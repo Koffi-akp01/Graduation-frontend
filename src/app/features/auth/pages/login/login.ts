@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -10,13 +10,22 @@ import { AuthService } from '../../../../core/services/auth/auth';
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class LoginComponent {
-  credentials  = { username: '', password: '' };
-  isLoading    = false;
-  errorMessage = '';
-  selectedRole = 'STUDENT';
+export class LoginComponent implements OnInit {
+  credentials     = { username: '', password: '' };
+  isLoading       = false;
+  errorMessage    = '';
+  justRegistered  = false;
 
   constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    const pending = sessionStorage.getItem('pending_login_username');
+    if (pending) {
+      this.credentials.username = pending;
+      this.justRegistered = true;
+      sessionStorage.removeItem('pending_login_username');
+    }
+  }
 
   onLogin(): void {
     this.isLoading    = true;

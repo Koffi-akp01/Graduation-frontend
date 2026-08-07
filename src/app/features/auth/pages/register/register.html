@@ -20,33 +20,76 @@
     <!-- En-tête -->
     <div class="reg-header">
       <div class="reg-title">Graduation Plan</div>
-      <div class="reg-subtitle">CRÉER VOTRE COMPTE ÉTUDIANT</div>
+      <div class="reg-subtitle">CRÉER VOTRE COMPTE</div>
     </div>
 
     <form (ngSubmit)="onRegister()" autocomplete="off">
 
-      <!-- Nom -->
+      <!-- Matricule — premier champ clé -->
       <div class="field-group">
-        <label>Nom <span class="req">*</span></label>
+        <label>Matricule <span class="req">*</span></label>
         <input
           type="text"
-          name="last_name"
-          [(ngModel)]="form.last_name"
-          placeholder="Koffi"
-          autocomplete="family-name"
+          name="matricule"
+          [(ngModel)]="form.matricule"
+          (ngModelChange)="onMatriculeChange()"
+          placeholder="ex: M2-INFO-2026  ou  DM-001"
           required />
       </div>
 
-      <!-- Prénom -->
+      <!-- Badge rôle détecté -->
+      @if (detectedRole) {
+        <div class="role-badge">
+          <span class="role-badge-ico">{{ detectedRole.icon }}</span>
+          <div>
+            <div class="role-badge-label">Rôle détecté</div>
+            <div class="role-badge-value">{{ detectedRole.label }}</div>
+          </div>
+        </div>
+      } @else if (form.matricule.length > 0) {
+        <div class="role-badge student">
+          <span class="role-badge-ico">🎓</span>
+          <div>
+            <div class="role-badge-label">Rôle détecté</div>
+            <div class="role-badge-value">Étudiant</div>
+          </div>
+        </div>
+      }
+
+      <!-- Nom -->
+      <div class="two-col">
+        <div class="field-group">
+          <label>Nom <span class="req">*</span></label>
+          <input
+            type="text"
+            name="last_name"
+            [(ngModel)]="form.last_name"
+            (ngModelChange)="onNameChange()"
+            placeholder="Koffi"
+            autocomplete="family-name"
+            required />
+        </div>
+        <div class="field-group">
+          <label>Prénom <span class="req">*</span></label>
+          <input
+            type="text"
+            name="first_name"
+            [(ngModel)]="form.first_name"
+            (ngModelChange)="onNameChange()"
+            placeholder="Ama"
+            autocomplete="given-name"
+            required />
+        </div>
+      </div>
+
+      <!-- Genre -->
       <div class="field-group">
-        <label>Prénom <span class="req">*</span></label>
-        <input
-          type="text"
-          name="first_name"
-          [(ngModel)]="form.first_name"
-          placeholder="Ama"
-          autocomplete="given-name"
-          required />
+        <label>Genre <span class="req">*</span></label>
+        <select name="genre" [(ngModel)]="form.genre" required>
+          <option value="">— Sélectionner —</option>
+          <option value="M">Masculin</option>
+          <option value="F">Féminin</option>
+        </select>
       </div>
 
       <!-- Email -->
@@ -56,21 +99,10 @@
           type="email"
           name="email"
           [(ngModel)]="form.email"
-          placeholder="ama.koffi@ipnet.edu"
+          placeholder="prenom.nom@ipnetinstitute.com"
           autocomplete="email"
           required />
-      </div>
-
-      <!-- Matricule -->
-      <div class="field-group">
-        <label>Matricule <span class="req">*</span></label>
-        <input
-          type="text"
-          name="matricule"
-          [(ngModel)]="form.matricule"
-          placeholder="M2-INFO-2026"
-          required />
-        <span class="field-hint">Format : Niveau-Filière-Année</span>
+        <span class="field-hint">Format : prenom.nom&#64;ipnetinstitute.com</span>
       </div>
 
       <!-- Nom d'utilisateur -->
@@ -84,6 +116,47 @@
           autocomplete="username"
           required />
       </div>
+
+      <!-- Filière + Année de formation — seulement pour étudiants -->
+      @if (isStudent) {
+        <div class="field-group">
+          <label>Filière <span class="req">*</span></label>
+          <select name="filiere_choisie" [(ngModel)]="form.filiere_choisie" required>
+            <option value="">— Sélectionner votre filière —</option>
+            <option value="GL">Génie Logiciel</option>
+            <option value="CS">Cybersécurité</option>
+            <option value="RSS">Réseaux Systèmes Sécurité</option>
+            <option value="DWM">Développement Web et Mobile</option>
+            <option value="WDIG">Web Design Infographie Multimédia</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Année de formation <span class="req">*</span></label>
+          <select name="annee_formation" [(ngModel)]="form.annee_formation" required>
+            <option value="">— Sélectionner —</option>
+            <option value="2022-2023">2022 – 2023</option>
+            <option value="2023-2024">2023 – 2024</option>
+            <option value="2024-2025">2024 – 2025</option>
+            <option value="2025-2026">2025 – 2026</option>
+            <option value="2026-2027">2026 – 2027</option>
+          </select>
+          <span class="field-hint">Année académique de votre formation</span>
+        </div>
+      }
+
+      <!-- Niveau professionnel — seulement pour le personnel -->
+      @if (!isStudent) {
+        <div class="field-group">
+          <label>Niveau professionnel <span class="req">*</span></label>
+          <select name="niveau_professionnel" [(ngModel)]="form.niveau_professionnel" required>
+            <option value="">— Sélectionner —</option>
+            <option value="LICENCE">Licencié(e)</option>
+            <option value="MASTER">Master</option>
+            <option value="DOCTORAT">Docteur(e)</option>
+            <option value="PROFESSORAT">Professeur(e)</option>
+          </select>
+        </div>
+      }
 
       <!-- Mot de passe + Confirmation -->
       <div class="two-col">
@@ -129,12 +202,10 @@
         </div>
       }
 
-      <!-- Alerte mdp -->
       @if (form.confirmPassword && form.password !== form.confirmPassword) {
         <div class="alert-msg warn">⚠ Les mots de passe ne correspondent pas.</div>
       }
 
-      <!-- Messages API -->
       @if (errorMessage) {
         <div class="alert-msg error">❌ {{ errorMessage }}</div>
       }
@@ -142,7 +213,6 @@
         <div class="alert-msg success">✅ {{ successMessage }}</div>
       }
 
-      <!-- Bouton -->
       <button
         type="submit"
         class="btn-submit"

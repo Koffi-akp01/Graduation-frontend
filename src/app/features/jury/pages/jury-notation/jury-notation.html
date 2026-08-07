@@ -1,154 +1,259 @@
 <app-top-nav></app-top-nav>
 
 <div class="app-page">
-  <!-- Sidebar -->
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
   <aside class="sidebar">
     <div class="sidebar-avatar">
-      <div class="avatar-circle" style="background:#2D6A4F">PJ</div>
+      <div class="avatar-circle" style="background:#2D6A4F">JR</div>
       <div>
-        <div class="avatar-name">Pr. Jean Asante</div>
-        <div class="avatar-role">Président du Jury</div>
+        <div class="avatar-name">Membre du Jury</div>
+        <div class="avatar-role">Notation & Évaluation</div>
       </div>
     </div>
+
     <div class="sidebar-section">Soutenances</div>
-    <a class="nav-item active"><span class="ico">🏠</span> Tableau de bord</a>
-    <a class="nav-item"><span class="ico">📅</span> Mes soutenances</a>
-    <a class="nav-item"><span class="ico">📝</span> Saisir les notes</a>
-    <a class="nav-item"><span class="ico">📄</span> Procès-verbaux</a>
-    <div class="sidebar-section">Disponibilités</div>
-    <a class="nav-item"><span class="ico">🔔</span> Mes indisponibilités</a>
+    <button class="nav-item" [class.active]="vue() === 'dashboard'" (click)="vue.set('dashboard'); selected.set(null)">
+      <span class="ico">🏠</span> Tableau de bord
+    </button>
+    <button class="nav-item" [class.active]="vue() === 'notation'" (click)="vue.set('notation')" [disabled]="!selected()">
+      <span class="ico">📝</span> Saisir les notes
+    </button>
+
+    <div class="sidebar-section">Outils</div>
+    <a class="nav-item" routerLink="/analyse" routerLinkActive="active">
+      <span class="ico">🔬</span> Plagiat / IA
+    </a>
+    <a class="nav-item" routerLink="/archive" routerLinkActive="active">
+      <span class="ico">🗄</span> Archives
+    </a>
   </aside>
 
-  <!-- Contenu principal -->
+  <!-- ══ MAIN ═════════════════════════════════════════════════════════════════ -->
   <div class="main">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Pr. Jean Asante</div>
-        <div class="page-subtitle">Président du jury — 4 soutenances ce mois</div>
-      </div>
-      <button class="btn btn-secondary">📅 Mes indisponibilités</button>
-    </div>
 
-    <!-- Stat cards -->
-    <div class="stats-grid">
-      <div class="stat-card blue">
-        <div class="stat-label">Soutenances assignées</div>
-        <div class="stat-value">4</div>
-        <div class="stat-sub">Session Juillet 2026</div>
-        <div class="stat-icon">🎓</div>
-      </div>
-      <div class="stat-card gold">
-        <div class="stat-label">Notes à saisir</div>
-        <div class="stat-value">1</div>
-        <div class="stat-sub">En attente</div>
-        <div class="stat-icon">📝</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">PV signés</div>
-        <div class="stat-value">3</div>
-        <div class="stat-sub">Archivés</div>
-        <div class="stat-icon">✅</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">PV en attente</div>
-        <div class="stat-value">1</div>
-        <div class="stat-sub">Signature requise</div>
-        <div class="stat-icon">⏳</div>
-      </div>
-    </div>
+    <!-- ── DASHBOARD : liste des soutenances ──────────────────────────────── -->
+    @if (vue() === 'dashboard') {
 
-    <!-- Formulaire de notation -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">📝 Saisie des notes — Ama Koffi</span>
-        <span class="badge badge-pending">En attente de saisie</span>
-      </div>
-      <div style="padding:24px">
-        <!-- Infos étudiant -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-          <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
-            <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">Étudiant</div>
-            <div style="font-size:15px;font-weight:700;margin-top:4px">Ama Koffi</div>
-            <div style="font-size:12px;color:var(--ink3)">Master 2 Informatique</div>
-          </div>
-          <div style="background:var(--bg);border-radius:var(--radius);padding:14px">
-            <div style="font-size:11px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">Titre du mémoire</div>
-            <div style="font-size:13px;font-weight:600;margin-top:4px">Système de détection d'intrusions basé sur le Machine Learning</div>
-          </div>
+      <div class="page-header">
+        <div>
+          <div class="page-title">Mes soutenances</div>
+          <div class="page-subtitle">{{ soutenances().length }} soutenance(s) assignée(s)</div>
         </div>
+        <button class="btn btn-secondary" (click)="charger()">Actualiser</button>
+      </div>
 
-        <!-- Tableau de notation pondérée -->
-        <form [formGroup]="notationForm" (ngSubmit)="validerNote()">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Total assignées</div>
+          <div class="stat-value">{{ soutenances().length }}</div>
+          <div class="stat-icon">🎓</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Notes à saisir</div>
+          <div class="stat-value">{{ soutenances().length - evaluations().length }}</div>
+          <div class="stat-icon">📝</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">PV signés</div>
+          <div class="stat-value">{{ evaluations().length }}</div>
+          <div class="stat-icon">✅</div>
+        </div>
+      </div>
+
+      <!-- Tableau -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Liste des soutenances</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Filière</th>
+              <th>Titre du mémoire</th>
+              <th>Date</th>
+              <th>Salle</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of soutenances(); track s.id) {
+              <tr>
+                <td><strong>{{ s.etudiant_details }}</strong></td>
+                <td>{{ s.filiere }}</td>
+                <td style="font-size:12px;max-width:180px">{{ s.theme_titre }}</td>
+                <td style="font-size:12px">{{ s.date_soutenance | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ s.salle_nom }}</td>
+                <td>
+                  <span class="badge" [ngClass]="statutClass(s)">{{ statut(s) }}</span>
+                </td>
+                <td>
+                  <button class="btn btn-primary btn-sm" (click)="ouvrirNotation(s)"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous">
+                    {{ getEval(s.id!)?.est_signe_par_tous ? 'Clôturé' : 'Saisir notes' }}
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" style="text-align:center;padding:48px;color:var(--ink3)">
+                  Aucune soutenance assignée pour le moment.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ── NOTATION : formulaire de notes ─────────────────────────────────── -->
+    @if (vue() === 'notation' && selected(); as s) {
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Saisie des notes</div>
+          <div class="page-subtitle">{{ s.etudiant_details }}</div>
+        </div>
+        <button class="btn btn-secondary" (click)="retour()">← Retour</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📝 Évaluation — {{ s.etudiant_details }}</span>
+          <span class="badge" [ngClass]="statutClass(s)">{{ statut(s) }}</span>
+        </div>
+        <div style="padding:24px">
+
+          <!-- Infos soutenance -->
+          <div class="notation-info-grid">
+            <div class="info-panel">
+              <div class="info-panel-lbl">Étudiant</div>
+              <div class="info-panel-val">{{ s.etudiant_details }}</div>
+              <div class="info-panel-sub">{{ s.filiere }}</div>
+            </div>
+            <div class="info-panel">
+              <div class="info-panel-lbl">Titre du mémoire</div>
+              <div class="info-panel-val info-panel-val--sm">{{ s.theme_titre || '—' }}</div>
+            </div>
+          </div>
+
+          <!-- Table de notation -->
           <table style="margin-bottom:16px">
             <thead>
               <tr>
                 <th>Critère d'évaluation</th>
-                <th>Coefficient</th>
+                <th style="text-align:center">Coeff.</th>
                 <th>Note /20</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>Qualité rédactionnelle du mémoire</td>
-                <td style="text-align:center;font-weight:700">3</td>
+                <td class="coeff-cell">3</td>
                 <td>
-                  <input type="number" formControlName="note_rapport" min="0" max="20"
-                    style="width:70px;text-align:center;font-family:'DM Mono',monospace"/>
+                  <input type="number" class="note-input" [(ngModel)]="noteMemoire" min="0" max="20"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous" />
                 </td>
               </tr>
               <tr>
                 <td>Maîtrise du sujet (présentation orale)</td>
-                <td style="text-align:center;font-weight:700">4</td>
+                <td class="coeff-cell">4</td>
                 <td>
-                  <input type="number" formControlName="note_presentation" min="0" max="20"
-                    style="width:70px;text-align:center;font-family:'DM Mono',monospace"/>
+                  <input type="number" class="note-input" [(ngModel)]="noteMaitrise" min="0" max="20"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous" />
+                </td>
+              </tr>
+              <tr>
+                <td>Présentation (support, clarté)</td>
+                <td class="coeff-cell">3</td>
+                <td>
+                  <input type="number" class="note-input" [(ngModel)]="notePresentation" min="0" max="20"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous" />
                 </td>
               </tr>
               <tr>
                 <td>Réponses aux questions du jury</td>
-                <td style="text-align:center;font-weight:700">3</td>
+                <td class="coeff-cell">3</td>
                 <td>
-                  <input type="number" formControlName="note_reponses" min="0" max="20"
-                    style="width:70px;text-align:center;font-family:'DM Mono',monospace"/>
+                  <input type="number" class="note-input" [(ngModel)]="noteReponses" min="0" max="20"
+                    [disabled]="!!getEval(s.id!)?.est_signe_par_tous" />
                 </td>
               </tr>
-              <tr style="background:var(--gold-lt)">
-                <td colspan="2"><strong>MOYENNE FINALE (/20)</strong></td>
+              <tr class="tr-total">
+                <td colspan="2"><strong>MOYENNE PONDÉRÉE (/20) — coefficients 3 · 4 · 3 · 3</strong></td>
                 <td>
-                  <strong style="font-size:20px;font-family:'DM Mono',monospace;color:var(--accent)">
-                    {{ moyenne() }}
-                  </strong>
+                  <div class="note-finale-display">
+                    <span class="note-finale-num">{{ noteFinale }}</span>
+                    <span class="note-finale-mention">→ {{ mentionFor(+noteFinale) }}</span>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <div class="form-group" style="margin-bottom:16px">
-            <label>Mention attribuée</label>
-            <select>
-              <option>Sélectionner la mention...</option>
-              <option>Passable (10–12)</option>
-              <option>Assez Bien (12–14)</option>
-              <option selected>Bien (14–16)</option>
-              <option>Très Bien (16–18)</option>
-              <option>Félicitations (18–20)</option>
-            </select>
-          </div>
-
+          <!-- Observations / Délibérations du jury -->
           <div class="form-group" style="margin-bottom:20px">
-            <label>Observations et délibérations</label>
-            <textarea formControlName="observations" rows="3" placeholder="Appréciations du jury..."></textarea>
+            <label style="font-weight:600;display:block;margin-bottom:6px">
+              📝 Observations et délibérations du jury
+            </label>
+            <textarea [(ngModel)]="remarques" rows="4"
+              [disabled]="!!getEval(s.id!)?.est_signe_par_tous"
+              placeholder="Appréciations du jury, points forts/faibles, recommandations…"
+              style="width:100%;border:1px solid var(--border,#d1d5db);border-radius:8px;padding:10px;font-size:13px;resize:vertical;font-family:inherit"></textarea>
           </div>
 
+          <!-- Bloc PV (visible après signature) -->
+          @if (getEval(s.id!)?.est_signe_par_tous) {
+            <div style="background:#f0fdf4;border:1px solid #a5d6a7;border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div>
+                <div style="font-weight:700;color:#1b5e20;font-size:14px">✅ PV signé et archivé</div>
+                <div style="font-size:12px;color:#4caf50;margin-top:2px">
+                  Note finale : {{ noteFinale }}/20 — {{ mentionFor(+noteFinale) }}
+                </div>
+              </div>
+              <div style="display:flex;gap:8px">
+                @if (pvUrl()) {
+                  <a [href]="pvUrl()!" target="_blank" rel="noopener"
+                     style="display:inline-flex;align-items:center;gap:6px;background:#2e7d32;color:#fff;padding:8px 14px;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none">
+                    📥 Télécharger le PV
+                  </a>
+                }
+                <button class="btn btn-secondary" style="font-size:12px;padding:7px 12px" (click)="telechargerPV()">
+                  🔄 Régénérer
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Alertes -->
+          @if (errorMsg) {
+            <div class="alert-msg error" style="margin-bottom:12px">{{ errorMsg }}</div>
+          }
+          @if (successMsg) {
+            <div class="alert-msg success" style="margin-bottom:12px">{{ successMsg }}</div>
+          }
+
+          <!-- Actions -->
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary">Annuler</button>
-            <button type="button" class="btn btn-gold">📄 Générer le PV</button>
-            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
-              {{ isSubmitting() ? 'Enregistrement...' : '✅ Signer & Soumettre' }}
-            </button>
+            <button class="btn btn-secondary" (click)="retour()">← Retour</button>
+            @if (!getEval(s.id!)?.est_signe_par_tous) {
+              <button class="btn btn-primary" (click)="enregistrerNotes()" [disabled]="isLoading">
+                {{ isLoading ? 'Enregistrement...' : '💾 Enregistrer les notes' }}
+              </button>
+              @if (getEval(s.id!)) {
+                <button class="btn btn-gold" (click)="validerPV()" [disabled]="isLoading">
+                  {{ isLoading ? 'Génération...' : '📄 Signer & Générer le PV' }}
+                </button>
+              }
+            } @else {
+              <span class="badge badge-success">PV signé — évaluation clôturée</span>
+            }
           </div>
-        </form>
+        </div>
       </div>
-    </div>
+    }
+
   </div>
 </div>

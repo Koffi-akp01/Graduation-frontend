@@ -1,0 +1,338 @@
+/* ── Layout général ───────────────────────────────────────────────────────── */
+.chat-main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Chargement initial ──────────────────────────────────────────────────── */
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  color: #718096;
+  font-size: 14px;
+}
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(200,150,62,.2);
+  border-top-color: #C8963E;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Pas d'affectation ───────────────────────────────────────────────────── */
+.no-aff-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 24px;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.no-aff-icon  { font-size: 52px; opacity: .5; }
+.no-aff-title { font-size: 18px; font-weight: 700; color: #1A3C5E; }
+.no-aff-sub   { font-size: 14px; color: #718096; line-height: 1.6; }
+
+/* ── Zone chat ───────────────────────────────────────────────────────────── */
+.chat-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.chat-body {
+  flex: 1;
+  display: flex;
+  gap: 0;
+  min-height: 0;
+  height: calc(100vh - 64px - 80px);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+
+/* ── Panneau messages ────────────────────────────────────────────────────── */
+.chat-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-right: 1px solid #E2DDD4;
+  min-width: 0;
+}
+
+.chat-pane-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #0F2237;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.partner-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #C8963E;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.partner-name { font-weight: 700; font-size: 15px; }
+.partner-role { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 2px; }
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #F7F5F0;
+}
+
+.empty-chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: auto;
+  color: #A0AEC0;
+  font-size: 14px;
+}
+.empty-chat-icon { font-size: 40px; opacity: .4; }
+
+/* ── Bulles ──────────────────────────────────────────────────────────────── */
+.message {
+  display: flex;
+
+  &.mine { justify-content: flex-end; }
+}
+
+.bubble {
+  max-width: 68%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  border-bottom-left-radius: 4px;
+}
+
+.message.mine .bubble {
+  background: #0F2237;
+  color: #fff;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 4px;
+
+  .sender { color: #C8963E; }
+  .content { color: #fff; }
+  .time    { color: rgba(255,255,255,.5); }
+}
+
+.sender  { display: block; font-size: 11px; font-weight: 700; color: #1A3C5E; margin-bottom: 4px; }
+.content { margin: 0; font-size: 14px; line-height: 1.5; white-space: pre-wrap; color: #2D3748; }
+.time    { display: block; font-size: 11px; color: #A0AEC0; margin-top: 5px; text-align: right; }
+
+/* ── Zone de saisie ──────────────────────────────────────────────────────── */
+.input-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #E2DDD4;
+  background: #FAF8F3;
+  flex-shrink: 0;
+}
+
+.input-row textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid #E2DDD4;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  &:focus { outline: none; border-color: #1A3C5E; }
+}
+
+.btn-send {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: #C8963E;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+
+  &:hover:not(:disabled) { background: #b8832e; }
+  &:disabled { opacity: .5; cursor: default; }
+}
+
+/* ── Panneau rendez-vous ─────────────────────────────────────────────────── */
+.rdv-pane {
+  width: 320px;
+  flex-shrink: 0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rdv-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #C8963E;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.btn-propose-rdv {
+  background: rgba(255,255,255,.2);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.4);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  &:hover { background: rgba(255,255,255,.3); }
+}
+
+.rdv-form {
+  padding: 12px 14px;
+  border-bottom: 1px solid #ffe0b2;
+  background: #fff8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7B4F17;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.form-ctrl {
+  width: 100%;
+  border: 1px solid #FFCC80;
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  box-sizing: border-box;
+  &:focus { outline: none; border-color: #C8963E; }
+}
+
+.rdv-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rdv-card {
+  border: 1px solid #E2DDD4;
+  border-radius: 10px;
+  padding: 12px;
+  background: #FAF8F3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &.rdv-confirme { border-color: #9AE6B4; background: #F0FFF4; }
+  &.rdv-annule   { border-color: #FEB2B2; background: #FFF5F5; opacity: .7; }
+  &.rdv-passe    { opacity: .5; }
+}
+
+.rdv-date { font-weight: 700; font-size: 13px; color: #1A3C5E; }
+.rdv-lieu { font-size: 12px; color: #718096; }
+.rdv-desc { font-size: 12px; color: #4A5568; margin-top: 2px; line-height: 1.4; }
+
+.rdv-badge {
+  display: inline-block;
+  margin-top: 4px;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  width: fit-content;
+}
+.rdv-badge-propose  { background: #FEF3C7; color: #92400E; }
+.rdv-badge-confirme { background: #D1FAE5; color: #065F46; }
+.rdv-badge-annule   { background: #FEE2E2; color: #991B1B; }
+.rdv-badge-passe    { background: #F3F4F6; color: #6B7280; }
+
+.rdv-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.rdv-cancel-btn { margin-top: 6px; width: 100%; }
+
+.rdv-empty {
+  text-align: center;
+  color: #A0AEC0;
+  font-size: 13px;
+  margin-top: 24px;
+  font-style: italic;
+}
+
+/* ── Alertes ─────────────────────────────────────────────────────────────── */
+.alert {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.alert-success { background: #D1FAE5; color: #065F46; }
+.alert-danger  { background: #FEE2E2; color: #991B1B; }
+
+/* ── Boutons utilitaires ─────────────────────────────────────────────────── */
+.btn-success { background: #D1FAE5; color: #065F46; border: 1px solid #6EE7B7; }
+.btn-success:hover { background: #A7F3D0; }
+.btn-danger  { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+.btn-danger:hover  { background: #FECACA; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .chat-body {
+    flex-direction: column;
+    height: auto;
+  }
+  .chat-pane { min-height: 60vh; }
+  .rdv-pane  { width: 100%; border-top: 1px solid #E2DDD4; max-height: 320px; }
+}
