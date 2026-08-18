@@ -135,11 +135,13 @@
             <div class="dir-card-footer">
               @if (demandeEnAttente()) {
                 <span class="dir-btn-disabled">Demande déjà soumise</span>
+              } @else if (submittingId() === d.id) {
+                <span class="dir-btn-disabled">⏳ Votre demande est en cours…</span>
               } @else {
                 <button class="btn btn-primary btn-sm"
-                  [disabled]="isSubmitting()"
+                  [disabled]="submittingId() !== null"
                   (click)="demanderAffectation(d.id)">
-                  @if (isSubmitting()) { Envoi… } @else { Choisir ce directeur }
+                  Choisir ce directeur
                 </button>
               }
             </div>

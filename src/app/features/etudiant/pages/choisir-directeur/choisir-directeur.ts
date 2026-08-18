@@ -15,7 +15,7 @@ export class ChoisirDirecteurComponent implements OnInit {
   directeurs      = signal<Directeur[]>([]);
   affectations    = signal<Affectation[]>([]);
   isLoading       = signal(false);
-  isSubmitting    = signal(false);
+  submittingId    = signal<number | null>(null);
   successMsg      = signal('');
   errorMsg        = signal('');
 
@@ -45,17 +45,17 @@ export class ChoisirDirecteurComponent implements OnInit {
       this.errorMsg.set('Vous avez déjà une demande en attente.');
       return;
     }
-    this.isSubmitting.set(true);
+    this.submittingId.set(directeurId);
     this.errorMsg.set('');
     this.affectationService.demanderAffectation(directeurId).subscribe({
       next: (a) => {
         this.affectations.update(list => [...list, a]);
         this.successMsg.set(`Demande envoyée à ${a.directeur_nom}. En attente de validation.`);
-        this.isSubmitting.set(false);
+        this.submittingId.set(null);
       },
       error: (err) => {
         this.errorMsg.set(err?.error?.detail || 'Erreur lors de la demande.');
-        this.isSubmitting.set(false);
+        this.submittingId.set(null);
       },
     });
   }
